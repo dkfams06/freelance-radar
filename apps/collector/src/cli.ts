@@ -1,6 +1,14 @@
+import { mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import { parseArgs } from "node:util";
 import { PLATFORMS, errorMessage, isPlatformName, type JobType, type PlatformName } from "@fr/shared";
-import { createServiceClient, SupabaseCollectorStore, type CollectorStore, type JobParams } from "@fr/db";
+import {
+  createServiceClient,
+  MemoryCollectorStore,
+  SupabaseCollectorStore,
+  type CollectorStore,
+  type JobParams,
+} from "@fr/db";
 import { createBrowserProvider } from "./browser";
 import { CollectorLogger } from "./core/logger";
 import { CollectorWorker, WORKER_ID } from "./worker";
@@ -25,6 +33,7 @@ options:
   --max-pages <n>    최대 페이지 수
   --refresh-known    new: 이미 있는 프로젝트도 다시 조회해서 상태 변화 반영
   --queue            직접 실행하지 않고 crawl_jobs 에 등록만 (worker 가 처리)
+  --dry-run          DB 대신 메모리에 저장하고 결과를 apps/collector/.debug/dry-run/*.json 으로 저장
 
 worker options:
   --platforms <list>     처리할 플랫폼 (기본: 전체)
@@ -47,6 +56,7 @@ async function main() {
       "max-pages": { type: "string" },
       "refresh-known": { type: "boolean" },
       queue: { type: "boolean" },
+      "dry-run": { type: "boolean" },
       platforms: { type: "string" },
       "schedule-new": { type: "string" },
       help: { type: "boolean", short: "h" },
@@ -71,7 +81,8 @@ async function main() {
   process.on("SIGINT", onSignal);
   process.on("SIGTERM", onSignal);
 
-  const store: CollectorStore = new SupabaseCollectorStore(createServiceClient());
+  const dryRun = !!values["dry-run"];
+  const store: CollectorStore = dryRun ? new MemoryCollectorStore() : new SupabaseCollectorStore(createServiceClient());
   const persistentLogger = new CollectorLogger({}, store);
 
   if (target === "worker") {
@@ -167,7 +178,29 @@ async function main() {
     process.exitCode = failed ? 1 : 0;
   } finally {
     await browser.close();
+    if (dryRun) dumpDryRun(store as MemoryCollectorStore, logger);
   }
+}
+
+function dumpDryRun(store: MemoryCollectorStore, logger: CollectorLogger) {
+  const dir = path.resolve(import.meta.dirname, "../.debug/dry-run");
+  mkdirSync(dir, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const file = path.join(dir, `${stamp}.json`);
+  writeFileSync(
+    file,
+    JSON.stringify(
+      {
+        projects: [...store.projects.values()],
+        errors: store.errors,
+        jobs: [...store.jobs.values()],
+        checkpoints: [...store.checkpoints.values()],
+      },
+      null,
+      2,
+    ),
+  );
+  logger.info("DRY_RUN_SAVED", { file, projects: store.projects.size, errors: store.errors.length });
 }
 
 function parsePlatforms(value: string): PlatformName[] {
