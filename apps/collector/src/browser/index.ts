@@ -1,9 +1,14 @@
 import type { CollectorLogger } from "../core/logger";
+import { AsideBrowserProvider } from "./aside";
 import type { BrowserProvider } from "./provider";
 
 export type { BrowserProvider } from "./provider";
 
-/** Phase 4 에서 Aside 연결 구현 */
-export async function createBrowserProvider(_logger: CollectorLogger): Promise<BrowserProvider> {
-  throw new Error("Aside browser provider is not configured yet");
+export async function createBrowserProvider(logger: CollectorLogger): Promise<BrowserProvider> {
+  const provider = new AsideBrowserProvider(logger, {
+    account: process.env.ASIDE_ACCOUNT || null,
+    cliPath: process.env.ASIDE_CLI_PATH || undefined,
+  });
+  await provider.start();
+  return provider;
 }
