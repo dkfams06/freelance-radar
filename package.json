@@ -1,0 +1,33 @@
+{
+  "name": "freelance-radar",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "collector": "pnpm --filter @fr/collector run cli",
+    "collector:worker": "pnpm --filter @fr/collector run cli worker",
+    "crawl:wishket": "pnpm --filter @fr/collector run cli wishket backfill",
+    "crawl:freemoa": "pnpm --filter @fr/collector run cli freemoa backfill",
+    "crawl:all": "pnpm --filter @fr/collector run cli all backfill",
+    "dashboard:dev": "pnpm --filter @fr/dashboard dev",
+    "dashboard:build": "pnpm --filter @fr/dashboard build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "pnpm -r --parallel run typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
+  }
+}

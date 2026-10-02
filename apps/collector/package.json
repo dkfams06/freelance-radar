@@ -1,0 +1,16 @@
+{
+  "name": "@fr/collector",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cli": "tsx --env-file-if-exists=../../.env src/cli.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fr/db": "workspace:*",
+    "@fr/platform-freemoa": "workspace:*",
+    "@fr/platform-wishket": "workspace:*",
+    "@fr/shared": "workspace:*"
+  }
+}
