@@ -4,7 +4,15 @@ import { AsideMcpClient } from "./aside-mcp";
 import type { BrowserProvider } from "./provider";
 
 const MARK = "__FR_RESULT__";
-const TAB_LOST_PATTERN = /target.*closed|has been closed|detached|Cannot read properties of (undefined|null)/i;
+/**
+ * REPL 안의 탭 핸들을 잃은 경우.
+ * Aside REPL 엔진은 V8("Cannot read properties of undefined")과 다른 문구
+ * ("cannot read property 'goto' of undefined")를 쓰므로 둘 다 잡는다.
+ */
+export const TAB_LOST_PATTERN =
+  /target.*closed|has been closed|detached|cannot read propert(y|ies)\b.*of (undefined|null)/i;
+/** Aside 브라우저/데몬이 내려간 경우: 다시 올라오면 탭을 새로 확보해야 한다 */
+export const ASIDE_DOWN_PATTERN = /Aside isn't running|ECONNREFUSED 127\.0\.0\.1|aside mcp exited/i;
 
 class TabLostError extends CrawlError {
   constructor(message: string) {
@@ -114,15 +122,36 @@ export class AsideBrowserPage implements BrowserPage {
       const __v = await (async () => { ${body} })();
       console.log(${JSON.stringify(MARK)} + JSON.stringify(__v === undefined ? null : __v));
     })();`;
-    const res = await this.client.repl(`[freelance-radar] ${this.key}: ${title}`, code, timeoutMs);
+    let res;
+    try {
+      res = await this.client.repl(`[freelance-radar] ${this.key}: ${title}`, code, timeoutMs);
+    } catch (e) {
+      if (ASIDE_DOWN_PATTERN.test(e instanceof Error ? e.message : String(e))) this.generation = -1;
+      throw e;
+    }
     if (res.isError) {
       if (TAB_LOST_PATTERN.test(res.text)) throw new TabLostError(res.text);
+      if (ASIDE_DOWN_PATTERN.test(res.text)) {
+        // 다음 호출에서 탭을 다시 확보하도록 표시하고, 일반 retry(10s/30s/90s)에 맡긴다
+        this.generation = -1;
+        throw new CrawlError("NETWORK", res.text);
+      }
       throw toCrawlError(new Error(res.text));
     }
     return parseMarkedResult<T>(res.text);
   }
 
   async goto(url: string, options: { timeoutMs?: number } = {}): Promise<NavigationResult> {
+    try {
+      return await this.gotoOnce(url, options);
+    } catch (e) {
+      if (!(e instanceof TabLostError)) throw e;
+      this.generation = -1;
+      return this.gotoOnce(url, options);
+    }
+  }
+
+  private async gotoOnce(url: string, options: { timeoutMs?: number }): Promise<NavigationResult> {
     const timeout = options.timeoutMs ?? 60_000;
     const opened = await this.ensureTab(url);
     const result = await this.run<NavigationResult>(
