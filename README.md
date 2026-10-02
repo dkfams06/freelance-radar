@@ -1,0 +1,132 @@
+# freelance-radar — Collector V1
+
+위시캣(Wishket)과 프리모아(Freemoa)의 외주 프로젝트를 수집해 Supabase(PostgreSQL)에 저장하는 수집기입니다.
+분석 기능(유형별 빈도/견적/난이도/반복률)은 이후 Phase 에서 이 데이터를 기반으로 진행합니다.
+
+## 구조
+
+```
+apps/
+  collector/            장시간 실행되는 Node.js 수집 프로세스 (CLI + worker)
+    src/core/           플랫폼을 모르는 실행 코어 (JobRunner, retry, rate limiter, checkpoint, cutoff, logger)
+    src/browser/        Aside Browser 드라이버 (aside mcp → repl 도구)
+    src/adapters.ts     플랫폼 → Adapter 레지스트리 (플랫폼 이름을 아는 유일한 곳)
+    e2e/                실제 브라우저를 쓰는 스크립트 (기본 테스트에서 제외)
+  dashboard/            Next.js 내부 관리화면 (/admin/crawler)
+packages/
+  shared/               공통 타입, Adapter 인터페이스, 오류 분류, 파싱 유틸
+  db/                   Supabase 클라이언트, 저장소(CollectorStore), 대시보드 쿼리
+  platform-wishket/     위시캣 Adapter (목록 XHR + 상세 DOM 추출 → 정규화)
+  platform-freemoa/     프리모아 Adapter (사이트 JSON API → 정규화)
+supabase/migrations/    SQL migration (ORM 없음)
+```
+
+### 수집 방식 요약
+
+| | 위시캣 | 프리모아 |
+|---|---|---|
+| 목록 | `/project/?d=<LZString("srt=new&page=N")>` XHR → `{result: html, count}` (최신 등록순, 10건/페이지) | `POST /m4a/s41a {sm:3, page:N}` JSON (최신 등록순, 10건/페이지) |
+| 상세 | 상세 페이지를 페이지 컨텍스트에서 `fetch` → `DOMParser` 로 구조화 | `POST /m4a/s41v {pno}` JSON |
+| 로그인 필요 | 상세의 업무 내용/모집 요건 | 상세 API 전체 |
+| 1년치 규모(2026-10 기준) | 약 495 페이지 / ~4,950건 | 약 40 페이지 / ~400건 |
+
+- 모든 요청은 Aside 브라우저의 로그인 세션(쿠키)으로 같은 origin 에서 실행됩니다. 비밀번호는 이 프로젝트 어디에도 저장하지 않습니다.
+- 마감된 프로젝트도 접근 가능한 한 저장합니다.
+- 위시캣 "프라이빗 매칭"(상위 등급 파트너 전용) 프로젝트는 본문이 공개되지 않아 공개 필드만 저장하고 `extra.privateMatching=true` 로 표시합니다.
+- 프리모아 "견적 요청을 받은 파트너만 열람" 프로젝트는 목록 데이터로 저장하고 `extra.detailRestricted=true` 로 표시합니다.
+- 원본(raw)에서 **내 계정 정보**(아이디, 내 지원 내역/통계)와 **다른 사용자의 식별정보**(댓글 작성자 아이디/이메일, 지원자 목록, 클라이언트 이메일)는 브라우저 밖으로 꺼내기 전에 제거합니다.
+
+## 준비
+
+1. Node.js 22.12+ / pnpm 10
+2. Aside 브라우저 + Aside CLI (`%LOCALAPPDATA%\Aside\CLI\current\aside.exe`). 확인: `aside --version`
+3. Aside 브라우저에서 위시캣·프리모아에 **직접 로그인** (Collector 는 이 세션을 재사용)
+4. Supabase 프로젝트 생성 후 migration 적용
+   - SQL Editor 에 `supabase/migrations/20261002000000_collector_v1.sql` 내용을 실행하거나
+   - Supabase CLI: `supabase link --project-ref <ref>` → `supabase db push`
+5. 루트에 `.env` 작성 (`.env.example` 참고)
+
+```bash
+pnpm install
+cp .env.example .env   # SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 입력
+```
+
+## Collector CLI
+
+```bash
+pnpm collector wishket backfill --max 20     # 소량 검증 (성공 20건 후 종료)
+pnpm collector all backfill                  # 2025-10-02 이후 전체 백필 (최신 → 과거)
+pnpm collector freemoa resume                # 중단된 백필을 checkpoint 부터 재개
+pnpm collector all new                       # 신규 프로젝트 확인 (기존 프로젝트를 연속 5건 만나면 종료)
+pnpm collector all new --refresh-known       # 만난 기존 프로젝트도 다시 조회해 상태 변화 반영
+pnpm collector all login-check               # 로그인 상태만 확인
+pnpm collector wishket backfill --queue      # 실행하지 않고 crawl_jobs 에 등록만 (worker 가 처리)
+pnpm collector wishket backfill --max 20 --dry-run   # DB 없이 실행, 결과를 apps/collector/.debug/dry-run 에 저장
+
+pnpm crawl:wishket | pnpm crawl:freemoa | pnpm crawl:all   # backfill 단축 명령
+```
+
+옵션: `--cutoff <ISO>`, `--start-page <n>`, `--max-pages <n>`.
+`Ctrl+C` 한 번: 현재 프로젝트 처리 후 checkpoint 를 저장하고 `PAUSED` 로 종료 (다시 누르면 강제 종료).
+
+### Worker (대시보드 연동)
+
+```bash
+pnpm collector:worker                       # crawl_jobs polling (COLLECTOR_POLL_INTERVAL)
+pnpm collector worker --schedule-new 10     # + 10분마다 CHECK_NEW 자동 생성 (진행/대기 작업이 있으면 건너뜀)
+```
+
+- 동시성 1: 한 번에 한 작업, 한 프로젝트씩. 요청 간 1.5~3초 랜덤 지연.
+- 429/403/timeout/network 오류나 느린 응답(>8초)이 감지되면 지연 배수를 2배씩(최대 16배) 늘리고, 연속 성공 시 회복.
+- 일반 실패는 10초 → 30초 → 90초 간격으로 최대 3회 재시도 후 `crawl_errors` 에 기록하고 다음 프로젝트로 진행.
+- 목록 페이지가 끝내 실패하면 데이터 누락을 막기 위해 작업을 `FAILED` 로 멈추고 checkpoint 를 유지 (재개 가능).
+- 세션 만료 → `login()` (페이지 새로고침으로 세션 복구 → 선택: Aside 에이전트 자동입력) → 실패했던 프로젝트 재시도.
+  CAPTCHA/OTP/2차 인증이거나 자동 로그인 실패 시 `LOGIN_REQUIRED` 로 전환하고 중단. Aside 에서 직접 로그인 후 대시보드 **재개**.
+- 시작 시 이전 프로세스가 남긴 `RUNNING` 작업은 checkpoint 를 유지한 채 다시 대기열로 돌립니다(단일 worker 전제).
+
+OS 스케줄러를 쓸 경우 worker 대신 `pnpm collector all new` 를 10분 간격으로 실행해도 됩니다.
+(Windows 작업 스케줄러 / cron `*/10 * * * *` / systemd timer)
+
+## Dashboard
+
+```bash
+pnpm dashboard:dev     # http://localhost:3100/admin/crawler
+```
+
+- 모든 DB 접근은 서버 컴포넌트/서버 액션에서 service role 로 수행합니다. 브라우저에 키가 내려가지 않습니다.
+- 버튼은 `crawl_jobs` row 를 만들거나(백필 시작/재개/신규 확인) 진행 중 작업에 `requested_action=PAUSE` 를 남깁니다(중지). 실제 실행은 worker 가 합니다.
+- Vercel 배포 시 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DASHBOARD_BASIC_AUTH_USER`, `DASHBOARD_BASIC_AUTH_PASSWORD` 를 설정하세요.
+  프로덕션에서 Basic Auth 값이 없으면 503 을 반환합니다.
+
+## 데이터 모델
+
+| 테이블 | 용도 |
+|---|---|
+| `projects` | 정규화 데이터 + raw (`raw_payload` JSON 우선, `raw_text`, `raw_metadata`, 필요 시 `raw_html`). unique `(platform, external_project_id)`, `project_key = platform:id` |
+| `project_snapshots` | 정규화 내용이 바뀔 때마다 이력 (지원자 수, 모집 마감, 예산/일정 변경 추적) |
+| `crawl_jobs` | BACKFILL / CHECK_NEW / RESUME 작업 큐와 상태 |
+| `crawl_checkpoints` | 작업별 재개 지점 (last_page, last_project_id, 카운트, oldest_registered_at) |
+| `crawl_errors` | 실패 기록 (재수집 성공 시 resolved_at 자동 기록) |
+| `collector_status` | 플랫폼별 런타임 상태 / 로그인 상태 / heartbeat |
+| `crawl_logs` | 핵심 실행 이벤트 |
+
+- `first_seen_at` 은 최초 insert 시에만 설정, 재수집 시 `last_seen_at` 과 정규화 필드를 갱신합니다.
+- 공통 컬럼에 매핑되지 않는 값은 버리지 않고 `extra` 에 보존합니다 (위시캣 상세 라벨 전체, 근무 환경, 모집 요건 등).
+- `duplicate_group_id` 는 플랫폼 간 중복 묶음용으로 준비만 되어 있습니다 (분석 단계에서 채움).
+- RLS 는 모든 테이블에 켜져 있고 anon/authenticated 정책이 없습니다 → service role 만 접근.
+
+## 테스트
+
+```bash
+pnpm test          # 단위 테스트 (normalize, upsert, checkpoint/resume, retry, rate limiter, cutoff, login 처리)
+pnpm typecheck
+
+# 실제 브라우저 (Aside 실행 + 로그인 필요)
+pnpm --filter @fr/collector exec tsx e2e/aside-smoke.ts
+pnpm --filter @fr/collector exec tsx e2e/adapter-probe.ts wishket 3 [page]
+pnpm --filter @fr/collector exec tsx e2e/list-dates.ts freemoa 30 40 50
+```
+
+## 범위 밖 (Collector V1 에서 구현하지 않음)
+
+AI 프로젝트 평가, Vibe Coding 가능성/수익성/학습가치 점수, 기술 재사용성, 요구사항 반복률, 임베딩/유사도, Telegram, CRM, 지원서 작성.
