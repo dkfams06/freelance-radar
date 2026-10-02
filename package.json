@@ -16,10 +16,15 @@
     "dashboard:build": "pnpm --filter @fr/dashboard build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "pnpm -r --parallel run typecheck"
+    "typecheck": "pnpm -r --parallel run typecheck",
+    "db:migrate": "tsx --env-file-if-exists=.env scripts/db-migrate.ts",
+    "db:check": "pnpm --filter @fr/collector exec tsx --env-file-if-exists=../../.env e2e/db-check.ts",
+    "db:report": "tsx --env-file-if-exists=.env scripts/db-report.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.1",
     "tsx": "^4.23.15",
     "typescript": "~5.9.3",
     "vitest": "^5.0.3"

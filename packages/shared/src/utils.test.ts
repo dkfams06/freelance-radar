@@ -40,3 +40,11 @@ describe("금액/기간", () => {
     expect(parseRelativeKoreanTime("3일 전", now)?.toISOString()).toBe("2026-09-29T00:00:00.000Z");
   });
 });
+
+describe("cleanText", () => {
+  it("CRLF 정리와 공백 압축", async () => {
+    const { cleanText } = await import("./utils");
+    expect(cleanText("a\r\nb\r\n\r\n\r\n\r\nc  d")).toBe("a\nb\n\nc d");
+    expect(cleanText("   ")).toBeNull();
+  });
+});

@@ -14,6 +14,14 @@ describe("computeBackfillProgress", () => {
     expect(p).toBeGreaterThan(0.49);
     expect(p).toBeLessThan(0.51);
   });
+  it("--max 로 제한된 완료 작업은 100% 가 아니다", () => {
+    const p = computeBackfillProgress(
+      { ...job, status: "COMPLETED", params: { max_projects: 20 } },
+      { ...base, oldest_registered_at: "2026-09-30T00:00:00Z" },
+      now,
+    )!;
+    expect(p).toBeLessThan(0.05);
+  });
   it("완료된 작업은 100%, cutoff 을 넘어도 100% 로 고정", () => {
     expect(computeBackfillProgress({ ...job, status: "COMPLETED" }, null, now)).toBe(1);
     expect(computeBackfillProgress(job, { ...base, oldest_registered_at: "2025-01-01T00:00:00Z" }, now)).toBe(1);

@@ -59,7 +59,9 @@ export function computeBackfillProgress(
   now = new Date(),
 ): number | null {
   if (!job) return null;
-  if (job.status === "COMPLETED") return 1;
+  // 검증용 제한 수집(max_projects/max_pages)은 완료돼도 전체 백필이 끝난 것이 아니므로 날짜로 계산
+  const limited = Boolean(job.params?.max_projects || job.params?.max_pages);
+  if (job.status === "COMPLETED" && !limited) return 1;
   const cutoff = new Date(checkpoint?.cutoff_at ?? (job.params?.cutoff as string | undefined) ?? DEFAULT_BACKFILL_CUTOFF);
   if (!checkpoint?.oldest_registered_at) return 0;
   const start = new Date(checkpoint.started_at ?? job.created_at).getTime();

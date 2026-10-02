@@ -8,3 +8,4 @@ dist/
 coverage/
 apps/collector/.debug/
 supabase/.temp/
+/.claude/
