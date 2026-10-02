@@ -1,0 +1,90 @@
+{
+  "externalId": "158894",
+  "url": "https://www.wishket.com/project/158894/",
+  "payload": {
+    "detail": {
+      "source": "wishket.detail.dom",
+      "status": 200,
+      "finalUrl": "https://www.wishket.com/project/158894/",
+      "loggedIn": true,
+      "locked": false,
+      "captcha": false,
+      "statusMarks": [
+        "프라이빗 매칭",
+        "모집 중",
+        "NEW",
+        "외주"
+      ],
+      "registeredText": "등록 일자 2026.10.02.",
+      "title": "룸형 주점 태블릿 주문·소통 시스템 구축",
+      "categoryGroups": [
+        [
+          "개발",
+          "디자인",
+          "기획"
+        ],
+        [
+          "웹",
+          "안드로이드"
+        ],
+        [
+          "기타(내부 시스템),",
+          "내부 시스템 연동"
+        ]
+      ],
+      "fields": {
+        "예상 금액": "40,000,000원",
+        "예상 기간": "120일",
+        "지원자 수": "비공개",
+        "모집 마감일": "2026년 10월 16일",
+        "예상 시작일": "2026년 11월 01일",
+        "클라이언트 위치": "서울특별시 서초구"
+      },
+      "fieldNotes": {
+        "모집 마감일": "마감 2주 전"
+      },
+      "target": null,
+      "skills": [],
+      "description": "PRIME·PRO·BOOST 파트너에게\n공개되는 프라이빗 매칭 프로젝트입니다.\nBOOST 파트너 신청하기",
+      "workConditions": [],
+      "recruitConditions": [],
+      "targetLevelInfo": null,
+      "client": {
+        "name": null,
+        "rating": null,
+        "ratingCount": null,
+        "badges": [],
+        "stats": {}
+      },
+      "commentCount": "6",
+      "text": "프라이빗 매칭PRIME·PRO·BOOST 파트너에게만\n공개되는 비공개 프로젝트입니다.\n\n모집 중\nNEW\n외주\n\n등록 일자 2026.10.02.\n\n룸형 주점 태블릿 주문·소통 시스템 구축\n개발디자인기획\n웹안드로이드\n기타(내부 시스템), 내부 시스템 연동\n\n예상 금액\n\n40,000,000원\n\n예상 기간\n\n120일\n\n지원자 수\n\n비공개\n\n모집 마감일\n\n2026년 10월 16일마감 2주 전\n\nPRIME·PRO·BOOST 파트너에게\n공개되는 프라이빗 매칭 프로젝트입니다.\nBOOST 파트너 신청하기\n예상 시작일\n\n2026년 11월 01일\n\n진행 분류\n\n기획 상태\n\n프로젝트 경험\n\n협업 예정 인력\n\n우선 순위\n\n업무 내용\nPRIME·PRO·BOOST 파트너에게\n공개되는 프라이빗 매칭 프로젝트입니다.\nBOOST 파트너 신"
+    },
+    "listCard": {
+      "id": "158894",
+      "path": "/project/158894/",
+      "title": "룸형 주점 태블릿 주문·소통 시스템 구축",
+      "statusMarks": [
+        "프라이빗 매칭",
+        "모집 중",
+        "NEW"
+      ],
+      "budgetText": "예상 금액 40,000,000원",
+      "termText": "예상 기간120일",
+      "startText": null,
+      "roleOrCategory": "개발 · 디자인 · 기획",
+      "level": null,
+      "typeMark": "외주",
+      "skills": [],
+      "location": "서울특별시 서초구",
+      "registeredText": "· 등록일자 2026.10.02.",
+      "deadlineText": "마감 2주 전",
+      "applicantText": "지원자 비공개",
+      "clientName": "ol******",
+      "clientRating": "인증 완료",
+      "clientBadges": [
+        "인증된 클라이언트",
+        "클라이언트 평균 평점"
+      ]
+    }
+  }
+}

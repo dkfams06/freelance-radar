@@ -33,8 +33,6 @@ export interface FreelancePlatformAdapter {
 
 export interface AdapterContext {
   page: BrowserPage;
-  /** 선택적 자동 로그인 자격증명 (환경변수에서만 주입, DB 저장 금지) */
-  credentials?: { username: string; password: string } | null;
   log?: (message: string, data?: Record<string, unknown>) => void;
 }
 

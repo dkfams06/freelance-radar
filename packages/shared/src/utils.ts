@@ -111,7 +111,7 @@ export function parseKstDate(text: string | null | undefined): Date | null {
   if (!text) return null;
   const s = text.trim();
   const m =
-    s.match(/(\d{4}|\d{2})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})\s*일?(?:\D+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/) ?? null;
+    s.match(/(\d{4}|\d{2})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})\s*일?(?:\D*?(\d{1,2}):(\d{2})(?::(\d{2}))?)?/) ?? null;
   if (!m) {
     const d = new Date(s);
     return Number.isNaN(d.getTime()) ? null : d;

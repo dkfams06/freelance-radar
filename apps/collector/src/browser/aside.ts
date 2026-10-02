@@ -36,9 +36,27 @@ export class AsideBrowserPage implements BrowserPage {
   constructor(
     private readonly client: AsideMcpClient,
     private readonly key: string,
-    private readonly homeUrl: string,
+    homeUrl: string,
+    private readonly assistedLoginEnabled = false,
   ) {
     this.lastUrl = homeUrl;
+  }
+
+  /**
+   * Aside 에이전트(exec)에게 Aside 비밀번호 관리자 자동입력으로 로그인하도록 요청한다.
+   * 비밀번호는 이 프로세스를 거치지 않는다. CAPTCHA/OTP 는 풀지 않도록 지시한다.
+   * 결과는 신뢰하지 않고 호출자가 checkLogin() 으로 다시 확인한다.
+   */
+  async assistedLogin(request: { siteName: string; loginUrl: string }): Promise<{ attempted: boolean; detail?: string }> {
+    if (!this.assistedLoginEnabled) return { attempted: false };
+    const prompt = [
+      `Open ${request.loginUrl} and sign in to ${request.siteName} using the credentials already saved in Aside's password manager (autofill).`,
+      "Do not create an account and do not type any password that is not autofilled.",
+      "If a CAPTCHA, OTP, SMS/email code, or any 2-step verification appears, do NOT try to solve or bypass it: stop immediately and reply 'LOGIN_REQUIRED: <reason>'.",
+      "If you end up signed in, reply 'LOGIN_OK'. Do nothing else on the site.",
+    ].join(" ");
+    const res = await this.client.callTool("exec", { prompt }, 10 * 60_000);
+    return { attempted: true, detail: res.text.slice(0, 500) };
   }
 
   private tabExpr() {
@@ -162,7 +180,13 @@ export class AsideBrowserProvider implements BrowserProvider {
   private readonly client: AsideMcpClient;
   private readonly pages = new Map<PlatformName, AsideBrowserPage>();
 
-  constructor(logger: CollectorLogger, options: { account?: string | null; cliPath?: string } = {}) {
+  private readonly assistedLogin: boolean;
+
+  constructor(
+    logger: CollectorLogger,
+    options: { account?: string | null; cliPath?: string; assistedLogin?: boolean } = {},
+  ) {
+    this.assistedLogin = options.assistedLogin ?? false;
     this.client = new AsideMcpClient({
       account: options.account,
       cliPath: options.cliPath,
@@ -177,7 +201,7 @@ export class AsideBrowserProvider implements BrowserProvider {
   async getPage(platform: PlatformName): Promise<BrowserPage> {
     let page = this.pages.get(platform);
     if (!page) {
-      page = new AsideBrowserPage(this.client, platform, HOME_URLS[platform]);
+      page = new AsideBrowserPage(this.client, platform, HOME_URLS[platform], this.assistedLogin);
       this.pages.set(platform, page);
     }
     return page;

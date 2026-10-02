@@ -10,13 +10,6 @@ const FACTORIES: Record<PlatformName, AdapterFactory> = {
   freemoa: createFreemoaAdapter,
 };
 
-function credentialsFromEnv(platform: PlatformName) {
-  const prefix = platform.toUpperCase();
-  const username = process.env[`${prefix}_LOGIN_ID`];
-  const password = process.env[`${prefix}_LOGIN_PASSWORD`];
-  return username && password ? { username, password } : null;
-}
-
 export class AdapterRegistry {
   private readonly cache = new Map<PlatformName, FreelancePlatformAdapter>();
 
@@ -32,7 +25,6 @@ export class AdapterRegistry {
     const log = this.logger.child({ platform });
     const adapter = FACTORIES[platform]({
       page,
-      credentials: credentialsFromEnv(platform),
       log: (message, data) => log.debug(message, data),
     });
     this.cache.set(platform, adapter);

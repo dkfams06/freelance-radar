@@ -15,6 +15,11 @@ export interface BrowserPage {
   evaluate<T = unknown>(expression: string, options?: { timeoutMs?: number }): Promise<T>;
   currentUrl(): Promise<string>;
   html(): Promise<string>;
+  /**
+   * 선택 기능: 브라우저가 저장된 자격증명(비밀번호 관리자 자동입력)으로 로그인을 시도한다.
+   * CAPTCHA/OTP 를 우회하지 않는다. 결과는 호출자가 다시 확인해야 한다.
+   */
+  assistedLogin?(request: { siteName: string; loginUrl: string }): Promise<{ attempted: boolean; detail?: string }>;
 }
 
 export interface PageFetchResult<T = unknown> {

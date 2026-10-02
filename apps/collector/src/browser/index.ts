@@ -8,6 +8,7 @@ export async function createBrowserProvider(logger: CollectorLogger): Promise<Br
   const provider = new AsideBrowserProvider(logger, {
     account: process.env.ASIDE_ACCOUNT || null,
     cliPath: process.env.ASIDE_CLI_PATH || undefined,
+    assistedLogin: process.env.ASIDE_ASSISTED_LOGIN === "1",
   });
   await provider.start();
   return provider;
