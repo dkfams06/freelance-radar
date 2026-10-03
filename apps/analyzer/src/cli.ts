@@ -32,6 +32,12 @@ import {
   extractFeatures,
   renderRepetitionReport,
   type FeatureRow,
+  buildOpportunityV02Report,
+  buildStarterKitReport,
+  renderOpportunityV02Report,
+  renderStarterKitReport,
+  type FeatureV01Json,
+  type OpportunityV01Json,
 } from "@fr/analysis";
 import { LlmClient, llmBackend, loadLlmConfig, type SyncLlm } from "./llm";
 import { ClaudeCliClient } from "./llm-cli";
@@ -74,6 +80,7 @@ commands:
   compare <a> <b> 두 결과 파일의 분류 비교 (예: v2 → v3, 수동 샘플 → 실제 API)
   market-stats    시장 통계 (원본 전체 + 분석 표본). docs/market-stats-v1.md|json 생성. 최종 점수는 만들지 않음
   opportunity-score 495건 분석으로 공략 점수 v0.1 후보 + 이상치 포함/제외 + 민감도 리포트 생성
+  opportunity-score-v0.2  v0.1 + feature repetition f1 결합 후보 점수 및 starter kit 설계
   feature-repeat  일반 외주 분석 결과로 project_type 내부 기능 반복률/유사도/반복 bundle 리포트 (LLM 호출 없음)
                   --save: project_features 테이블에도 저장 · --min-support <n> (기본 5) · --types a,b,c
   validate <file> 결과 파일의 모든 분석을 현재 schema 로 검증 (DB 불필요). --report 를 붙이면 .out 에 md 리포트 생성
@@ -105,6 +112,9 @@ options:
   --min-combo <n>               market-stats: 자산 조합 최소 등장 건수 (기본 5)
   --out <path>                  market-stats: 출력 경로(확장자 제외, 기본 docs/market-stats-v1)
                                 opportunity-score: 출력 경로(기본 docs/opportunity-score-v0.1-500)
+                                opportunity-score-v0.2: 출력 경로(기본 docs/opportunity-score-v0.2-500)
+  --opportunity-file <file>     opportunity-score-v0.2 입력 v0.1 JSON
+  --feature-file <file>         opportunity-score-v0.2 입력 feature repetition JSON
 
 env: ANTHROPIC_API_KEY, ANALYZER_MODEL (일반 실행 기본 claude-opus-5-5), ANALYZER_EFFORT (기본 low), ANALYZER_MAX_TOKENS (기본 8000)
      ANALYZER_BACKEND=claude-cli  → API 키 대신 Claude 구독제(claude -p) 로 sample/run 실행 (Batch 불가)
@@ -171,6 +181,8 @@ async function main() {
       "min-n": { type: "string" },
       "min-combo": { type: "string" },
       out: { type: "string" },
+      "opportunity-file": { type: "string" },
+      "feature-file": { type: "string" },
       save: { type: "boolean" },
       "min-support": { type: "string" },
       types: { type: "string" },
@@ -501,6 +513,31 @@ async function main() {
       log(`기본 후보: 이상치 제외 + 균형형(v0.1), 일반 외주 ${report.modes.exclude_outliers.non_staffing.n}건`);
       log(`→ ${outBase}.md`);
       log(`→ ${outBase}.json`);
+      return;
+    }
+
+    case "opportunity-score-v0.2": {
+      const repoRoot = path.resolve(import.meta.dirname, "../../..");
+      const opportunityPath = resolveArg(values["opportunity-file"] ?? "docs/opportunity-score-v0.1-500.json")!;
+      const featurePath = resolveArg(values["feature-file"] ?? "docs/feature-repetition-f1-v3.3.json")!;
+      const opportunity = JSON.parse(readFileSync(opportunityPath, "utf8")) as OpportunityV01Json;
+      const feature = JSON.parse(readFileSync(featurePath, "utf8")) as FeatureV01Json;
+      const report = buildOpportunityV02Report(opportunity, feature, {
+        opportunityFile: opportunityPath,
+        featureFile: featurePath,
+      });
+      const starterKit = buildStarterKitReport(feature);
+      const outBase = values.out
+        ? path.resolve(process.env.INIT_CWD ?? process.cwd(), values.out)
+        : path.join(repoRoot, "docs", "opportunity-score-v0.2-500");
+      mkdirSync(path.dirname(outBase), { recursive: true });
+      writeFileSync(`${outBase}.json`, `${JSON.stringify(report, null, 2)}\n`);
+      writeFileSync(`${outBase}.md`, `${renderOpportunityV02Report(report)}\n`);
+      writeFileSync(path.join(repoRoot, "docs", "starter-kit-v0.1.md"), `${renderStarterKitReport(starterKit)}\n`);
+      log(`v0.2 후보 ${report.types.length}개 유형 / feature source ${feature.total}건`);
+      log(`→ ${outBase}.md`);
+      log(`→ ${outBase}.json`);
+      log(`→ ${path.join(repoRoot, "docs", "starter-kit-v0.1.md")}`);
       return;
     }
 
