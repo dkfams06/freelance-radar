@@ -1,0 +1,1868 @@
+{
+  "analysis_version": "v3.3",
+  "model": "claude-sonnet-5-5",
+  "mode": "sync",
+  "created_at": "2026-10-03T03:59:09.716Z",
+  "note": "backend=claude-cli (claude -p, Claude 구독제). 비용은 API 단가 환산 추정치이며 실제 청구되지 않음 (구독 사용량 한도에 반영)",
+  "usage_total": {
+    "input_tokens": 198,
+    "output_tokens": 74886,
+    "cache_creation_input_tokens": 115123,
+    "cache_read_input_tokens": 1069940
+  },
+  "cost_usd_total": 1.2510515,
+  "projection_total": 5287,
+  "items": [
+    {
+      "project": {
+        "id": "43aadf81-b7ee-43d9-b3dd-ccd072636c16",
+        "platform": "freemoa",
+        "external_project_id": "48251",
+        "title": "별장/콘도 회원권 분양, 예약 관리 플랫폼 구축(Web/App)",
+        "budget": "50,000,000원 ~ 100,000,000원",
+        "project_duration": "121일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "63d7ed34db50a6c6f6ade62ccfdeca9d",
+        "chars": 2138
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "platform_marketplace",
+        "project_subcategory": "별장 회원권 분양·예약",
+        "engagement_type": "new_build",
+        "industry": "real_estate",
+        "complexity_types": [
+          "integration_heavy",
+          "workflow_complex",
+          "high_risk_domain",
+          "multi_platform"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "payments",
+          "external_api_integration",
+          "mobile",
+          "realtime",
+          "security"
+        ],
+        "uncertain_fields": [
+          "project_type"
+        ],
+        "summary": "부동산 개발사를 위해 별장/콘도 회원권 분양, 실시간 예약, 회원 간 지분 거래(2차 마켓), 결제·정산을 아우르는 웹·앱·관리자 플랫폼을 신규 구축한다.",
+        "required_features": [
+          "authentication",
+          "identity_verification",
+          "social_login",
+          "product_catalog",
+          "reservation",
+          "scheduling_calendar",
+          "matching",
+          "payment",
+          "subscription_billing",
+          "settlement",
+          "admin_dashboard",
+          "user_management",
+          "cms",
+          "approval_workflow",
+          "order_management",
+          "app_store_release",
+          "notification_push"
+        ],
+        "required_integrations": [
+          "payment_gateway",
+          "identity_verification_service",
+          "kakao_login",
+          "naver_login",
+          "google_login",
+          "apple_login"
+        ],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "cross_platform_app",
+          "backend_api"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "authentication",
+          "payment",
+          "cross_platform_mobile",
+          "ui_design",
+          "project_management",
+          "security"
+        ],
+        "suggested_stack": [
+          "Next.js",
+          "TypeScript",
+          "Supabase",
+          "Expo(React Native)",
+          "Tailwind",
+          "토스페이먼츠",
+          "Vercel"
+        ],
+        "vibe_coding_difficulty": 62,
+        "estimated_hours_min": 700,
+        "estimated_hours_max": 1200,
+        "learning_value": 70,
+        "reusability_value": 60,
+        "market_value": 62,
+        "technical_risk": 60,
+        "requirement_clarity": 40,
+        "rationale": {
+          "vibe_coding_difficulty": "웹·앱·관리자에 정기결제, 지분 거래, 정산이 겹쳐 난이도가 높다.",
+          "estimated_hours": "3개 클라이언트와 PG, 본인인증, 정산, 2차 마켓까지 범위가 커서 700~1200시간.",
+          "learning_value": "결제, 정기과금, 예약 엔진, 앱 배포 경험을 얻는다.",
+          "reusability_value": "예약, 결제, 관리자 모듈은 재사용되지만 지분 거래는 도메인 특화다.",
+          "market_value": "예약·결제·마켓 조합은 반복되나 회원권 지분 거래는 틈새다.",
+          "technical_risk": "지분 거래의 법적 요건, 정산 정확성, 아이디어 단계의 불확실성이 있다."
+        }
+      },
+      "usage": {
+        "input_tokens": 8,
+        "output_tokens": 3517,
+        "cache_creation_input_tokens": 14700,
+        "cache_read_input_tokens": 30649
+      },
+      "cost_usd": 0.0780658,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "ae121a16-33bd-4ca2-9fac-21735d8779f1",
+        "platform": "freemoa",
+        "external_project_id": "48011",
+        "title": "[신규/임베디드] Raspberry Pi 센서 연동 프로토타입 개발",
+        "budget": "5,000,000원 ~ 7,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "23e6a690d80f5496839bfb35d67ebb98",
+        "chars": 1678
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "라즈베리파이 센서 프로토타입",
+        "engagement_type": "new_build",
+        "industry": "general",
+        "complexity_types": [
+          "hardware_iot"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "hardware_iot",
+          "data_pipeline"
+        ],
+        "uncertain_fields": [],
+        "summary": "Raspberry Pi에 센서 2~3종을 연동해 데이터를 수집·처리하고 BCS 기초 분석 결과를 출력하는 임베디드 프로토타입을 신규 개발한다.",
+        "required_features": [
+          "hardware_integration",
+          "iot_device_control",
+          "data_pipeline"
+        ],
+        "required_integrations": [
+          "hardware_device"
+        ],
+        "required_platforms": [
+          "embedded"
+        ],
+        "required_skills": [
+          "embedded",
+          "backend"
+        ],
+        "suggested_stack": [
+          "Raspberry Pi OS",
+          "Python",
+          "GPIO/I2C/SPI libraries",
+          "SQLite"
+        ],
+        "vibe_coding_difficulty": 58,
+        "estimated_hours_min": 60,
+        "estimated_hours_max": 130,
+        "learning_value": 45,
+        "reusability_value": 30,
+        "market_value": 40,
+        "technical_risk": 55,
+        "requirement_clarity": 40,
+        "rationale": {
+          "vibe_coding_difficulty": "실센서 연동과 하드웨어 검증이 필요하고 BCS 정의가 불명확함",
+          "estimated_hours": "센서 2~3종 연동, 통합, 기초 분석까지 약 60~130시간",
+          "learning_value": "센서·GPIO 경험은 쌓이나 범용 확장성은 제한적",
+          "reusability_value": "센서 드라이버 코드는 일부만 재사용 가능",
+          "market_value": "RPi 프로토타입 의뢰는 있으나 센서마다 달라 반복성 보통",
+          "technical_risk": "센서 미확정, 하드웨어 불량 가능성, BCS 모호함"
+        }
+      },
+      "usage": {
+        "input_tokens": 12,
+        "output_tokens": 4601,
+        "cache_creation_input_tokens": 14477,
+        "cache_read_input_tokens": 58951
+      },
+      "cost_usd": 0.0940167,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "7110502c-494a-42e1-abaf-2d7d0db97ab7",
+        "platform": "freemoa",
+        "external_project_id": "47955",
+        "title": "(상주) 커스텀 Android 단말 및 기본 탑재 앱 QA엔지니어",
+        "budget": "4,000,000원 ~ 5,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "91f5965b8d51f9b00cb03dc46504bd17",
+        "chars": 1320
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "qa_testing",
+        "project_subcategory": "Android 단말 앱 QA",
+        "engagement_type": "staffing",
+        "industry": "general",
+        "complexity_types": [
+          "hardware_iot"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "hardware_iot"
+        ],
+        "uncertain_fields": [],
+        "summary": "자사 커스텀 AOSP 기반 Android 단말의 기본 탑재 앱(런처, VoIP, 업데이터 등)에 대해 TC 작성, 테스트 수행, 이슈 공유를 하는 1개월 강남 상주 QA 인력 투입.",
+        "required_features": [
+          "bug_fix_maintenance"
+        ],
+        "required_integrations": [
+          "hardware_device"
+        ],
+        "required_platforms": [
+          "android"
+        ],
+        "required_skills": [
+          "qa_testing",
+          "mobile_native"
+        ],
+        "suggested_stack": [
+          "Android Studio",
+          "ADB",
+          "Appium",
+          "Jira"
+        ],
+        "vibe_coding_difficulty": 40,
+        "estimated_hours_min": 150,
+        "estimated_hours_max": 180,
+        "learning_value": 35,
+        "reusability_value": 25,
+        "market_value": 45,
+        "technical_risk": 30,
+        "requirement_clarity": 65,
+        "rationale": {
+          "vibe_coding_difficulty": "실기기 수동 QA 중심이라 AI 활용 여지가 제한적이다.",
+          "estimated_hours": "약 1개월 주5일 상주 기준 150~180시간이다.",
+          "learning_value": "AOSP 단말 QA 경험은 있으나 코드 자산은 적다.",
+          "reusability_value": "TC 작성 방법은 재사용되나 대상이 자사 단말에 한정된다.",
+          "market_value": "모바일 앱 QA 수요는 있으나 상주 단기 건이다.",
+          "technical_risk": "단말과 앱이 미완성 상태라 일정 변동 위험이 있다."
+        }
+      },
+      "usage": {
+        "input_tokens": 12,
+        "output_tokens": 4169,
+        "cache_creation_input_tokens": 4009,
+        "cache_read_input_tokens": 67886
+      },
+      "cost_usd": 0.0653137,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "1c58e8b6-f209-4c05-878d-48c9aa8815ff",
+        "platform": "freemoa",
+        "external_project_id": "48311",
+        "title": "[상주] PLM/BOM 고도화 개발 (Java/Vue3/Tibero)",
+        "budget": "5,000,000원 ~ 10,000,000원",
+        "project_duration": "120일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "e72898dc71737bb20cdc5826ffa90663",
+        "chars": 1601
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "business_management",
+        "project_subcategory": "PLM/BOM 시스템",
+        "engagement_type": "staffing",
+        "industry": "manufacturing",
+        "complexity_types": [
+          "workflow_complex",
+          "legacy_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "제조 고객사의 PLM/BOM 시스템 고도화를 위해 화성 현장에 상주하며 BOM 분석·설계와 Java/Vue3/Tibero 기반 개발을 수행하는 기간제 인력 투입 프로젝트.",
+        "required_features": [
+          "admin_dashboard",
+          "role_permission",
+          "approval_workflow",
+          "data_export",
+          "legacy_migration"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "backend_api"
+        ],
+        "required_skills": [
+          "backend",
+          "frontend",
+          "database",
+          "legacy_tech",
+          "project_management"
+        ],
+        "suggested_stack": [
+          "Java",
+          "Spring",
+          "Vue3",
+          "Tibero",
+          "JavaScript"
+        ],
+        "vibe_coding_difficulty": 60,
+        "estimated_hours_min": 600,
+        "estimated_hours_max": 900,
+        "learning_value": 35,
+        "reusability_value": 25,
+        "market_value": 40,
+        "technical_risk": 50,
+        "requirement_clarity": 35,
+        "rationale": {
+          "vibe_coding_difficulty": "고객사 BOM 도메인과 기존 시스템 의존, 상주 환경이라 어렵다.",
+          "estimated_hours": "4개월 상주 중 개발 1명 분량을 범위 불명확한 채 추정.",
+          "learning_value": "PLM/BOM 도메인과 Tibero는 배우지만 범용성은 제한적이다.",
+          "reusability_value": "고객사 업무 흐름과 기존 시스템에 종속되어 재사용이 낮다.",
+          "market_value": "제조 PLM/BOM 상주 수요는 있으나 특수 도메인이다.",
+          "technical_risk": "요구 범위가 모호하고 고객 협의·기존 시스템 불확실성이 있다."
+        }
+      },
+      "usage": {
+        "input_tokens": 12,
+        "output_tokens": 5220,
+        "cache_creation_input_tokens": 4326,
+        "cache_read_input_tokens": 68494
+      },
+      "cost_usd": 0.07673780000000001,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "deaa495d-8875-4f4d-8546-a5b4a05a53d8",
+        "platform": "freemoa",
+        "external_project_id": "47704",
+        "title": "크리에이터 주요 지표 분석 시각화 제공 플랫폼 웹 개발",
+        "budget": "10,000,000원 ~ 20,000,000원",
+        "project_duration": "60일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "4feeb74387bfbfecafd92a3cfbdac495",
+        "chars": 2525
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "data_dashboard",
+        "project_subcategory": "크리에이터 지표 분석",
+        "engagement_type": "new_build",
+        "industry": "media_content",
+        "complexity_types": [
+          "standard_crud",
+          "integration_heavy"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "analytics_dashboard",
+          "external_api_integration",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [],
+        "summary": "브랜드·광고주·에이전시를 위해 유튜브 크리에이터 채널 지표를 시각화·비교하는 분석 웹 서비스와 관리자 백오피스, 백엔드를 신규 구축한다. 데이터 수집·가공은 내부 개발자가 담당하고 외주는 API 연동 UI와 서버를 맡는다.",
+        "required_features": [
+          "authentication",
+          "social_login",
+          "user_management",
+          "admin_dashboard",
+          "statistics_reporting",
+          "search_filter",
+          "cms",
+          "subscription_billing",
+          "payment",
+          "role_permission",
+          "board_community"
+        ],
+        "required_integrations": [
+          "google_login",
+          "payment_gateway"
+        ],
+        "required_platforms": [
+          "web",
+          "mobile_web",
+          "admin_web",
+          "backend_api"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "authentication",
+          "devops_infra"
+        ],
+        "suggested_stack": [
+          "Next.js",
+          "TypeScript",
+          "NestJS",
+          "PostgreSQL",
+          "Tailwind",
+          "Recharts",
+          "GCP Cloud Run"
+        ],
+        "vibe_coding_difficulty": 38,
+        "estimated_hours_min": 280,
+        "estimated_hours_max": 450,
+        "learning_value": 50,
+        "reusability_value": 60,
+        "market_value": 68,
+        "technical_risk": 32,
+        "requirement_clarity": 75,
+        "rationale": {
+          "vibe_coding_difficulty": "표준 CRUD·차트 UI 중심이며 내부 API 연동 의존이 있음.",
+          "estimated_hours": "사용자 웹, 백오피스, 백엔드, API 연동을 합쳐 약 280~450시간.",
+          "learning_value": "대시보드 시각화와 NestJS/GCP 경험은 유용하나 새로운 개념은 적음.",
+          "reusability_value": "인증·어드민·차트 대시보드 구조는 다른 프로젝트에 재사용 가능.",
+          "market_value": "분석 대시보드와 백오피스 조합은 외주 시장에서 반복적으로 나옴.",
+          "technical_risk": "내부 API 지연과 결제 범위 미확정이 위험하나 기술은 주류임."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1267,
+        "cache_creation_input_tokens": 4421,
+        "cache_read_input_tokens": 26553
+      },
+      "cost_usd": 0.029045099999999997,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "a204db52-7228-4ac2-9bc2-e913a381365e",
+        "platform": "freemoa",
+        "external_project_id": "47969",
+        "title": "OpenClaw 설치 및 증권 HTS API 연동 설정 작업",
+        "budget": "300,000원 ~ 800,000원",
+        "project_duration": "2일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "b264110c9f561fb5e26680d17264ca5d",
+        "chars": 991
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "automation_rpa",
+        "project_subcategory": "증권 API 환경 설정",
+        "engagement_type": "new_build",
+        "industry": "finance",
+        "complexity_types": [
+          "integration_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "external_api_integration"
+        ],
+        "uncertain_fields": [],
+        "summary": "Windows 11 PC에 OpenClaw를 설치하고 증권사 HTS OpenAPI를 연동해 기본 데이터 수신을 확인하는 원격 설정 작업. 자동매매 로직 개발은 범위에 없다.",
+        "required_features": [
+          "data_pipeline"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "desktop"
+        ],
+        "required_skills": [
+          "backend"
+        ],
+        "suggested_stack": [
+          "Python",
+          "Windows 11",
+          "증권사 OpenAPI"
+        ],
+        "vibe_coding_difficulty": 25,
+        "estimated_hours_min": 6,
+        "estimated_hours_max": 16,
+        "learning_value": 25,
+        "reusability_value": 22,
+        "market_value": 35,
+        "technical_risk": 35,
+        "requirement_clarity": 55,
+        "rationale": {
+          "vibe_coding_difficulty": "설치·설정 중심이나 증권사 API와 원격 환경 이슈가 있음.",
+          "estimated_hours": "설치, 연동 설정, 테스트, 사용 안내까지 1~2일 분량.",
+          "learning_value": "증권 OpenAPI 연동 경험은 쌓이나 코드 자산은 적음.",
+          "reusability_value": "특정 PC 환경 설정 위주라 코드 재사용은 제한적.",
+          "market_value": "증권 API 환경 설정 수요는 있으나 틈새 영역임.",
+          "technical_risk": "OpenClaw와 증권사 API의 호환성, 인증서·계정 의존이 있음."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1450,
+        "cache_creation_input_tokens": 2564,
+        "cache_read_input_tokens": 25080
+      },
+      "cost_usd": 0.025938,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "5a6a889f-0c1b-4f19-b056-7540f2676130",
+        "platform": "freemoa",
+        "external_project_id": "48169",
+        "title": "[도급/상주] 영어교육 플랫폼 차세대 아키텍처 전환 개발",
+        "budget": "100,000,000원 ~ 200,000,000원",
+        "project_duration": "180일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "9e3524b5e2b2059e314d72eb9231e671",
+        "chars": 4350
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "saas",
+        "project_subcategory": "영어교육 LMS 재구축",
+        "engagement_type": "renewal",
+        "industry": "education",
+        "complexity_types": [
+          "legacy_heavy",
+          "integration_heavy",
+          "workflow_complex"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "saas_architecture",
+          "ai_llm",
+          "speech_audio_ai",
+          "external_api_integration",
+          "data_pipeline",
+          "security",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "PHP·그누보드 기반 운영 중인 영어교육 플랫폼(ELP/LEMS)을 Next.js·NestJS·PostgreSQL 기반 멀티테넌트 구조로 전면 재구축하고 데이터를 마이그레이션한다. GPT/STT/TTS 연동과 관리자 시스템을 포함한다.",
+        "required_features": [
+          "authentication",
+          "role_permission",
+          "admin_dashboard",
+          "user_management",
+          "statistics_reporting",
+          "board_community",
+          "file_upload",
+          "llm_generation",
+          "speech_processing",
+          "legacy_migration",
+          "data_pipeline",
+          "security_hardening",
+          "infra_devops",
+          "scheduling_calendar",
+          "search_filter"
+        ],
+        "required_integrations": [
+          "openai",
+          "hardware_device"
+        ],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "backend_api"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "authentication",
+          "llm_integration",
+          "devops_infra",
+          "data_engineering",
+          "legacy_tech",
+          "security"
+        ],
+        "suggested_stack": [
+          "Next.js",
+          "NestJS",
+          "TypeScript",
+          "PostgreSQL",
+          "Redis",
+          "BullMQ",
+          "OpenAI API"
+        ],
+        "vibe_coding_difficulty": 65,
+        "estimated_hours_min": 1400,
+        "estimated_hours_max": 2400,
+        "learning_value": 70,
+        "reusability_value": 55,
+        "market_value": 55,
+        "technical_risk": 65,
+        "requirement_clarity": 55,
+        "rationale": {
+          "vibe_coding_difficulty": "기존 기능 전수 재구축, 데이터 마이그레이션, 멀티테넌트, 5천 동시접속 설계로 난도 높음.",
+          "estimated_hours": "ELP·LEMS 전체 재구축과 DB 이전, AI 연동, 인프라 포함해 대규모 범위.",
+          "learning_value": "멀티테넌트, 큐/워커, DB 마이그레이션, AI 연동 구조 등 재사용 가능한 역량 많음.",
+          "reusability_value": "인증·RBAC·멀티테넌트·Adapter 구조는 재사용 가능하나 교육 도메인 로직은 특화.",
+          "market_value": "LMS·SaaS 재구축은 반복되나 대규모 도급·상주 조건은 제한적.",
+          "technical_risk": "RFP 미공개, 레거시 데이터 정합성, 카페24 인프라 한계와 동시접속 요구가 위험."
+        }
+      },
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 4945,
+        "cache_creation_input_tokens": 6926,
+        "cache_read_input_tokens": 61399
+      },
+      "cost_usd": 0.0790648,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "d3cf6aca-4ae1-417f-98fd-e93cd0a0fa05",
+        "platform": "wishket",
+        "external_project_id": "158096",
+        "title": "글로벌 B2B 쇼핑몰 신규 구축 (WordPress + WooCommerce)",
+        "budget": "15,000,000원",
+        "project_duration": "90일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "e19af80dbd7d87d7807d9b6b5f8ed6bd",
+        "chars": 5405
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "ecommerce",
+        "project_subcategory": "글로벌 B2B 쇼핑몰",
+        "engagement_type": "new_build",
+        "industry": "commerce",
+        "complexity_types": [
+          "standard_crud",
+          "integration_heavy"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "external_api_integration",
+          "cloud_infra",
+          "security"
+        ],
+        "uncertain_fields": [],
+        "summary": "해외 바이어 대상 B2B 쇼핑몰을 WordPress+WooCommerce로 신규 구축한다. 상품 DB 설계, 패싯 필터, B2B 회원 승인·가격 제어, 견적 요청, SEO, 인프라와 운영 교육을 포함한다.",
+        "required_features": [
+          "authentication",
+          "user_management",
+          "role_permission",
+          "admin_dashboard",
+          "product_catalog",
+          "search_filter",
+          "cart_checkout",
+          "order_management",
+          "payment",
+          "seo",
+          "multilingual",
+          "data_export",
+          "statistics_reporting",
+          "notification_email",
+          "cms",
+          "infra_devops",
+          "document_generation"
+        ],
+        "required_integrations": [
+          "shopping_platform",
+          "google_workspace"
+        ],
+        "required_platforms": [
+          "web",
+          "mobile_web",
+          "admin_web"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "ui_design",
+          "devops_infra",
+          "project_management"
+        ],
+        "suggested_stack": [
+          "WordPress",
+          "WooCommerce",
+          "FacetWP",
+          "ACF",
+          "Cloudflare",
+          "Elementor"
+        ],
+        "vibe_coding_difficulty": 35,
+        "estimated_hours_min": 220,
+        "estimated_hours_max": 360,
+        "learning_value": 40,
+        "reusability_value": 60,
+        "market_value": 80,
+        "technical_risk": 35,
+        "requirement_clarity": 75,
+        "rationale": {
+          "vibe_coding_difficulty": "플러그인 중심 WooCommerce 구축이나 B2B 가격·필터·인프라 범위가 넓음",
+          "estimated_hours": "기획·디자인·개발·인프라·QA·교육까지 포함해 220~360시간",
+          "learning_value": "WooCommerce B2B와 SEO 경험은 쌓이나 신기술은 적음",
+          "reusability_value": "Child Theme, 플러그인, B2B 가격 구조를 다른 쇼핑몰에 재사용 가능",
+          "market_value": "WooCommerce B2B 쇼핑몰 구축은 외주에서 반복 수요가 많음",
+          "technical_risk": "해외 PG 제한과 플러그인 충돌이 있으나 검증된 스택임"
+        }
+      },
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 3944,
+        "cache_creation_input_tokens": 7341,
+        "cache_read_input_tokens": 63664
+      },
+      "cost_usd": 0.0705453,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "5b93ce61-fd50-400e-ab34-06c16b488739",
+        "platform": "wishket",
+        "external_project_id": "155100",
+        "title": "WordPress 기반 글로벌 B2B 홈페이지 신규 구축",
+        "budget": "12,000,000원",
+        "project_duration": "60일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "c5994b804a4dc0162d305b4a5d5fd1e0",
+        "chars": 2226
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "website",
+        "project_subcategory": "글로벌 B2B 다국어 홈페이지",
+        "engagement_type": "new_build",
+        "industry": "manufacturing",
+        "complexity_types": [
+          "standard_crud"
+        ],
+        "reuse_level": "high",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "admin_system"
+        ],
+        "uncertain_fields": [],
+        "summary": "사막 생태계 복원 기술 기업의 해외 영업용 B2B 홈페이지를 WordPress 커스텀 테마와 WPML로 구축한다. 영어·한국어·아랍어(RTL) 다국어를 지원하고 향후 프랑스어로 확장 가능해야 한다.",
+        "required_features": [
+          "cms",
+          "landing_page",
+          "multilingual",
+          "admin_dashboard",
+          "seo",
+          "product_catalog",
+          "file_upload"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "mobile_web",
+          "admin_web"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "ui_design"
+        ],
+        "suggested_stack": [
+          "WordPress",
+          "WPML",
+          "PHP",
+          "ACF",
+          "Tailwind",
+          "GA4"
+        ],
+        "vibe_coding_difficulty": 22,
+        "estimated_hours_min": 120,
+        "estimated_hours_max": 200,
+        "learning_value": 35,
+        "reusability_value": 65,
+        "market_value": 75,
+        "technical_risk": 20,
+        "requirement_clarity": 72,
+        "rationale": {
+          "vibe_coding_difficulty": "WordPress 커스텀 테마와 WPML 설정 중심이라 표준 수준이며 RTL 대응이 추가된다.",
+          "estimated_hours": "약 14페이지 커스텀 테마, 다국어, RTL, 배포를 합쳐 120~200시간으로 본다.",
+          "learning_value": "WPML과 RTL 경험은 얻지만 기술 자체는 흔하다.",
+          "reusability_value": "커스텀 테마와 다국어 구조를 다른 B2B 사이트에 재사용할 수 있다.",
+          "market_value": "WordPress 다국어 기업 사이트는 반복 수요가 많다.",
+          "technical_risk": "위험은 낮다. 수출바우처 조건과 아랍어 번역 일정이 변수다."
+        }
+      },
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 4229,
+        "cache_creation_input_tokens": 7736,
+        "cache_read_input_tokens": 60373
+      },
+      "cost_usd": 0.0737246,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "21b89954-22cb-42ab-9957-feb8fde7879f",
+        "platform": "wishket",
+        "external_project_id": "156240",
+        "title": "Supabase 기반 사용자 게시판 및 관리자/광고주 대시보드 구축",
+        "budget": "15,000,000원",
+        "project_duration": "60일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "ad0a08e02bc4952b52812759590a854c",
+        "chars": 2696
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "platform_marketplace",
+        "project_subcategory": "커뮤니티·광고 플랫폼",
+        "engagement_type": "new_build",
+        "industry": "general",
+        "complexity_types": [
+          "workflow_complex",
+          "multi_platform"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "analytics_dashboard",
+          "ai_llm",
+          "cloud_infra",
+          "security"
+        ],
+        "uncertain_fields": [],
+        "summary": "Flutter 앱 웹뷰에 연동되는 커뮤니티 게시판과 자체 광고 캠페인 시스템, 관리자·광고주 대시보드를 Supabase 기반으로 신규 구축한다.",
+        "required_features": [
+          "authentication",
+          "role_permission",
+          "user_management",
+          "admin_dashboard",
+          "board_community",
+          "comments_reviews",
+          "file_upload",
+          "cms",
+          "statistics_reporting",
+          "data_export",
+          "llm_generation",
+          "seo",
+          "approval_workflow",
+          "scheduling_calendar"
+        ],
+        "required_integrations": [
+          "supabase",
+          "openai"
+        ],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "mobile_web"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "authentication",
+          "ui_design"
+        ],
+        "suggested_stack": [
+          "Next.js",
+          "TypeScript",
+          "Supabase",
+          "MUI",
+          "Tailwind",
+          "Vercel"
+        ],
+        "vibe_coding_difficulty": 42,
+        "estimated_hours_min": 280,
+        "estimated_hours_max": 420,
+        "learning_value": 60,
+        "reusability_value": 65,
+        "market_value": 65,
+        "technical_risk": 35,
+        "requirement_clarity": 72,
+        "rationale": {
+          "vibe_coding_difficulty": "표준 CRUD 중심이나 광고 트래킹 배치, 권한, 웹뷰 연동이 있음",
+          "estimated_hours": "게시판, 광고, 어드민, 통계, 디자인, QA까지 범위가 넓음",
+          "learning_value": "Supabase RLS, Edge Functions, 광고 트래킹을 익힐 수 있음",
+          "reusability_value": "권한, 게시판, 어드민 구조는 재사용할 수 있으나 광고 로직은 특화됨",
+          "market_value": "Supabase 기반 커뮤니티·어드민 개발은 반복 수요가 많음",
+          "technical_risk": "트래킹 부하와 웹뷰 연동 외에는 검증된 기술임"
+        }
+      },
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 3911,
+        "cache_creation_input_tokens": 5277,
+        "cache_read_input_tokens": 57592
+      },
+      "cost_usd": 0.0638409,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "394b49e4-c8c1-45d3-ba7c-1e88d89561bf",
+        "platform": "wishket",
+        "external_project_id": "158628",
+        "title": "React/Spring Boot 기반 대기업 PG 백오피스 풀스택 개발",
+        "budget": "6,000,000원/월",
+        "project_duration": "225일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "099cb3cfb842cec5902566ab4315a48e",
+        "chars": 1024
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "fintech_payment",
+        "project_subcategory": "PG 백오피스 정산",
+        "engagement_type": "staffing",
+        "industry": "finance",
+        "complexity_types": [
+          "high_risk_domain",
+          "workflow_complex"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "admin_system",
+          "data_pipeline",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "대기업 차세대 PG 시스템 재구축의 백오피스(정산 포함) 웹을 React/Spring Boot/Oracle로 개발하는 상주 기간제 인력 투입 프로젝트.",
+        "required_features": [
+          "admin_dashboard",
+          "settlement",
+          "role_permission",
+          "statistics_reporting",
+          "data_export",
+          "payment"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "admin_web",
+          "backend_api"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "payment",
+          "legacy_tech"
+        ],
+        "suggested_stack": [
+          "React",
+          "Spring Boot",
+          "Spring Batch",
+          "Oracle",
+          "IBSheet"
+        ],
+        "vibe_coding_difficulty": 62,
+        "estimated_hours_min": 900,
+        "estimated_hours_max": 1300,
+        "learning_value": 45,
+        "reusability_value": 35,
+        "market_value": 55,
+        "technical_risk": 50,
+        "requirement_clarity": 35,
+        "rationale": {
+          "vibe_coding_difficulty": "대기업 PG 정산, 상주, 대형 조직 환경이라 어렵다.",
+          "estimated_hours": "약 7개월 상주 1인 분량으로 추정했다.",
+          "learning_value": "Spring Batch 정산 경험은 유용하나 IBSheet 등 레거시 요소가 많다.",
+          "reusability_value": "기업 전용 업무 흐름이라 재사용이 제한적이다.",
+          "market_value": "SI형 PG/정산 백오피스 수요는 꾸준하다.",
+          "technical_risk": "정산 정확성 요구와 발주처 의존이 있다."
+        }
+      },
+      "usage": {
+        "input_tokens": 12,
+        "output_tokens": 5001,
+        "cache_creation_input_tokens": 4904,
+        "cache_read_input_tokens": 67982
+      },
+      "cost_usd": 0.0758904,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "98b639be-2e07-4efb-aa62-79bba52dfd0b",
+        "platform": "wishket",
+        "external_project_id": "154821",
+        "title": "RPA 기반 대기업 업무 프로세스 자동화 개발 및 운영 지원",
+        "budget": "5,500,000원/월",
+        "project_duration": "150일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "80c9e8410579a9701a9ce2762c19d97d",
+        "chars": 1033
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "automation_rpa",
+        "project_subcategory": "대기업 RPA 개발·운영",
+        "engagement_type": "staffing",
+        "industry": "manufacturing",
+        "complexity_types": [
+          "legacy_heavy",
+          "integration_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "workflow_automation",
+          "browser_automation",
+          "analytics_dashboard",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "LS그룹에 상주하며 기존 RPA 시스템을 운영·개선하고 업무 자동화 프로세스를 설계·개발하는 기간제 인력 투입 프로젝트입니다.",
+        "required_features": [
+          "approval_workflow",
+          "bug_fix_maintenance",
+          "statistics_reporting",
+          "document_generation"
+        ],
+        "required_integrations": [
+          "erp_external"
+        ],
+        "required_platforms": [
+          "desktop",
+          "web"
+        ],
+        "required_skills": [
+          "backend",
+          "legacy_tech",
+          "project_management"
+        ],
+        "suggested_stack": [
+          "UiPath",
+          "Power Automate",
+          "PowerApps",
+          "Power BI",
+          "Python"
+        ],
+        "vibe_coding_difficulty": 50,
+        "estimated_hours_min": 700,
+        "estimated_hours_max": 850,
+        "learning_value": 45,
+        "reusability_value": 35,
+        "market_value": 60,
+        "technical_risk": 35,
+        "requirement_clarity": 35,
+        "rationale": {
+          "vibe_coding_difficulty": "UiPath 등 로우코드 도구와 기존 RPA 시스템 의존, 상주 환경.",
+          "estimated_hours": "4.5개월 상주 1인 기준 약 700~850시간.",
+          "learning_value": "RPA·Power Platform 경험은 쌓이나 기업 환경 종속적.",
+          "reusability_value": "기업 내부 업무 흐름 중심이라 코드 재사용은 제한적.",
+          "market_value": "RPA·업무 자동화 수요는 꾸준하나 상주형 위주.",
+          "technical_risk": "기존 시스템 불확실성은 있으나 기술 자체는 검증됨."
+        }
+      },
+      "usage": {
+        "input_tokens": 8,
+        "output_tokens": 2251,
+        "cache_creation_input_tokens": 3050,
+        "cache_read_input_tokens": 38698
+      },
+      "cost_usd": 0.037890599999999997,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "f31756bd-8ef0-4727-aea9-9396fb0a7479",
+        "platform": "wishket",
+        "external_project_id": "153028",
+        "title": "클라우드 기반 전자차트 SaaS 플랫폼 MVP 개발",
+        "budget": "40,000,000원",
+        "project_duration": "170일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "0fdee0cd588b2f2d44dbbd09f6c8ae25",
+        "chars": 1845
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "saas",
+        "project_subcategory": "뷰티샵 전자차트 SaaS",
+        "engagement_type": "new_build",
+        "industry": "other",
+        "complexity_types": [
+          "standard_crud",
+          "multi_platform"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "saas_architecture",
+          "mobile",
+          "analytics_dashboard",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [],
+        "summary": "뷰티샵을 대상으로 고객·시술 전자차트, 사진, 예약, 통계를 관리하는 클라우드 SaaS의 MVP를 관리자 웹과 태블릿/모바일 앱으로 신규 구축한다.",
+        "required_features": [
+          "authentication",
+          "role_permission",
+          "user_management",
+          "admin_dashboard",
+          "file_upload",
+          "reservation",
+          "scheduling_calendar",
+          "e_signature",
+          "statistics_reporting",
+          "crm",
+          "document_generation"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "ios",
+          "android"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "authentication",
+          "cross_platform_mobile",
+          "ui_design",
+          "devops_infra",
+          "project_management"
+        ],
+        "suggested_stack": [
+          "Next.js",
+          "TypeScript",
+          "Supabase",
+          "Expo (React Native)",
+          "Tailwind",
+          "Vercel"
+        ],
+        "vibe_coding_difficulty": 42,
+        "estimated_hours_min": 400,
+        "estimated_hours_max": 650,
+        "learning_value": 60,
+        "reusability_value": 68,
+        "market_value": 70,
+        "technical_risk": 35,
+        "requirement_clarity": 50,
+        "rationale": {
+          "vibe_coding_difficulty": "CRUD 중심이나 웹+앱, 서명·사진 관리가 포함됨",
+          "estimated_hours": "기획·디자인·웹·앱·인프라·문서 산출물까지 포함한 범위",
+          "learning_value": "SaaS 멀티테넌시와 앱 배포 경험을 쌓을 수 있음",
+          "reusability_value": "인증·권한·예약·CRUD 구조를 다른 SaaS에 재사용 가능",
+          "market_value": "업종별 예약·차트 SaaS 수요가 반복적임",
+          "technical_risk": "정부지원사업 선정 여부가 불확실하고 민감정보 이슈가 있음"
+        }
+      },
+      "usage": {
+        "input_tokens": 14,
+        "output_tokens": 6453,
+        "cache_creation_input_tokens": 6824,
+        "cache_read_input_tokens": 87479
+      },
+      "cost_usd": 0.0991138,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "007f36ae-0ce6-4135-9273-938bf5f6f6c7",
+        "platform": "wishket",
+        "external_project_id": "150086",
+        "title": "쿠팡 API 연동 제품 판매량 및 재고 추적 자동화 (Excel VBA)",
+        "budget": "1,000,000원",
+        "project_duration": "5일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "036b870fe9c7f669679553dffeb7abca",
+        "chars": 1622
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "automation_rpa",
+        "project_subcategory": "쿠팡 재고 엑셀 자동화",
+        "engagement_type": "new_build",
+        "industry": "commerce",
+        "complexity_types": [
+          "standard_crud"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "external_api_integration",
+          "workflow_automation"
+        ],
+        "uncertain_fields": [],
+        "summary": "쿠팡 로켓그로스 API로 제품별 현재 재고를 조회하고 전일 대비 판매량을 계산해 시트에 누적 기록하는 Excel VBA 자동화 도구를 만든다. 셀러의 수동 재고/판매 관리 업무 대체가 목적이다.",
+        "required_features": [
+          "data_pipeline",
+          "inventory_management",
+          "statistics_reporting"
+        ],
+        "required_integrations": [
+          "marketplace_api"
+        ],
+        "required_platforms": [
+          "desktop"
+        ],
+        "required_skills": [
+          "backend",
+          "legacy_tech"
+        ],
+        "suggested_stack": [
+          "Excel VBA",
+          "Coupang Open API",
+          "VBA-JSON"
+        ],
+        "vibe_coding_difficulty": 25,
+        "estimated_hours_min": 16,
+        "estimated_hours_max": 32,
+        "learning_value": 25,
+        "reusability_value": 45,
+        "market_value": 60,
+        "technical_risk": 30,
+        "requirement_clarity": 65,
+        "rationale": {
+          "vibe_coding_difficulty": "VBA와 단일 API 조회·차감 계산 중심의 단순 구조.",
+          "estimated_hours": "시트 설계, HMAC 인증 호출, 누적 기록, 테스트로 16~32시간.",
+          "learning_value": "VBA는 쇠퇴 기술이나 쿠팡 API 인증 경험은 남음.",
+          "reusability_value": "쿠팡 API 호출·HMAC 서명 로직은 재사용 가능하나 VBA 종속.",
+          "market_value": "셀러 대상 엑셀 자동화 수요는 꾸준히 반복됨.",
+          "technical_risk": "쿠팡 API 키 발급과 재고 엔드포인트 적합성이 불확실함."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1125,
+        "cache_creation_input_tokens": 3333,
+        "cache_read_input_tokens": 25781
+      },
+      "cost_usd": 0.0247507,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "1c665cb9-b05a-49c3-b1a5-0bc8acb98805",
+        "platform": "wishket",
+        "external_project_id": "157477",
+        "title": "EMS 연동 피크제어 및 Auto-DR 서버 백엔드 개발",
+        "budget": "5,000,000원",
+        "project_duration": "60일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "fa7f13149da1bac5bf2316a71c5ee686",
+        "chars": 1757
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "피크제어·Auto-DR 서버",
+        "engagement_type": "new_build",
+        "industry": "other",
+        "complexity_types": [
+          "hardware_iot",
+          "integration_heavy",
+          "algorithmic_specialized"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "backend_api",
+          "database",
+          "hardware_iot",
+          "external_api_integration",
+          "data_pipeline"
+        ],
+        "uncertain_fields": [],
+        "summary": "기존 EMS와 연동해 Modbus로 피크제어 대상 설비를 모니터링·제어하고 OpenADR 2.0b 기반 Auto-DR, 단계별 부하 차단, ESS/태양광 제어, 이행률 정산을 처리하는 Python 비동기 백엔드 서버를 구축한다.",
+        "required_features": [
+          "hardware_integration",
+          "iot_device_control",
+          "data_pipeline",
+          "notification_email",
+          "statistics_reporting",
+          "public_api",
+          "scheduling_calendar",
+          "document_generation",
+          "infra_devops"
+        ],
+        "required_integrations": [
+          "hardware_device",
+          "public_data_api",
+          "erp_external"
+        ],
+        "required_platforms": [
+          "backend_api"
+        ],
+        "required_skills": [
+          "backend",
+          "database",
+          "devops_infra",
+          "data_engineering"
+        ],
+        "suggested_stack": [
+          "Python",
+          "FastAPI",
+          "AsyncIO",
+          "PostgreSQL",
+          "pymodbus",
+          "Docker"
+        ],
+        "vibe_coding_difficulty": 68,
+        "estimated_hours_min": 220,
+        "estimated_hours_max": 400,
+        "learning_value": 60,
+        "reusability_value": 35,
+        "market_value": 35,
+        "technical_risk": 70,
+        "requirement_clarity": 55,
+        "rationale": {
+          "vibe_coding_difficulty": "Modbus 실설비 제어와 OpenADR 규격, 예측·제어 로직으로 검증이 어렵다.",
+          "estimated_hours": "5개 기능군에 설비 연동·테스트·인프라 구성까지 포함해 산정.",
+          "learning_value": "OpenADR·Modbus·에너지 제어는 배울 가치가 있으나 틈새 도메인이다.",
+          "reusability_value": "Modbus 수집 모듈 등 일부만 재사용되고 대부분 고객 설비에 종속된다.",
+          "market_value": "에너지 DR 영역은 수요가 있으나 반복성은 낮은 편이다.",
+          "technical_risk": "실설비 의존, 기존 EMS 스키마 불확실, 예산 대비 범위가 커서 위험이 높다."
+        }
+      },
+      "usage": {
+        "input_tokens": 22,
+        "output_tokens": 11086,
+        "cache_creation_input_tokens": 4983,
+        "cache_read_input_tokens": 127804
+      },
+      "cost_usd": 0.14892229999999998,
+      "attempts": 2
+    },
+    {
+      "project": {
+        "id": "ab5e3a06-37a0-45b3-a900-de46a29c40e7",
+        "platform": "wishket",
+        "external_project_id": "149922",
+        "title": "Sharetribe 기반 숙박 예약 플랫폼 결제/정산 기능 개발",
+        "budget": "5,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "daa77c48ca984f4eda71cebb2403cd30",
+        "chars": 2181
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "platform_marketplace",
+        "project_subcategory": "숙박 예약 마켓플레이스",
+        "engagement_type": "feature_extension",
+        "industry": "travel_hospitality",
+        "complexity_types": [
+          "integration_heavy",
+          "high_risk_domain"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "payments",
+          "external_api_integration",
+          "database"
+        ],
+        "uncertain_fields": [],
+        "summary": "Sharetribe Pro 기반 한일 숙박 예약 플랫폼에 신규 PG 연동 결제·자동 정산, iCal 캘린더 동기화·차단일, 고객 문의 기능을 추가한다.",
+        "required_features": [
+          "payment",
+          "settlement",
+          "admin_dashboard",
+          "scheduling_calendar",
+          "reservation",
+          "board_community",
+          "statistics_reporting"
+        ],
+        "required_integrations": [
+          "payment_gateway"
+        ],
+        "required_platforms": [
+          "web",
+          "admin_web"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "payment",
+          "database"
+        ],
+        "suggested_stack": [
+          "Sharetribe Flex SDK",
+          "Next.js",
+          "TypeScript",
+          "Node.js",
+          "PostgreSQL"
+        ],
+        "vibe_coding_difficulty": 58,
+        "estimated_hours_min": 130,
+        "estimated_hours_max": 230,
+        "learning_value": 60,
+        "reusability_value": 50,
+        "market_value": 55,
+        "technical_risk": 65,
+        "requirement_clarity": 55,
+        "rationale": {
+          "vibe_coding_difficulty": "Sharetribe 제약 속 해외 PG·정산·iCal 동기화 통합이 어렵다.",
+          "estimated_hours": "결제·정산, iCal, 문의, 관리자 화면까지 범위가 넓다.",
+          "learning_value": "크로스보더 결제·정산과 iCal 동기화 경험을 쌓는다.",
+          "reusability_value": "iCal 동기화·정산 모듈은 재사용 가능하나 Sharetribe에 종속된다.",
+          "market_value": "예약 플랫폼 결제·정산은 반복 수요가 있으나 Sharetribe 한정이다.",
+          "technical_risk": "PG 선정·정산 방식 미확정, Sharetribe 결제 구조 제약이 위험이다."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1162,
+        "cache_creation_input_tokens": 4010,
+        "cache_read_input_tokens": 26340
+      },
+      "cost_usd": 0.026925,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "1c02cc02-eeb1-4723-9877-c256dd0716a1",
+        "platform": "wishket",
+        "external_project_id": "152942",
+        "title": "Nest.js/AWS 기반 AI튜터 앱 백엔드 개발 (주 20시간 재택)",
+        "budget": "3,000,000원/월",
+        "project_duration": "360일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "e47dd3b5e07495750a57e1b7d37dbead",
+        "chars": 1270
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "mobile_app",
+        "project_subcategory": "AI튜터 앱 백엔드",
+        "engagement_type": "staffing",
+        "industry": "education",
+        "complexity_types": [
+          "legacy_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "backend_api",
+          "database",
+          "cloud_infra",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "출시된 AI튜터 모바일 앱의 Nest.js/AWS 백엔드를 주 20시간 재택으로 유지관리하고 신규 기능을 개발하는 시니어 백엔드 인력 투입 건.",
+        "required_features": [
+          "bug_fix_maintenance",
+          "user_management",
+          "authentication",
+          "infra_devops"
+        ],
+        "required_integrations": [
+          "aws"
+        ],
+        "required_platforms": [
+          "backend_api"
+        ],
+        "required_skills": [
+          "backend",
+          "database",
+          "devops_infra"
+        ],
+        "suggested_stack": [
+          "NestJS",
+          "TypeScript",
+          "AWS",
+          "MongoDB",
+          "MariaDB"
+        ],
+        "vibe_coding_difficulty": 50,
+        "estimated_hours_min": 900,
+        "estimated_hours_max": 1100,
+        "learning_value": 35,
+        "reusability_value": 30,
+        "market_value": 60,
+        "technical_risk": 40,
+        "requirement_clarity": 40,
+        "rationale": {
+          "vibe_coding_difficulty": "기존 코드 분석과 운영 이슈 대응이 중심이라 중간 난이도.",
+          "estimated_hours": "주 20시간씩 약 52주 기준으로 추정.",
+          "learning_value": "NestJS/AWS 운영 경험은 쌓이나 신규 기술 학습은 제한적.",
+          "reusability_value": "기존 서비스 종속 코드라 재사용은 제한적.",
+          "market_value": "NestJS/AWS 백엔드 유지보수 인력 수요는 꾸준함.",
+          "technical_risk": "기존 시스템 상태와 범위가 불명확해 위험이 있음."
+        }
+      },
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 3334,
+        "cache_creation_input_tokens": 3637,
+        "cache_read_input_tokens": 53359
+      },
+      "cost_usd": 0.053124300000000006,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "03de6cda-040c-472b-8f36-d68adcedc253",
+        "platform": "wishket",
+        "external_project_id": "157967",
+        "title": "C#.Net WPF 기반 키오스크 배리어프리 기능 추가 개발",
+        "budget": "3,000,000원/월",
+        "project_duration": "90일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "fb63871018da0932dab6dc57d1d0b7af",
+        "chars": 1224
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "키오스크 배리어프리",
+        "engagement_type": "staffing",
+        "industry": "general",
+        "complexity_types": [
+          "legacy_heavy",
+          "hardware_iot"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "legacy_enterprise",
+          "hardware_iot"
+        ],
+        "uncertain_fields": [
+          "project_type"
+        ],
+        "summary": "부산 상주로 기존 C# WPF 키오스크 시스템 소스를 분석해 기획·디자인된 배리어프리 기능과 화면을 추가 개발하는 기간제 인력 투입 건.",
+        "required_features": [
+          "hardware_integration",
+          "legacy_migration"
+        ],
+        "required_integrations": [
+          "hardware_device"
+        ],
+        "required_platforms": [
+          "desktop"
+        ],
+        "required_skills": [
+          "desktop_app",
+          "legacy_tech",
+          "frontend"
+        ],
+        "suggested_stack": [
+          "C#",
+          ".NET",
+          "WPF"
+        ],
+        "vibe_coding_difficulty": 55,
+        "estimated_hours_min": 400,
+        "estimated_hours_max": 520,
+        "learning_value": 35,
+        "reusability_value": 25,
+        "market_value": 35,
+        "technical_risk": 45,
+        "requirement_clarity": 50,
+        "rationale": {
+          "vibe_coding_difficulty": "기존 WPF 키오스크 코드 분석과 상주 환경, 장비 연동 가능성.",
+          "estimated_hours": "3개월 상주 1명 기준, 화면 개발 중심으로 추정.",
+          "learning_value": "WPF 키오스크와 접근성 경험은 있으나 범위가 좁음.",
+          "reusability_value": "특정 기업 레거시 코드에 종속되어 재사용 제한적.",
+          "market_value": "키오스크 접근성 수요는 있으나 WPF 상주는 틈새.",
+          "technical_risk": "기존 코드 품질과 장비 연동 범위가 불확실."
+        }
+      },
+      "usage": {
+        "input_tokens": 8,
+        "output_tokens": 2191,
+        "cache_creation_input_tokens": 3250,
+        "cache_read_input_tokens": 39114
+      },
+      "cost_usd": 0.037873800000000006,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "ed5af3bf-7f17-43c4-b762-8d98d09c7e13",
+        "platform": "wishket",
+        "external_project_id": "150884",
+        "title": "Nest.js/React 기반 회계/인사 ERP 시스템 기능 개선",
+        "budget": "6,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "fa21b60068e1ab5caf663feb3b115e06",
+        "chars": 2773
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "business_management",
+        "project_subcategory": "회계/인사 ERP 급여대장",
+        "engagement_type": "feature_extension",
+        "industry": "professional_services",
+        "complexity_types": [
+          "legacy_heavy",
+          "high_risk_domain",
+          "workflow_complex"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "admin_system",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "운영 중인 Nest.js/React 기반 회계·인사·노무 ERP의 급여대장(근로소득자) 로직을 개선하고 연봉 테이블 기능을 신설한다. 기존 소스 분석 후 기획·디자인·개발·QA까지 수행한다.",
+        "required_features": [
+          "admin_dashboard",
+          "hr_attendance",
+          "accounting",
+          "user_management",
+          "bug_fix_maintenance"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "legacy_tech"
+        ],
+        "suggested_stack": [
+          "NestJS",
+          "React",
+          "TypeScript",
+          "PostgreSQL",
+          "Redis",
+          "Tailwind CSS"
+        ],
+        "vibe_coding_difficulty": 58,
+        "estimated_hours_min": 100,
+        "estimated_hours_max": 180,
+        "learning_value": 45,
+        "reusability_value": 35,
+        "market_value": 55,
+        "technical_risk": 55,
+        "requirement_clarity": 65,
+        "rationale": {
+          "vibe_coding_difficulty": "타인 소스 분석과 급여·4대보험 계산 정확성 검증이 필요하다.",
+          "estimated_hours": "연봉테이블 신설, 일할계산, 퇴사자 처리, 기획·QA 포함 약 100~180시간.",
+          "learning_value": "급여 계산 로직은 배우나 특정 시스템 중심이다.",
+          "reusability_value": "급여 계산 개념은 쓰지만 코드는 기존 ERP에 종속된다.",
+          "market_value": "ERP/급여 기능 개선 수요는 꾸준하나 도메인 특화다.",
+          "technical_risk": "급여 오계산 위험과 기존 코드 품질 불확실성이 있다."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1152,
+        "cache_creation_input_tokens": 4565,
+        "cache_read_input_tokens": 26869
+      },
+      "cost_usd": 0.028318299999999998,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "96237d21-5682-4954-a481-5b3b05eed0df",
+        "platform": "wishket",
+        "external_project_id": "153015",
+        "title": "AI 기반 사용자 맞춤형 디지털 복지 앱 구축",
+        "budget": "20,000,000원",
+        "project_duration": "180일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "a366afcf41da731292000a3d5f292bd3",
+        "chars": 2090
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "platform_marketplace",
+        "project_subcategory": "AI 복지 정보·상담 앱",
+        "engagement_type": "new_build",
+        "industry": "public_sector",
+        "complexity_types": [
+          "multi_platform",
+          "integration_heavy"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "mobile",
+          "backend_api",
+          "database",
+          "admin_system",
+          "ai_llm",
+          "authentication_authorization",
+          "external_api_integration",
+          "core_web"
+        ],
+        "uncertain_fields": [
+          "project_type"
+        ],
+        "summary": "복지 정책·시설·행사 정보를 제공하고 AI로 위치 기반 추천과 금융·법률·복지 연계 로드맵을 제시하며 예약·상담 신청까지 지원하는 iOS/Android 앱과 관리자 웹을 기획부터 구축한다.",
+        "required_features": [
+          "authentication",
+          "user_management",
+          "product_catalog",
+          "search_filter",
+          "map_location",
+          "llm_generation",
+          "recommendation",
+          "reservation",
+          "admin_dashboard",
+          "cms",
+          "statistics_reporting",
+          "notification_push",
+          "app_store_release"
+        ],
+        "required_integrations": [
+          "public_data_api",
+          "kakao_map",
+          "openai",
+          "push_service"
+        ],
+        "required_platforms": [
+          "cross_platform_app",
+          "admin_web",
+          "backend_api"
+        ],
+        "required_skills": [
+          "cross_platform_mobile",
+          "backend",
+          "frontend",
+          "database",
+          "llm_integration",
+          "ui_design",
+          "project_management"
+        ],
+        "suggested_stack": [
+          "Expo(React Native)",
+          "Next.js",
+          "TypeScript",
+          "Supabase",
+          "OpenAI API",
+          "Vercel"
+        ],
+        "vibe_coding_difficulty": 42,
+        "estimated_hours_min": 280,
+        "estimated_hours_max": 480,
+        "learning_value": 55,
+        "reusability_value": 55,
+        "market_value": 60,
+        "technical_risk": 40,
+        "requirement_clarity": 40,
+        "rationale": {
+          "vibe_coding_difficulty": "앱+관리자+AI 추천·위치 연동이나 대부분 표준 구성이다.",
+          "estimated_hours": "기획·디자인·앱·백엔드·관리자 전 범위로 280~480시간.",
+          "learning_value": "LBS, LLM 추천, 앱 배포 경험을 쌓을 수 있다.",
+          "reusability_value": "인증·관리자·예약·지도 모듈은 재사용 가능하나 도메인 특화다.",
+          "market_value": "정보 제공+예약 매칭 앱은 반복적으로 나오는 유형이다.",
+          "technical_risk": "정부과제 선정 조건부이고 공공데이터와 AI 품질이 불확실하다."
+        }
+      },
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 3878,
+        "cache_creation_input_tokens": 4790,
+        "cache_read_input_tokens": 55873
+      },
+      "cost_usd": 0.0619496,
+      "attempts": 1
+    }
+  ]
+}

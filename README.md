@@ -161,7 +161,7 @@ ANALYZER_BACKEND=claude-cli ANALYZER_MODEL=claude-sonnet-5-5 pnpm analyzer sampl
 - `ANTHROPIC_API_KEY` 는 자식 프로세스에서 제거해 구독 인증을 쓴다. 리포트의 비용은 API 단가 환산 추정치이며 실제 청구는 없다 (구독 사용량 한도에 반영).
 - Batch API(`batch-submit`, `classify --batch`)는 API 키가 필요하다.
 
-- 현재 기준은 `v3.2` (v3.1 에 project_type `maintenance` 제거·`test_automation` 추가·complexity_types 규칙 강화·reuse low/medium 경계. v3.1 = v3 에 project_type `qa_testing` 추가, reuse_level 기준 강화, iot_device 경계, 예산과 작업시간 분리, uncertain_fields 조건 강화). v3 = v2 에 project_type 4종·technology_assets 3종·engagement 경계 규칙 추가: 통계용 6개 분류 `project_type`, `engagement_type`, `industry`, `complexity_types[]`, `reuse_level`, `technology_assets[]`
+- 현재 기준은 `v3.3` (v3.2 에서 reuse_level 규칙만 수정: medium 은 구체적 모듈 필요, one_off 는 아주 특수한 고객 종속만. v3.2 = v3.1 에 project_type `maintenance` 제거·`test_automation` 추가·complexity_types 규칙 강화·reuse low/medium 경계. v3.1 = v3 에 project_type `qa_testing` 추가, reuse_level 기준 강화, iot_device 경계, 예산과 작업시간 분리, uncertain_fields 조건 강화). v3 = v2 에 project_type 4종·technology_assets 3종·engagement 경계 규칙 추가: 통계용 6개 분류 `project_type`, `engagement_type`, `industry`, `complexity_types[]`, `reuse_level`, `technology_assets[]`
   (enum 은 `packages/analysis/src/taxonomy.ts`). 판단이 애매한 분류는 `uncertain_fields` 로 표시되고 리포트 "분류가 애매한 케이스"에 모인다.
 - 점수(종합점수·빈도/견적/구현 용이성/반복률 점수)는 아직 만들지 않는다. 수집 → 분류 → 분포 확인 → 배점 결정 → 전체 점수화 순서.
 - `run` / `batch-submit` 은 100건을 넘으면 `--yes` 가 있어야 실행된다.
