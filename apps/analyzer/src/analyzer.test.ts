@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
 import { buildRequestParams, interpretMessage } from "./llm";
-import { renderReport, reviewCases, type ResultsFile } from "./results";
+import { renderComparison, renderReport, reviewCases, type ResultsFile } from "./results";
 
 const analysis = {
   project_type: "ecommerce",
@@ -129,5 +129,36 @@ describe("renderReport", () => {
     expect(md).toContain("- project_type: ecommerce 1");
     expect(md).toContain("custom_size_guide(1)");
     expect(md).toContain("전체 5,000건 분석 비용 추정");
+  });
+});
+
+describe("renderComparison", () => {
+  const file = (version: string, over: Record<string, unknown>): ResultsFile => ({
+    analysis_version: version,
+    model: "m",
+    mode: "import",
+    created_at: "",
+    usage_total: { input_tokens: 0, output_tokens: 0 },
+    cost_usd_total: null,
+    items: [
+      {
+        project: { id: "p1", platform: "wishket", external_project_id: "1", title: "결제", budget: null, project_duration: null },
+        input_meta: { truncated: false, limited_info: false, hash: "h", chars: 1 },
+        ok: true,
+        analysis: { ...analysis, ...over } as never,
+      },
+    ],
+  });
+
+  it("reports other counts, field changes, asset additions and resolved ambiguity", () => {
+    const md = renderComparison(
+      file("v2", { project_type: "other", uncertain_fields: ["project_type"], technology_assets: ["core_web"] }),
+      file("v3", { project_type: "fintech_payment", technology_assets: ["core_web", "computer_vision"] }),
+    );
+    expect(md).toContain("| project_type | 1 | 0 |");
+    expect(md).toContain("other → **fintech_payment**");
+    expect(md).toContain("+ computer_vision");
+    expect(md).toContain("## engagement_type 변경 (0건)");
+    expect(md).toContain("## 애매 표시가 해소된 사례 (1건)");
   });
 });

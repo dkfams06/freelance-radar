@@ -24,7 +24,11 @@ export const PROJECT_TYPES = {
   automation_rpa: "브라우저 자동화/RPA/업무 자동화 프로그램",
   data_dashboard: "BI/통계/대시보드/데이터 분석",
   maintenance: "기존 시스템 유지보수가 본질",
-  other: "위 어디에도 맞지 않음",
+  fintech_payment: "PG/선불/결제 인프라/핀테크 시스템",
+  iot_device: "무인 기기/장치/센서 중심 시스템 (기기 + 서버/앱)",
+  media_processing: "녹취/영상·음성 처리/미디어 분석 파이프라인",
+  enterprise_infra: "DR/관제/인프라 설계 등 엔터프라이즈 인프라",
+  other: "위 어디에도 정말 맞지 않음",
 } as const;
 export type ProjectType = keyof typeof PROJECT_TYPES;
 export const PROJECT_TYPE_CODES = Object.keys(PROJECT_TYPES) as [ProjectType, ...ProjectType[]];
@@ -97,6 +101,9 @@ export const TECHNOLOGY_ASSETS = [
   "legacy_enterprise",
   "hardware_iot",
   "security",
+  "computer_vision",
+  "speech_audio_ai",
+  "ocr_document_ai",
   "other",
 ] as const;
 export type TechnologyAsset = (typeof TECHNOLOGY_ASSETS)[number];

@@ -17,9 +17,11 @@ import {
  * project_analyses 는 (project_id, analysis_version) 단위로 저장되므로
  * 버전을 올리면 원본 수집 없이 같은 projects 를 새 기준으로 다시 분석할 수 있다.
  */
-export const ANALYSIS_VERSION = "v2";
+export const ANALYSIS_VERSION = "v3";
 // v1: 최초 기준 (project_category 15종, engagement_type 7종)
 // v2: 통계용 6개 분류 추가 (project_type, engagement_type 재정의, complexity_types, reuse_level, technology_assets, industry)
+// v3: project_type 4종(fintech_payment, iot_device, media_processing, enterprise_infra), technology_assets 3종
+//     (computer_vision, speech_audio_ai, ocr_document_ai) 추가, engagement_type 경계 규칙 명시
 
 const list = (o: Record<string, string>) =>
   Object.entries(o)
@@ -48,15 +50,26 @@ export const SYSTEM_PROMPT = `당신은 한국 IT 외주 시장(위시캣, 프�
 ${list(PROJECT_TYPES)}
 - 결과물의 "주된 성격" 하나만 고릅니다. 예: 앱이 핵심인 예약 서비스 → reservation (앱 여부는 required_platforms 와 complexity_types 로 표현).
 - 기존 시스템의 유지보수/소규모 수정이 본질이면 maintenance. 기존 시스템에 큰 기능을 붙이는 일이면 그 기능의 성격으로 고르고 engagement_type 을 feature_extension 으로.
-- 상주/인력 구인이라도 "투입되어 만드는 대상"의 성격으로 고릅니다 (예: 금융 정보계 EDW → data_dashboard, PG 결제 시스템 → other).
+- 상주/인력 구인이라도 "투입되어 만드는 대상"의 성격으로 고릅니다 (예: 금융 정보계 EDW → data_dashboard, PG 결제 시스템 → fintech_payment).
+- PG/선불결제/결제 인프라 → fintech_payment. 단, 일반 쇼핑몰·예약 서비스에 결제를 붙이는 것은 그 서비스 유형(ecommerce, reservation)입니다.
+- 무인 락커·키오스크·센서 등 장치가 시스템의 중심 → iot_device. 장치와 연동하는 기존 앱의 유지보수도 장치가 중심이면 iot_device.
+- 녹취/영상·음성 처리/미디어 분석 파이프라인이 결과물의 중심 → media_processing. LLM/RAG/에이전트가 중심이면 ai_service.
+- DR/관제/APM/인프라 아키텍처 설계 → enterprise_infra.
+- other 는 위 어떤 범주에도 맞지 않을 때만 씁니다. other 를 고르기 전에 가장 가까운 유형이 있는지 다시 확인합니다.
 
 ## project_subcategory
 project_type 안의 세부 유형을 짧은 한국어 명사구로 (예: "병원 예약", "B2B 주문관리", "부동산 중개 플랫폼"). 15자 이내. 새 분류 체계를 만들지 말고 설명용으로만 씁니다.
 
 ## engagement_type (일의 형태, 정확히 하나)
 ${list(ENGAGEMENT_TYPES)}
-- 상주·기간제·월 단가·"인력 모집" 형태이면 업무 내용과 관계없이 staffing. 일반 외주와 분리하는 데 가장 중요한 값입니다.
-- 공고가 기능 추가와 유지보수를 함께 요구하면 이번 계약의 중심 작업으로 고릅니다.
+경계 규칙:
+- new_build: 새 결과물이나 독립 서비스 구축이 주된 목적 (클라이언트의 시제품·스크립트를 바탕으로 새 제품을 만드는 경우 포함).
+- feature_extension: 기존 제품은 유지하고 기능 추가가 주된 목적.
+- renewal: 기존 서비스의 UI/UX/구조를 전면 개편하는 것이 주된 목적.
+- maintenance: 운영, 장애 대응, 수정, 소규모 개선이 주된 목적.
+- staffing: 상주/기간제/월 단가/인력 투입 형태면 업무 내용과 관계없이 staffing. 일반 외주와 분리하는 데 가장 중요한 값입니다.
+- design_publishing: 개발보다 디자인/퍼블리싱/웹빌더(아임웹, 윅스 등) 작업이 중심.
+- 복합 프로젝트는 이번 계약에서 가장 큰 작업 비중 하나를 고릅니다 (예: 추가 개발 후 별도 유지보수 계약 예정 → 이번 계약의 추가 개발 기준 feature_extension).
 
 ## industry (산업군, 정확히 하나)
 ${list(INDUSTRIES)}
@@ -77,6 +90,7 @@ ${TECHNOLOGY_ASSETS.join(", ")}
 - 이 프로젝트를 실제로 수행하면 남는 재사용 가능한 역량/코드 자산만 고릅니다.
 - 웹 화면이 있으면 core_web, 서버/API 가 있으면 backend_api, DB 설계가 있으면 database.
 - 상주 컨설팅처럼 코드 자산이 거의 남지 않으면 해당 영역 1~2개만 고르거나 legacy_enterprise 를 씁니다.
+- 영상 객체 인식 → computer_vision, 음성 인식/녹취 → speech_audio_ai, 문서·이미지 OCR → ocr_document_ai. ai_llm 과 함께 고를 수 있습니다 (예: LLM + OCR → ai_llm, ocr_document_ai).
 
 ## summary
 무엇을, 누구를 위해, 어떤 형태로 만드는지 한국어 1~2문장. 예산·기간·지원 조건은 쓰지 않습니다.

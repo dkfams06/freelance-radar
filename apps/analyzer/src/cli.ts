@@ -20,7 +20,7 @@ import {
   type TokenUsage,
 } from "@fr/analysis";
 import { LlmClient, loadLlmConfig } from "./llm";
-import { OUT_DIR, readResults, summarizeUsage, writeResults, type ResultItem, type ResultsFile } from "./results";
+import { OUT_DIR, readResults, renderComparison, summarizeUsage, writeResults, type ResultItem, type ResultsFile } from "./results";
 import { analyzeProjectsSync, toItemProject } from "./runner";
 import { AnalyzerStore } from "./store";
 
@@ -37,6 +37,7 @@ commands:
   export-inputs   샘플 프로젝트의 분석 입력 텍스트를 파일로 저장 (프롬프트 검토용)
   import <file>   결과 파일(.out/*.json)의 분석을 스키마 재검증 후 DB 저장
   report <file>   결과 파일로 Markdown 리포트 재생성
+  compare <a> <b> 두 결과 파일의 분류 비교 (예: v2 → v3, 수동 샘플 → 실제 API)
   classify        전체 수집 데이터 분류 준비: 기본은 대상 건수/토큰/비용/API 호출 수 추정만 출력
                   --execute 를 붙여야 실제 실행 (--batch: Batch API 로 제출)
   stats           분류 결과 분포 통계 (project_type / engagement_type / industry / reuse_level / technology_assets)
@@ -85,9 +86,22 @@ async function main() {
       help: { type: "boolean", short: "h" },
     },
   });
-  const [command, rawArg] = positionals;
+  const [command, rawArg, rawArg2] = positionals;
   // pnpm --filter 는 패키지 디렉터리에서 실행되므로 상대 경로는 호출한 위치(INIT_CWD) 기준으로 푼다
-  const arg = rawArg ? path.resolve(process.env.INIT_CWD ?? process.cwd(), rawArg) : undefined;
+  const resolveArg = (a?: string) => (a ? path.resolve(process.env.INIT_CWD ?? process.cwd(), a) : undefined);
+  const arg = resolveArg(rawArg);
+  const arg2 = resolveArg(rawArg2);
+  if (command === "compare") {
+    // DB 불필요
+    if (!arg || !arg2) throw new Error("compare <base.json> <next.json>");
+    const md = renderComparison(readResults(arg), readResults(arg2));
+    mkdirSync(OUT_DIR, { recursive: true });
+    const file = path.join(OUT_DIR, `compare-${stamp()}.md`);
+    writeFileSync(file, md);
+    log(md);
+    log(`\n→ ${file}`);
+    return;
+  }
   if (!command || values.help) {
     console.log(USAGE);
     return;

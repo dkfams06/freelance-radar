@@ -237,3 +237,74 @@ export function renderReport(r: ResultsFile): string {
   L.push("");
   return L.join("\n");
 }
+
+const CLASS_FIELDS = ["project_type", "engagement_type", "industry", "reuse_level"] as const;
+const ARRAY_FIELDS = ["complexity_types", "technology_assets"] as const;
+
+/**
+ * 같은 프로젝트들에 대한 두 결과 파일의 분류 비교 (예: v2 → v3, 수동 샘플 → 실제 API).
+ * 프로젝트는 project.id 로 맞춘다.
+ */
+export function renderComparison(base: ResultsFile, next: ResultsFile): string {
+  const baseById = new Map(base.items.filter((i) => i.analysis).map((i) => [i.project.id, i]));
+  const pairs = next.items
+    .filter((i) => i.analysis && baseById.has(i.project.id))
+    .map((n) => ({ b: baseById.get(n.project.id)!, n }));
+  const label = (r: ResultsFile) => `${r.analysis_version} (${r.model})`;
+  const title = (i: ResultItem) => `[${i.project.platform}:${i.project.external_project_id}] ${esc(i.project.title)}`;
+  const L: string[] = [`# 분류 비교: ${label(base)} → ${label(next)}`, "", `- 비교 대상: ${pairs.length}건`, ""];
+
+  // other 건수
+  L.push("## other 건수", "", "| 필드 | 이전 | 이후 |", "|---|---|---|");
+  for (const f of CLASS_FIELDS) {
+    const c = (side: "b" | "n") => pairs.filter((p) => p[side].analysis![f] === "other").length;
+    L.push(`| ${f} | ${c("b")} | ${c("n")} |`);
+  }
+  for (const f of ARRAY_FIELDS) {
+    const c = (side: "b" | "n") => pairs.filter((p) => (p[side].analysis![f] as string[]).includes("other")).length;
+    L.push(`| ${f} (other 포함) | ${c("b")} | ${c("n")} |`);
+  }
+  L.push("");
+
+  // 단일 값 필드 변경
+  for (const f of CLASS_FIELDS) {
+    const changed = pairs.filter((p) => p.b.analysis![f] !== p.n.analysis![f]);
+    L.push(`## ${f} 변경 (${changed.length}건)`, "");
+    if (!changed.length) L.push("- 없음");
+    for (const p of changed) L.push(`- ${title(p.n)}: ${p.b.analysis![f]} → **${p.n.analysis![f]}**`);
+    L.push("");
+  }
+
+  // 배열 필드 변경
+  for (const f of ARRAY_FIELDS) {
+    const changed = pairs
+      .map((p) => {
+        const before = new Set(p.b.analysis![f] as string[]);
+        const after = new Set(p.n.analysis![f] as string[]);
+        return { p, added: [...after].filter((x) => !before.has(x)), removed: [...before].filter((x) => !after.has(x)) };
+      })
+      .filter((c) => c.added.length || c.removed.length);
+    L.push(`## ${f} 변경 (${changed.length}건)`, "");
+    if (!changed.length) L.push("- 없음");
+    for (const c of changed) {
+      const parts = [c.added.length ? `+ ${c.added.join(", ")}` : "", c.removed.length ? `- ${c.removed.join(", ")}` : ""].filter(Boolean);
+      L.push(`- ${title(c.p.n)}: ${parts.join(" / ")}`);
+    }
+    L.push("");
+  }
+
+  // 분류 판단 애매 표시 변화
+  const unc = (i: ResultItem) => i.analysis!.uncertain_fields ?? [];
+  const resolved = pairs.filter((p) => unc(p.b).length && !unc(p.n).length);
+  L.push(`## 애매 표시가 해소된 사례 (${resolved.length}건)`, "");
+  if (!resolved.length) L.push("- 없음");
+  for (const p of resolved) L.push(`- ${title(p.n)}: 이전 애매 필드 ${unc(p.b).join(", ")}`);
+  L.push("");
+
+  const cases = reviewCases(pairs.map((p) => p.n));
+  L.push(`## 아직 애매한 사례 (${cases.length}건)`, "");
+  if (!cases.length) L.push("- 없음");
+  for (const c of cases) L.push(`- [${c.project.platform}:${c.project.external_project_id}] ${esc(c.project.title)} — ${c.reasons.join("; ")}`);
+  L.push("");
+  return L.join("\n");
+}
