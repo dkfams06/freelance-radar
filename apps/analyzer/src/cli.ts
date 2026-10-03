@@ -40,6 +40,8 @@ import {
   type OpportunityV01Json,
   HAIKU_VALIDATION_ANALYSIS_VERSION,
   HAIKU_VALIDATION_SAMPLE_SCHEMA,
+  HAIKU_MODEL,
+  SONNET_MODEL,
   selectHaikuValidationSample,
   validateHaikuValidationSample,
   renderHaikuValidationSelection,
@@ -83,6 +85,7 @@ commands:
   sample-verify    저장된 시장 표본 JSON을 전체 projects와 다시 비교 검증
   run-sample       고정 시장 표본을 claude -p로 순차 분석 (체크포인트 재개)
                   Sonnet/Haiku 모두 허용. Haiku 검증은 별도 --version을 사용해 기존 v3.3을 덮어쓰지 않음
+  run-haiku-all    전체 projects 중 Haiku v3.3 결과가 없는 건만 claude -p 순차 분석 (모델별 skip/resume)
   haiku-validate-report  Sonnet v3.3 vs Haiku 검증 결과·opportunity 순위 비교 리포트 생성
   run             미분석 프로젝트를 동기(Messages API) 분석
   batch-submit    미분석 프로젝트를 Message Batches API 로 제출 (50% 할인, 보통 1시간 이내 완료)
@@ -116,6 +119,7 @@ options:
   --model <name>                run-sample: 모델 (기본 claude-sonnet-5-5)
   --delay-ms <n>                run-sample: 호출 사이 대기(ms, 기본 250)
   --progress-file <file>        run-sample: 체크포인트 파일 경로
+  --target-file <file>          run-haiku-all: 전체 대상 project_id 목록 파일
   --all                         classify: 이미 분석된 프로젝트도 포함 (--force 와 같음)
   --execute                     classify: 추정만 하지 않고 실제로 실행
   --batch                       classify --execute: Message Batches API 로 제출
@@ -187,6 +191,7 @@ async function main() {
       model: { type: "string" },
       "delay-ms": { type: "string" },
       "progress-file": { type: "string" },
+      "target-file": { type: "string" },
       all: { type: "boolean" },
       execute: { type: "boolean" },
       batch: { type: "boolean" },
@@ -334,7 +339,7 @@ async function main() {
       const size = values.limit ? positive(values.limit, "--limit") : 100;
       const seed = "analyzer-v3.3-haiku-validation-100-v1";
       const output = sampleOutputPaths(path.resolve(process.env.INIT_CWD ?? process.cwd(), values.out ?? "docs/analyzer-v3.3-haiku-validation-sample-100.json"));
-      const { analyzed } = await store.marketRows(ANALYSIS_VERSION);
+      const { analyzed } = await store.marketRows(ANALYSIS_VERSION, SONNET_MODEL);
       const eligible = analyzed.filter((row) => row.model?.startsWith("claude-sonnet")) as HaikuValidationSource[];
       if (eligible.length < size) throw new Error(`Sonnet ${ANALYSIS_VERSION} 성공 분석이 ${size}건보다 적습니다 (${eligible.length}건)`);
       const picked = selectHaikuValidationSample(eligible, size, seed);
@@ -402,7 +407,7 @@ async function main() {
       if (new Set(sampleIds).size !== sampleIds.length) throw new Error(`${samplePath}: project_id 중복이 있습니다`);
       const projects = await store.projectsByIds(sampleIds);
       if (projects.length !== sampleIds.length) throw new Error(`${samplePath}: DB에서 표본 프로젝트를 모두 찾지 못했습니다 (${projects.length}/${sampleIds.length})`);
-      const model = values.model ?? (isHaikuValidationSample ? "claude-haiku-4-5" : "claude-sonnet-5-5");
+      const model = values.model ?? (isHaikuValidationSample ? HAIKU_MODEL : SONNET_MODEL);
       if (!model.startsWith("claude-sonnet") && !model.startsWith("claude-haiku")) throw new Error("run-sample은 Claude Sonnet/Haiku 계열 모델만 허용합니다");
       const cfg = { ...loadLlmConfig(), model };
       const llm = new ClaudeCliClient(cfg, { useApiKey: false });
@@ -420,6 +425,58 @@ async function main() {
         version,
         sampleFile: samplePath,
         sampleIds,
+        projects,
+        progressFile,
+        model,
+        llm,
+        store,
+        maxAttempts: 3,
+        delayMs,
+        retryFailed: Boolean(values["retry-failed"]),
+        log,
+      });
+      if (result.stopped) log(`분석 일시중지: ${result.progress.stopped_reason}. 다음 실행에서 project=${result.progress.current_project_id}부터 재개합니다.`);
+      return;
+    }
+
+    case "run-haiku-all": {
+      const backend = values.backend ?? process.env.ANALYZER_BACKEND ?? "claude-cli";
+      if (backend !== "claude-cli") throw new Error("run-haiku-all은 ANALYZER_BACKEND=claude-cli만 지원합니다. API/Batch 경로는 사용하지 않습니다.");
+      const model = values.model ?? HAIKU_MODEL;
+      if (model !== HAIKU_MODEL) throw new Error(`run-haiku-all은 고정 모델 ${HAIKU_MODEL}만 허용합니다`);
+      const targetPath = values["target-file"]
+        ? resolveArg(values["target-file"])!
+        : path.join(OUT_DIR, "run-haiku-all-v3.3-targets.json");
+      let projectIds: string[];
+      if (existsSync(targetPath)) {
+        const target = JSON.parse(readFileSync(targetPath, "utf8")) as { schema?: string; analysis_version?: string; model?: string; project_ids?: unknown };
+        if (target.schema !== "analyzer-haiku-all-targets/v1" || target.analysis_version !== ANALYSIS_VERSION || target.model !== model || !Array.isArray(target.project_ids) || target.project_ids.some((id) => typeof id !== "string")) {
+          throw new Error(`${targetPath}: 기존 Haiku 전체 대상 파일의 schema/version/model이 현재 실행과 다릅니다`);
+        }
+        projectIds = target.project_ids;
+      } else {
+        projectIds = await store.allProjectIds();
+        mkdirSync(path.dirname(targetPath), { recursive: true });
+        writeFileSync(targetPath, `${JSON.stringify({ schema: "analyzer-haiku-all-targets/v1", analysis_version: ANALYSIS_VERSION, model, project_ids: projectIds, created_at: new Date().toISOString() }, null, 2)}\n`);
+      }
+      const projects = await store.projectsByIds(projectIds);
+      if (projects.length !== projectIds.length) throw new Error(`전체 대상 프로젝트를 모두 찾지 못했습니다 (${projects.length}/${projectIds.length})`);
+      const delayMs = values["delay-ms"] === undefined
+        ? Number.parseInt(process.env.ANALYZER_CLI_DELAY_MS || "250", 10)
+        : nonNegative(values["delay-ms"], "--delay-ms");
+      if (!Number.isFinite(delayMs) || delayMs < 0) throw new Error("ANALYZER_CLI_DELAY_MS 는 0 이상의 정수여야 합니다");
+      const cfg = { ...loadLlmConfig(), model };
+      const llm = new ClaudeCliClient(cfg, { useApiKey: false });
+      const progressFile = values["progress-file"]
+        ? resolveArg(values["progress-file"])!
+        : path.join(OUT_DIR, `run-sample-${ANALYSIS_VERSION}-${model}-progress.json`);
+      log(`run-haiku-all total=${projectIds.length} backend=claude-cli model=${model} concurrency=1 delay_ms=${delayMs}`);
+      log(`target=${targetPath}`);
+      log(`progress=${progressFile}`);
+      const result = await runSample({
+        version: ANALYSIS_VERSION,
+        sampleFile: targetPath,
+        sampleIds: projectIds,
         projects,
         progressFile,
         model,
@@ -518,11 +575,12 @@ async function main() {
 
     case "market-stats": {
       const version = values.version ?? ANALYSIS_VERSION;
-      const { projects, analyzed: allAnalyzed } = await store.marketRows(version);
+      const model = values.model ?? HAIKU_MODEL;
+      const { projects, analyzed: allAnalyzed } = await store.marketRows(version, model);
       const sampleIds = values["sample-file"] ? readProjectIdsFile(resolveArg(values["sample-file"])!) : null;
       const sampleSet = sampleIds ? new Set(sampleIds) : null;
       const analyzed = sampleSet ? allAnalyzed.filter((a) => sampleSet.has(a.project_id)) : allAnalyzed;
-      const errors = await store.analysisErrors(version, sampleIds ?? allAnalyzed.map((a) => a.project_id));
+      const errors = await store.analysisErrors(version, sampleIds ?? allAnalyzed.map((a) => a.project_id), model);
       const report = computeMarketReport(projects, analyzed, {
         version,
         minN: values["min-n"] ? positive(values["min-n"], "--min-n") : undefined,
@@ -534,7 +592,7 @@ async function main() {
       mkdirSync(path.dirname(outBase), { recursive: true });
       writeFileSync(`${outBase}.json`, `${JSON.stringify(report, null, 2)}\n`);
       writeFileSync(`${outBase}.md`, `${renderMarketReport(report)}\n`);
-      log(`원본 ${report.base.total}건 / 분석(${version}) ${report.coverage.analyzed}건 / 커버리지 ${(report.coverage.coverage_rate * 100).toFixed(2)}%`);
+      log(`원본 ${report.base.total}건 / 분석(${version}, model=${model}) ${report.coverage.analyzed}건 / 커버리지 ${(report.coverage.coverage_rate * 100).toFixed(2)}%`);
       for (const w of report.coverage.warnings) log(`⚠ ${w}`);
       log(`→ ${outBase}.md`);
       log(`→ ${outBase}.json`);
@@ -543,11 +601,12 @@ async function main() {
 
     case "opportunity-score": {
       const version = values.version ?? ANALYSIS_VERSION;
-      const { projects, analyzed: allAnalyzed } = await store.marketRows(version);
+      const model = values.model ?? HAIKU_MODEL;
+      const { projects, analyzed: allAnalyzed } = await store.marketRows(version, model);
       const sampleIds = values["sample-file"] ? readProjectIdsFile(resolveArg(values["sample-file"])!) : null;
       const sampleSet = sampleIds ? new Set(sampleIds) : null;
       const analyzed = sampleSet ? allAnalyzed.filter((a) => sampleSet.has(a.project_id)) : allAnalyzed;
-      const errors = await store.analysisErrors(version, sampleIds ?? analyzed.map((a) => a.project_id));
+      const errors = await store.analysisErrors(version, sampleIds ?? analyzed.map((a) => a.project_id), model);
       const report = computeOpportunityScoreReport(projects, analyzed, errors, {
         version,
         sampleProjectIds: sampleIds ?? undefined,
@@ -599,13 +658,13 @@ async function main() {
       const haikuVersion = values["haiku-version"] ?? sample.target_analysis_version;
       const sampleIds = sample.selected_project_ids;
       const sampleSet = new Set(sampleIds);
-      const sonnetMarket = await store.marketRows(sonnetVersion);
-      const haikuMarket = await store.marketRows(haikuVersion);
+      const sonnetMarket = await store.marketRows(sonnetVersion, SONNET_MODEL);
+      const haikuMarket = await store.marketRows(haikuVersion, HAIKU_MODEL);
       const projects = sonnetMarket.projects.filter((project) => sampleSet.has(project.id));
       const sonnetRows = sonnetMarket.analyzed.filter((row) => sampleSet.has(row.project_id) && row.model?.startsWith("claude-sonnet"));
       const haikuRows = haikuMarket.analyzed.filter((row) => sampleSet.has(row.project_id) && row.model?.startsWith("claude-haiku"));
-      const sonnetErrors = await store.analysisErrors(sonnetVersion, sampleIds);
-      const haikuErrors = await store.analysisErrors(haikuVersion, sampleIds);
+      const sonnetErrors = await store.analysisErrors(sonnetVersion, sampleIds, SONNET_MODEL);
+      const haikuErrors = await store.analysisErrors(haikuVersion, sampleIds, HAIKU_MODEL);
       const progressPath = values["progress-file"]
         ? resolveArg(values["progress-file"])!
         : path.join(OUT_DIR, `run-sample-${haikuVersion}-progress.json`);
@@ -648,7 +707,8 @@ async function main() {
     case "feature-repeat": {
       const version = values.version ?? ANALYSIS_VERSION;
       const types = values.types ? values.types.split(",").map((t) => t.trim()).filter(Boolean) : FEATURE_REPEAT_TYPES;
-      const { analyzed: allAnalyzed } = await store.marketRows(version);
+      const model = values.model ?? HAIKU_MODEL;
+      const { analyzed: allAnalyzed } = await store.marketRows(version, model);
       const sampleSet = values["sample-file"] ? new Set(readProjectIdsFile(resolveArg(values["sample-file"])!)) : null;
       // 일반 외주만 (opportunity-score 와 같은 기준: engagement_type != staffing)
       const analyzed = allAnalyzed.filter((a) => (!sampleSet || sampleSet.has(a.project_id)) && analysisSegment(a) === "non_staffing");
@@ -714,7 +774,8 @@ async function main() {
 
     case "stats": {
       const version = values.version ?? ANALYSIS_VERSION;
-      const rows = await store.statsRows(version);
+      const model = values.model ?? HAIKU_MODEL;
+      const rows = await store.statsRows(version, model);
       if (!rows.length) return log(`${version} 분석 결과가 없습니다`);
       const md = renderDistribution(computeDistribution(rows), `분류 분포 통계 (${version})`);
       mkdirSync(OUT_DIR, { recursive: true });

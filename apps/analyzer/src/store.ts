@@ -62,17 +62,21 @@ export class AnalyzerStore {
   }
 
   /** 해당 버전으로 이미 성공 분석된 project_id → input_hash */
-  async analyzedHashes(version: string): Promise<Map<string, string | null>> {
-    const rows = await this.pageAll<{ project_id: string; input_hash: string | null }>((f, t) =>
-      this.db.from("project_analyses").select("project_id,input_hash").eq("analysis_version", version).range(f, t),
-    );
+  async analyzedHashes(version: string, model?: string): Promise<Map<string, string | null>> {
+    const rows = await this.pageAll<{ project_id: string; input_hash: string | null }>((f, t) => {
+      let query = this.db.from("project_analyses").select("project_id,input_hash").eq("analysis_version", version);
+      if (model) query = query.eq("model", model);
+      return query.range(f, t);
+    });
     return new Map(rows.map((r) => [r.project_id, r.input_hash]));
   }
 
-  async unresolvedErrorProjectIds(version: string): Promise<Set<string>> {
-    const rows = await this.pageAll<{ project_id: string }>((f, t) =>
-      this.db.from("analysis_errors").select("project_id").eq("analysis_version", version).is("resolved_at", null).range(f, t),
-    );
+  async unresolvedErrorProjectIds(version: string, model?: string): Promise<Set<string>> {
+    const rows = await this.pageAll<{ project_id: string }>((f, t) => {
+      let query = this.db.from("analysis_errors").select("project_id").eq("analysis_version", version).is("resolved_at", null);
+      if (model) query = query.eq("model", model);
+      return query.range(f, t);
+    });
     return new Set(rows.map((r) => r.project_id));
   }
 
@@ -163,13 +167,14 @@ export class AnalyzerStore {
       cost_usd: args.costUsd,
       batch_id: args.batchId ?? null,
     };
-    const { error } = await this.db.from("project_analyses").upsert(row, { onConflict: "project_id,analysis_version" });
+    const { error } = await this.db.from("project_analyses").upsert(row, { onConflict: "project_id,analysis_version,model" });
     if (error) throw new Error(`save analysis: ${JSON.stringify(error)}`);
     await this.db
       .from("analysis_errors")
       .update({ resolved_at: new Date().toISOString() })
       .eq("project_id", args.projectId)
       .eq("analysis_version", args.version)
+      .eq("model", args.model)
       .is("resolved_at", null);
   }
 
@@ -186,7 +191,8 @@ export class AnalyzerStore {
       .from("analysis_errors")
       .select("id", { count: "exact", head: true })
       .eq("project_id", args.projectId)
-      .eq("analysis_version", args.version);
+      .eq("analysis_version", args.version)
+      .eq("model", args.model);
     const { error } = await this.db.from("analysis_errors").insert({
       project_id: args.projectId,
       analysis_version: args.version,
@@ -227,7 +233,7 @@ export class AnalyzerStore {
 
   /** 통계용: 분석 결과 + 원본 예산 (projects join) */
   /** 시장 통계용: 전체 원본 프로젝트 + 해당 버전 분석 결과(있는 것만) */
-  async marketRows(version: string): Promise<{ projects: MarketProject[]; analyzed: AnalyzedProject[] }> {
+  async marketRows(version: string, model?: string): Promise<{ projects: MarketProject[]; analyzed: AnalyzedProject[] }> {
     const projects = await this.pageAll<MarketProject>((f, t) =>
       this.db
         .from("projects")
@@ -235,17 +241,17 @@ export class AnalyzerStore {
         .order("id")
         .range(f, t) as unknown as PromiseLike<{ data: MarketProject[] | null; error: unknown }>,
     );
-    const analyses = await this.pageAll<MarketAnalysis>((f, t) =>
-      this.db
+    const analyses = await this.pageAll<MarketAnalysis>((f, t) => {
+      let query = this.db
         .from("project_analyses")
         .select(
           "project_id,model,project_type,engagement_type,industry,technology_assets,reuse_level," +
             "vibe_coding_difficulty,estimated_hours_min,estimated_hours_max,learning_value,reusability_value,market_value,raw_analysis",
         )
-        .eq("analysis_version", version)
-        .order("project_id")
-        .range(f, t) as unknown as PromiseLike<{ data: MarketAnalysis[] | null; error: unknown }>,
-    );
+        .eq("analysis_version", version);
+      if (model) query = query.eq("model", model);
+      return query.order("project_id").range(f, t) as unknown as PromiseLike<{ data: MarketAnalysis[] | null; error: unknown }>;
+    });
     const byId = new Map(projects.map((p) => [p.id, p]));
     const analyzed = analyses.flatMap((a) => {
       const p = byId.get(a.project_id);
@@ -266,38 +272,42 @@ export class AnalyzerStore {
     }
   }
 
-  async analysisErrors(version: string, projectIds?: string[]): Promise<Array<{ project_id: string; error_type: string; attempt: number; resolved_at: string | null }>> {
+  async analysisErrors(version: string, projectIds?: string[], model?: string): Promise<Array<{ project_id: string; error_type: string; attempt: number; resolved_at: string | null }>> {
     const out: Array<{ project_id: string; error_type: string; attempt: number; resolved_at: string | null }> = [];
     if (!projectIds) {
-      return this.pageAll((f, t) =>
-        this.db.from("analysis_errors").select("project_id,error_type,attempt,resolved_at").eq("analysis_version", version).range(f, t),
-      );
+      return this.pageAll((f, t) => {
+        let query = this.db.from("analysis_errors").select("project_id,error_type,attempt,resolved_at").eq("analysis_version", version);
+        if (model) query = query.eq("model", model);
+        return query.range(f, t);
+      });
     }
     for (let i = 0; i < projectIds.length; i += 200) {
-      const { data, error } = await this.db
+      let query = this.db
         .from("analysis_errors")
         .select("project_id,error_type,attempt,resolved_at")
         .eq("analysis_version", version)
         .in("project_id", projectIds.slice(i, i + 200));
+      if (model) query = query.eq("model", model);
+      const { data, error } = await query;
       if (error) throw new Error(`analysis errors: ${JSON.stringify(error)}`);
       out.push(...((data ?? []) as typeof out));
     }
     return out;
   }
 
-  async statsRows(version: string): Promise<StatsSourceRow[]> {
-    const rows = await this.pageAll<StatsDbRow>((f, t) =>
-      this.db
+  async statsRows(version: string, model?: string): Promise<StatsSourceRow[]> {
+    const rows = await this.pageAll<StatsDbRow>((f, t) => {
+      let query = this.db
         .from("project_analyses")
         .select(
           "project_id,project_type,engagement_type,industry,complexity_types,reuse_level,technology_assets," +
             "vibe_coding_difficulty,estimated_hours_min,estimated_hours_max,reusability_value,learning_value,market_value," +
             "projects(platform,budget_min,budget_max,budget_type)",
         )
-        .eq("analysis_version", version)
-        .order("project_id")
-        .range(f, t) as unknown as PromiseLike<{ data: StatsDbRow[] | null; error: unknown }>,
-    );
+        .eq("analysis_version", version);
+      if (model) query = query.eq("model", model);
+      return query.order("project_id").range(f, t) as unknown as PromiseLike<{ data: StatsDbRow[] | null; error: unknown }>;
+    });
     return rows.map(({ projects, ...a }) => ({ ...a, ...(projects ?? { platform: null, budget_min: null, budget_max: null, budget_type: null }) }));
   }
 

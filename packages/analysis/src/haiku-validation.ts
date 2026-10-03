@@ -6,6 +6,8 @@ import type { SampleSourceProject } from "./market-sample";
 
 export const HAIKU_VALIDATION_SAMPLE_SCHEMA = "analyzer-haiku-validation-sample/v1" as const;
 export const HAIKU_VALIDATION_ANALYSIS_VERSION = "v3.3-haiku-validation";
+export const HAIKU_MODEL = "claude-haiku-4-5-20251001";
+export const SONNET_MODEL = "claude-sonnet-5-5";
 
 export interface HaikuValidationSource extends SampleSourceProject {
   project_type: string | null;

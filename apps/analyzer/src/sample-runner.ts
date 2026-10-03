@@ -176,8 +176,8 @@ async function analyzeOne(
 export async function runSample(opts: RunSampleOptions): Promise<RunSampleResult> {
   const progress = loadProgress(opts);
   const byId = new Map(opts.projects.map((p) => [p.id, p]));
-  const analyzed = await opts.store.analyzedHashes(opts.version);
-  const unresolved = await opts.store.unresolvedErrorProjectIds(opts.version);
+  const analyzed = await opts.store.analyzedHashes(opts.version, opts.model);
+  const unresolved = await opts.store.unresolvedErrorProjectIds(opts.version, opts.model);
 
   if (opts.retryFailed) {
     const firstFailed = opts.sampleIds.findIndex((id) => progress.status[id] === "failed");
