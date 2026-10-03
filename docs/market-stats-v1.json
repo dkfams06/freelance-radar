@@ -1,0 +1,1766 @@
+{
+  "schema": "market-stats/v1",
+  "generated_at": "2026-10-03T04:10:26.298Z",
+  "analysis_version": "v3.3",
+  "params": {
+    "min_n": 5,
+    "min_combo": 5
+  },
+  "notes": [
+    "예산 금액 = 상한(budget_max, 없으면 budget_min). 중앙값을 우선 지표로 본다.",
+    "일반 외주(총액)와 staffing(월 단가)은 단위가 달라 분리 집계. 기본 시장 화면은 staffing 제외.",
+    "월별 평균은 수집 시점이 속한 마지막 달을 제외한 완전한 달만 사용 (첫 달 2025-10 은 cutoff 2025-10-02 라 약 1일 적음).",
+    "자산 조합은 2~3개 조합 중 최소 등장 건수 이상만, 같은 프로젝트 집합에서 나오는 조합은 항상 함께 등장하는 자산 묶음(closed itemset)으로 병합.",
+    "reuse_level 은 원본 4단계 유지 + 보조 3단계(high / medium / low_reuse = low + one_off) 집계.",
+    "최종 점수(외주 매력도/수익성/공략)는 계산하지 않는다."
+  ],
+  "base": {
+    "total": 5287,
+    "by_platform": {
+      "wishket": 4918,
+      "freemoa": 369
+    },
+    "months": [
+      {
+        "month": "2025-10",
+        "total": 383,
+        "non_staffing": 246,
+        "staffing": 137,
+        "partial": false
+      },
+      {
+        "month": "2025-11",
+        "total": 391,
+        "non_staffing": 268,
+        "staffing": 123,
+        "partial": false
+      },
+      {
+        "month": "2025-12",
+        "total": 440,
+        "non_staffing": 318,
+        "staffing": 122,
+        "partial": false
+      },
+      {
+        "month": "2026-01",
+        "total": 415,
+        "non_staffing": 282,
+        "staffing": 133,
+        "partial": false
+      },
+      {
+        "month": "2026-02",
+        "total": 365,
+        "non_staffing": 236,
+        "staffing": 129,
+        "partial": false
+      },
+      {
+        "month": "2026-03",
+        "total": 594,
+        "non_staffing": 292,
+        "staffing": 302,
+        "partial": false
+      },
+      {
+        "month": "2026-04",
+        "total": 456,
+        "non_staffing": 245,
+        "staffing": 211,
+        "partial": false
+      },
+      {
+        "month": "2026-05",
+        "total": 378,
+        "non_staffing": 224,
+        "staffing": 154,
+        "partial": false
+      },
+      {
+        "month": "2026-06",
+        "total": 486,
+        "non_staffing": 271,
+        "staffing": 215,
+        "partial": false
+      },
+      {
+        "month": "2026-07",
+        "total": 498,
+        "non_staffing": 242,
+        "staffing": 256,
+        "partial": false
+      },
+      {
+        "month": "2026-08",
+        "total": 408,
+        "non_staffing": 191,
+        "staffing": 217,
+        "partial": false
+      },
+      {
+        "month": "2026-09",
+        "total": 427,
+        "non_staffing": 191,
+        "staffing": 236,
+        "partial": false
+      },
+      {
+        "month": "2026-10",
+        "total": 46,
+        "non_staffing": 17,
+        "staffing": 29,
+        "partial": true
+      }
+    ],
+    "complete_months": 12,
+    "monthly_avg": {
+      "all": 436.75,
+      "non_staffing": 250.5,
+      "staffing": 186.25
+    },
+    "non_staffing": {
+      "count": 3023,
+      "share": 0.571779837336864,
+      "by_platform": {
+        "wishket": 2731,
+        "freemoa": 292
+      },
+      "budget": {
+        "count": 3023,
+        "with_budget": 2892,
+        "presence_rate": 0.9566655640092623,
+        "stats": {
+          "n": 2892,
+          "mean": 23272700.773167357,
+          "median": 10000000,
+          "p25": 4000000,
+          "p75": 25000000
+        },
+        "unit": "원(총액)"
+      },
+      "budget_by_platform": {
+        "wishket": {
+          "count": 2731,
+          "with_budget": 2608,
+          "presence_rate": 0.9549615525448554,
+          "stats": {
+            "n": 2608,
+            "mean": 22374961.90030675,
+            "median": 10000000,
+            "p25": 4000000,
+            "p75": 25000000
+          },
+          "unit": "원(총액)"
+        },
+        "freemoa": {
+          "count": 292,
+          "with_budget": 284,
+          "presence_rate": 0.9726027397260274,
+          "stats": {
+            "n": 284,
+            "mean": 31516725.352112677,
+            "median": 10000000,
+            "p25": 5000000,
+            "p75": 30000000
+          },
+          "unit": "원(총액)"
+        }
+      }
+    },
+    "staffing": {
+      "count": 2264,
+      "share": 0.428220162663136,
+      "by_platform": {
+        "freemoa": 77,
+        "wishket": 2187
+      },
+      "budget": {
+        "count": 2264,
+        "with_budget": 1921,
+        "presence_rate": 0.8484982332155477,
+        "stats": {
+          "n": 1921,
+          "mean": 5873233.003643936,
+          "median": 6000000,
+          "p25": 5000000,
+          "p75": 7000000
+        },
+        "unit": "원/월"
+      },
+      "budget_by_platform": {
+        "freemoa": {
+          "count": 77,
+          "with_budget": 76,
+          "presence_rate": 0.987012987012987,
+          "stats": {
+            "n": 76,
+            "mean": 7969078.947368421,
+            "median": 7000000,
+            "p25": 5000000,
+            "p75": 9000000
+          },
+          "unit": "원/월"
+        },
+        "wishket": {
+          "count": 2187,
+          "with_budget": 1845,
+          "presence_rate": 0.8436213991769548,
+          "stats": {
+            "n": 1845,
+            "mean": 5786900.054200542,
+            "median": 6000000,
+            "p25": 4800000,
+            "p75": 7000000
+          },
+          "unit": "원/월"
+        }
+      }
+    },
+    "overall_budget_presence": 0.9103461320219406,
+    "date_range": {
+      "from": "2025-10-02",
+      "to": "2026-10-02"
+    }
+  },
+  "coverage": {
+    "version": "v3.3",
+    "total_projects": 5287,
+    "analyzed": 20,
+    "coverage_rate": 0.0037828636277662192,
+    "analyzed_by_segment": {
+      "non_staffing": 14,
+      "staffing": 6
+    },
+    "total_by_segment": {
+      "non_staffing": 3023,
+      "staffing": 2264
+    },
+    "analyzed_by_platform": {
+      "wishket": 13,
+      "freemoa": 7
+    },
+    "warnings": [
+      "분석 커버리지가 0.4% 로 낮습니다 (분석 20 / 원본 5287). 분석 기반 수치는 시장 전체를 대표하지 않습니다.",
+      "분석 표본이 20건뿐이라 유형별 평균/중앙값은 참고용입니다 (n 이 작은 유형은 ⚠ 표시).",
+      "분석된 프로젝트는 무작위 표본이 아니라 검증용으로 직접 고른 샘플이라, 유형 비율·월평균 공고 수를 시장 비율로 해석하면 안 됩니다."
+    ]
+  },
+  "non_staffing": {
+    "segment": "non_staffing",
+    "n": 14,
+    "averages": {
+      "n": 14,
+      "avg_vibe_coding_difficulty": 45.714285714285715,
+      "avg_learning_value": 50,
+      "avg_reusability_value": 50.357142857142854,
+      "avg_market_value": 58.214285714285715
+    },
+    "reuse": {
+      "reuse_4": {
+        "medium": 9,
+        "low": 4,
+        "high": 1
+      },
+      "reuse_3": {
+        "high": 1,
+        "medium": 9,
+        "low_reuse": 4
+      }
+    },
+    "types": [
+      {
+        "key": "platform_marketplace",
+        "n": 4,
+        "share": 0.2857142857142857,
+        "monthly_avg_in_sample": 0.3333333333333333,
+        "monthly_avg_estimated": 71.57142857142857,
+        "budget": {
+          "n": 4,
+          "mean": 35000000,
+          "median": 17500000,
+          "p25": 12500000,
+          "p75": 40000000
+        },
+        "avg_vibe_coding_difficulty": 51,
+        "avg_hours_min": 347.5,
+        "avg_hours_max": 582.5,
+        "avg_learning_value": 61.25,
+        "avg_reusability_value": 57.5,
+        "avg_market_value": 60.5,
+        "reuse_4": {
+          "medium": 4
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 4,
+          "low_reuse": 0
+        },
+        "low_sample": true
+      },
+      {
+        "key": "automation_rpa",
+        "n": 2,
+        "share": 0.14285714285714285,
+        "monthly_avg_in_sample": 0.16666666666666666,
+        "monthly_avg_estimated": 35.785714285714285,
+        "budget": {
+          "n": 2,
+          "mean": 900000,
+          "median": 900000,
+          "p25": 850000,
+          "p75": 950000
+        },
+        "avg_vibe_coding_difficulty": 25,
+        "avg_hours_min": 11,
+        "avg_hours_max": 24,
+        "avg_learning_value": 25,
+        "avg_reusability_value": 33.5,
+        "avg_market_value": 47.5,
+        "reuse_4": {
+          "medium": 1,
+          "low": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 1,
+          "low_reuse": 1
+        },
+        "low_sample": true
+      },
+      {
+        "key": "iot_device",
+        "n": 2,
+        "share": 0.14285714285714285,
+        "monthly_avg_in_sample": 0.16666666666666666,
+        "monthly_avg_estimated": 35.785714285714285,
+        "budget": {
+          "n": 2,
+          "mean": 6000000,
+          "median": 6000000,
+          "p25": 5500000,
+          "p75": 6500000
+        },
+        "avg_vibe_coding_difficulty": 63,
+        "avg_hours_min": 140,
+        "avg_hours_max": 265,
+        "avg_learning_value": 52.5,
+        "avg_reusability_value": 32.5,
+        "avg_market_value": 37.5,
+        "reuse_4": {
+          "low": 2
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 0,
+          "low_reuse": 2
+        },
+        "low_sample": true
+      },
+      {
+        "key": "saas",
+        "n": 2,
+        "share": 0.14285714285714285,
+        "monthly_avg_in_sample": 0.16666666666666666,
+        "monthly_avg_estimated": 35.785714285714285,
+        "budget": {
+          "n": 2,
+          "mean": 120000000,
+          "median": 120000000,
+          "p25": 80000000,
+          "p75": 160000000
+        },
+        "avg_vibe_coding_difficulty": 53.5,
+        "avg_hours_min": 900,
+        "avg_hours_max": 1525,
+        "avg_learning_value": 65,
+        "avg_reusability_value": 61.5,
+        "avg_market_value": 62.5,
+        "reuse_4": {
+          "medium": 2
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 2,
+          "low_reuse": 0
+        },
+        "low_sample": true
+      },
+      {
+        "key": "business_management",
+        "n": 1,
+        "share": 0.07142857142857142,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 17.892857142857142,
+        "budget": {
+          "n": 1,
+          "mean": 6000000,
+          "median": 6000000,
+          "p25": 6000000,
+          "p75": 6000000
+        },
+        "avg_vibe_coding_difficulty": 58,
+        "avg_hours_min": 100,
+        "avg_hours_max": 180,
+        "avg_learning_value": 45,
+        "avg_reusability_value": 35,
+        "avg_market_value": 55,
+        "reuse_4": {
+          "low": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 0,
+          "low_reuse": 1
+        },
+        "low_sample": true
+      },
+      {
+        "key": "data_dashboard",
+        "n": 1,
+        "share": 0.07142857142857142,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 17.892857142857142,
+        "budget": {
+          "n": 1,
+          "mean": 20000000,
+          "median": 20000000,
+          "p25": 20000000,
+          "p75": 20000000
+        },
+        "avg_vibe_coding_difficulty": 38,
+        "avg_hours_min": 280,
+        "avg_hours_max": 450,
+        "avg_learning_value": 50,
+        "avg_reusability_value": 60,
+        "avg_market_value": 68,
+        "reuse_4": {
+          "medium": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 1,
+          "low_reuse": 0
+        },
+        "low_sample": true
+      },
+      {
+        "key": "ecommerce",
+        "n": 1,
+        "share": 0.07142857142857142,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 17.892857142857142,
+        "budget": {
+          "n": 1,
+          "mean": 15000000,
+          "median": 15000000,
+          "p25": 15000000,
+          "p75": 15000000
+        },
+        "avg_vibe_coding_difficulty": 35,
+        "avg_hours_min": 220,
+        "avg_hours_max": 360,
+        "avg_learning_value": 40,
+        "avg_reusability_value": 60,
+        "avg_market_value": 80,
+        "reuse_4": {
+          "medium": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 1,
+          "low_reuse": 0
+        },
+        "low_sample": true
+      },
+      {
+        "key": "website",
+        "n": 1,
+        "share": 0.07142857142857142,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 17.892857142857142,
+        "budget": {
+          "n": 1,
+          "mean": 12000000,
+          "median": 12000000,
+          "p25": 12000000,
+          "p75": 12000000
+        },
+        "avg_vibe_coding_difficulty": 22,
+        "avg_hours_min": 120,
+        "avg_hours_max": 200,
+        "avg_learning_value": 35,
+        "avg_reusability_value": 65,
+        "avg_market_value": 75,
+        "reuse_4": {
+          "high": 1
+        },
+        "reuse_3": {
+          "high": 1,
+          "medium": 0,
+          "low_reuse": 0
+        },
+        "low_sample": true
+      }
+    ],
+    "assets": [
+      {
+        "key": "backend_api",
+        "n": 11,
+        "share": 0.7857142857142857,
+        "budget": {
+          "n": 11,
+          "mean": 39818181.81818182,
+          "median": 15000000,
+          "p25": 9000000,
+          "p75": 30000000
+        },
+        "avg_vibe_coding_difficulty": 48.36363636363637,
+        "avg_learning_value": 55,
+        "avg_reusability_value": 55.27272727272727,
+        "low_sample": false
+      },
+      {
+        "key": "database",
+        "n": 11,
+        "share": 0.7857142857142857,
+        "budget": {
+          "n": 11,
+          "mean": 39818181.81818182,
+          "median": 15000000,
+          "p25": 9000000,
+          "p75": 30000000
+        },
+        "avg_vibe_coding_difficulty": 48.36363636363637,
+        "avg_learning_value": 55,
+        "avg_reusability_value": 55.27272727272727,
+        "low_sample": false
+      },
+      {
+        "key": "core_web",
+        "n": 10,
+        "share": 0.7142857142857143,
+        "budget": {
+          "n": 10,
+          "mean": 43300000,
+          "median": 17500000,
+          "p25": 12750000,
+          "p75": 35000000
+        },
+        "avg_vibe_coding_difficulty": 46.4,
+        "avg_learning_value": 54.5,
+        "avg_reusability_value": 57.3,
+        "low_sample": false
+      },
+      {
+        "key": "admin_system",
+        "n": 9,
+        "share": 0.6428571428571429,
+        "budget": {
+          "n": 9,
+          "mean": 47555555.55555555,
+          "median": 20000000,
+          "p25": 15000000,
+          "p75": 40000000
+        },
+        "avg_vibe_coding_difficulty": 45.111111111111114,
+        "avg_learning_value": 53.888888888888886,
+        "avg_reusability_value": 58.111111111111114,
+        "low_sample": false
+      },
+      {
+        "key": "external_api_integration",
+        "n": 9,
+        "share": 0.6428571428571429,
+        "budget": {
+          "n": 9,
+          "mean": 40755555.55555555,
+          "median": 15000000,
+          "p25": 5000000,
+          "p75": 20000000
+        },
+        "avg_vibe_coding_difficulty": 46.44444444444444,
+        "avg_learning_value": 50.55555555555556,
+        "avg_reusability_value": 49.111111111111114,
+        "low_sample": false
+      },
+      {
+        "key": "authentication_authorization",
+        "n": 7,
+        "share": 0.5,
+        "budget": {
+          "n": 7,
+          "mean": 58571428.571428575,
+          "median": 20000000,
+          "p25": 17500000,
+          "p75": 70000000
+        },
+        "avg_vibe_coding_difficulty": 46.57142857142857,
+        "avg_learning_value": 57.857142857142854,
+        "avg_reusability_value": 60.42857142857143,
+        "low_sample": false
+      },
+      {
+        "key": "cloud_infra",
+        "n": 4,
+        "share": 0.2857142857142857,
+        "budget": {
+          "n": 4,
+          "mean": 22500000,
+          "median": 17500000,
+          "p25": 15000000,
+          "p75": 25000000
+        },
+        "avg_vibe_coding_difficulty": 39.25,
+        "avg_learning_value": 52.5,
+        "avg_reusability_value": 63.25,
+        "low_sample": true
+      },
+      {
+        "key": "security",
+        "n": 4,
+        "share": 0.2857142857142857,
+        "budget": {
+          "n": 4,
+          "mean": 82500000,
+          "median": 57500000,
+          "p25": 15000000,
+          "p75": 125000000
+        },
+        "avg_vibe_coding_difficulty": 51,
+        "avg_learning_value": 60,
+        "avg_reusability_value": 60,
+        "low_sample": true
+      },
+      {
+        "key": "ai_llm",
+        "n": 3,
+        "share": 0.21428571428571427,
+        "budget": {
+          "n": 3,
+          "mean": 78333333.33333333,
+          "median": 20000000,
+          "p25": 17500000,
+          "p75": 110000000
+        },
+        "avg_vibe_coding_difficulty": 49.666666666666664,
+        "avg_learning_value": 61.666666666666664,
+        "avg_reusability_value": 58.333333333333336,
+        "low_sample": true
+      },
+      {
+        "key": "analytics_dashboard",
+        "n": 3,
+        "share": 0.21428571428571427,
+        "budget": {
+          "n": 3,
+          "mean": 25000000,
+          "median": 20000000,
+          "p25": 17500000,
+          "p75": 30000000
+        },
+        "avg_vibe_coding_difficulty": 40.666666666666664,
+        "avg_learning_value": 56.666666666666664,
+        "avg_reusability_value": 64.33333333333333,
+        "low_sample": true
+      },
+      {
+        "key": "data_pipeline",
+        "n": 3,
+        "share": 0.21428571428571427,
+        "budget": {
+          "n": 3,
+          "mean": 70666666.66666667,
+          "median": 7000000,
+          "p25": 6000000,
+          "p75": 103500000
+        },
+        "avg_vibe_coding_difficulty": 63.666666666666664,
+        "avg_learning_value": 58.333333333333336,
+        "avg_reusability_value": 40,
+        "low_sample": true
+      },
+      {
+        "key": "mobile",
+        "n": 3,
+        "share": 0.21428571428571427,
+        "budget": {
+          "n": 3,
+          "mean": 53333333.333333336,
+          "median": 40000000,
+          "p25": 30000000,
+          "p75": 70000000
+        },
+        "avg_vibe_coding_difficulty": 48.666666666666664,
+        "avg_learning_value": 61.666666666666664,
+        "avg_reusability_value": 61,
+        "low_sample": true
+      },
+      {
+        "key": "hardware_iot",
+        "n": 2,
+        "share": 0.14285714285714285,
+        "budget": {
+          "n": 2,
+          "mean": 6000000,
+          "median": 6000000,
+          "p25": 5500000,
+          "p75": 6500000
+        },
+        "avg_vibe_coding_difficulty": 63,
+        "avg_learning_value": 52.5,
+        "avg_reusability_value": 32.5,
+        "low_sample": true
+      },
+      {
+        "key": "legacy_enterprise",
+        "n": 2,
+        "share": 0.14285714285714285,
+        "budget": {
+          "n": 2,
+          "mean": 103000000,
+          "median": 103000000,
+          "p25": 54500000,
+          "p75": 151500000
+        },
+        "avg_vibe_coding_difficulty": 61.5,
+        "avg_learning_value": 57.5,
+        "avg_reusability_value": 45,
+        "low_sample": true
+      },
+      {
+        "key": "payments",
+        "n": 2,
+        "share": 0.14285714285714285,
+        "budget": {
+          "n": 2,
+          "mean": 52500000,
+          "median": 52500000,
+          "p25": 28750000,
+          "p75": 76250000
+        },
+        "avg_vibe_coding_difficulty": 60,
+        "avg_learning_value": 65,
+        "avg_reusability_value": 55,
+        "low_sample": true
+      },
+      {
+        "key": "saas_architecture",
+        "n": 2,
+        "share": 0.14285714285714285,
+        "budget": {
+          "n": 2,
+          "mean": 120000000,
+          "median": 120000000,
+          "p25": 80000000,
+          "p75": 160000000
+        },
+        "avg_vibe_coding_difficulty": 53.5,
+        "avg_learning_value": 65,
+        "avg_reusability_value": 61.5,
+        "low_sample": true
+      },
+      {
+        "key": "realtime",
+        "n": 1,
+        "share": 0.07142857142857142,
+        "budget": {
+          "n": 1,
+          "mean": 100000000,
+          "median": 100000000,
+          "p25": 100000000,
+          "p75": 100000000
+        },
+        "avg_vibe_coding_difficulty": 62,
+        "avg_learning_value": 70,
+        "avg_reusability_value": 60,
+        "low_sample": true
+      },
+      {
+        "key": "speech_audio_ai",
+        "n": 1,
+        "share": 0.07142857142857142,
+        "budget": {
+          "n": 1,
+          "mean": 200000000,
+          "median": 200000000,
+          "p25": 200000000,
+          "p75": 200000000
+        },
+        "avg_vibe_coding_difficulty": 65,
+        "avg_learning_value": 70,
+        "avg_reusability_value": 55,
+        "low_sample": true
+      },
+      {
+        "key": "workflow_automation",
+        "n": 1,
+        "share": 0.07142857142857142,
+        "budget": {
+          "n": 1,
+          "mean": 1000000,
+          "median": 1000000,
+          "p25": 1000000,
+          "p75": 1000000
+        },
+        "avg_vibe_coding_difficulty": 25,
+        "avg_learning_value": 25,
+        "avg_reusability_value": 45,
+        "low_sample": true
+      }
+    ],
+    "combos": [
+      {
+        "assets": [
+          "backend_api",
+          "database"
+        ],
+        "n": 11,
+        "share": 0.7857142857142857,
+        "budget": {
+          "n": 11,
+          "mean": 39818181.81818182,
+          "median": 15000000,
+          "p25": 9000000,
+          "p75": 30000000
+        },
+        "avg_vibe_coding_difficulty": 48.36363636363637,
+        "avg_learning_value": 55,
+        "avg_reusability_value": 55.27272727272727
+      },
+      {
+        "assets": [
+          "backend_api",
+          "core_web",
+          "database"
+        ],
+        "n": 10,
+        "share": 0.7142857142857143,
+        "budget": {
+          "n": 10,
+          "mean": 43300000,
+          "median": 17500000,
+          "p25": 12750000,
+          "p75": 35000000
+        },
+        "avg_vibe_coding_difficulty": 46.4,
+        "avg_learning_value": 54.5,
+        "avg_reusability_value": 57.3
+      },
+      {
+        "assets": [
+          "admin_system",
+          "backend_api",
+          "core_web",
+          "database"
+        ],
+        "n": 9,
+        "share": 0.6428571428571429,
+        "budget": {
+          "n": 9,
+          "mean": 47555555.55555555,
+          "median": 20000000,
+          "p25": 15000000,
+          "p75": 40000000
+        },
+        "avg_vibe_coding_difficulty": 45.111111111111114,
+        "avg_learning_value": 53.888888888888886,
+        "avg_reusability_value": 58.111111111111114
+      },
+      {
+        "assets": [
+          "admin_system",
+          "authentication_authorization",
+          "backend_api",
+          "core_web",
+          "database"
+        ],
+        "n": 7,
+        "share": 0.5,
+        "budget": {
+          "n": 7,
+          "mean": 58571428.571428575,
+          "median": 20000000,
+          "p25": 17500000,
+          "p75": 70000000
+        },
+        "avg_vibe_coding_difficulty": 46.57142857142857,
+        "avg_learning_value": 57.857142857142854,
+        "avg_reusability_value": 60.42857142857143
+      },
+      {
+        "assets": [
+          "backend_api",
+          "database",
+          "external_api_integration"
+        ],
+        "n": 7,
+        "share": 0.5,
+        "budget": {
+          "n": 7,
+          "mean": 52142857.14285714,
+          "median": 20000000,
+          "p25": 10000000,
+          "p75": 60000000
+        },
+        "avg_vibe_coding_difficulty": 52.57142857142857,
+        "avg_learning_value": 57.857142857142854,
+        "avg_reusability_value": 53.57142857142857
+      },
+      {
+        "assets": [
+          "backend_api",
+          "core_web",
+          "database",
+          "external_api_integration"
+        ],
+        "n": 6,
+        "share": 0.42857142857142855,
+        "budget": {
+          "n": 6,
+          "mean": 60000000,
+          "median": 20000000,
+          "p25": 16250000,
+          "p75": 80000000
+        },
+        "avg_vibe_coding_difficulty": 50,
+        "avg_learning_value": 57.5,
+        "avg_reusability_value": 56.666666666666664
+      },
+      {
+        "assets": [
+          "admin_system",
+          "authentication_authorization",
+          "backend_api",
+          "core_web",
+          "database",
+          "external_api_integration"
+        ],
+        "n": 5,
+        "share": 0.35714285714285715,
+        "budget": {
+          "n": 5,
+          "mean": 71000000,
+          "median": 20000000,
+          "p25": 20000000,
+          "p75": 100000000
+        },
+        "avg_vibe_coding_difficulty": 48.4,
+        "avg_learning_value": 57,
+        "avg_reusability_value": 58
+      }
+    ],
+    "watchlist": [
+      {
+        "assets": [
+          "core_web",
+          "admin_system"
+        ],
+        "n": 9,
+        "share": 0.6428571428571429,
+        "budget": {
+          "n": 9,
+          "mean": 47555555.55555555,
+          "median": 20000000,
+          "p25": 15000000,
+          "p75": 40000000
+        },
+        "avg_vibe_coding_difficulty": 45.111111111111114,
+        "avg_learning_value": 53.888888888888886,
+        "avg_reusability_value": 58.111111111111114
+      },
+      {
+        "assets": [
+          "core_web",
+          "payments",
+          "authentication_authorization"
+        ],
+        "n": 1,
+        "share": 0.07142857142857142,
+        "budget": {
+          "n": 1,
+          "mean": 100000000,
+          "median": 100000000,
+          "p25": 100000000,
+          "p75": 100000000
+        },
+        "avg_vibe_coding_difficulty": 62,
+        "avg_learning_value": 70,
+        "avg_reusability_value": 60
+      },
+      {
+        "assets": [
+          "ai_llm",
+          "rag_embeddings"
+        ],
+        "n": 0,
+        "share": 0,
+        "budget": {
+          "n": 0,
+          "mean": null,
+          "median": null,
+          "p25": null,
+          "p75": null
+        },
+        "avg_vibe_coding_difficulty": null,
+        "avg_learning_value": null,
+        "avg_reusability_value": null
+      },
+      {
+        "assets": [
+          "browser_automation",
+          "web_crawling"
+        ],
+        "n": 0,
+        "share": 0,
+        "budget": {
+          "n": 0,
+          "mean": null,
+          "median": null,
+          "p25": null,
+          "p75": null
+        },
+        "avg_vibe_coding_difficulty": null,
+        "avg_learning_value": null,
+        "avg_reusability_value": null
+      }
+    ],
+    "lists": {
+      "min_n": 5,
+      "eligible_types": 0,
+      "reference_mode": true,
+      "top_count": [
+        {
+          "key": "platform_marketplace",
+          "n": 4,
+          "value": 4,
+          "low_sample": true
+        },
+        {
+          "key": "automation_rpa",
+          "n": 2,
+          "value": 2,
+          "low_sample": true
+        },
+        {
+          "key": "iot_device",
+          "n": 2,
+          "value": 2,
+          "low_sample": true
+        },
+        {
+          "key": "saas",
+          "n": 2,
+          "value": 2,
+          "low_sample": true
+        },
+        {
+          "key": "business_management",
+          "n": 1,
+          "value": 1,
+          "low_sample": true
+        },
+        {
+          "key": "data_dashboard",
+          "n": 1,
+          "value": 1,
+          "low_sample": true
+        },
+        {
+          "key": "ecommerce",
+          "n": 1,
+          "value": 1,
+          "low_sample": true
+        },
+        {
+          "key": "website",
+          "n": 1,
+          "value": 1,
+          "low_sample": true
+        }
+      ],
+      "top_median_budget": [
+        {
+          "key": "saas",
+          "n": 2,
+          "value": 120000000,
+          "low_sample": true
+        },
+        {
+          "key": "data_dashboard",
+          "n": 1,
+          "value": 20000000,
+          "low_sample": true
+        },
+        {
+          "key": "platform_marketplace",
+          "n": 4,
+          "value": 17500000,
+          "low_sample": true
+        },
+        {
+          "key": "ecommerce",
+          "n": 1,
+          "value": 15000000,
+          "low_sample": true
+        },
+        {
+          "key": "website",
+          "n": 1,
+          "value": 12000000,
+          "low_sample": true
+        },
+        {
+          "key": "iot_device",
+          "n": 2,
+          "value": 6000000,
+          "low_sample": true
+        },
+        {
+          "key": "business_management",
+          "n": 1,
+          "value": 6000000,
+          "low_sample": true
+        },
+        {
+          "key": "automation_rpa",
+          "n": 2,
+          "value": 900000,
+          "low_sample": true
+        }
+      ],
+      "top_low_difficulty": [
+        {
+          "key": "website",
+          "n": 1,
+          "value": 22,
+          "low_sample": true
+        },
+        {
+          "key": "automation_rpa",
+          "n": 2,
+          "value": 25,
+          "low_sample": true
+        },
+        {
+          "key": "ecommerce",
+          "n": 1,
+          "value": 35,
+          "low_sample": true
+        },
+        {
+          "key": "data_dashboard",
+          "n": 1,
+          "value": 38,
+          "low_sample": true
+        },
+        {
+          "key": "platform_marketplace",
+          "n": 4,
+          "value": 51,
+          "low_sample": true
+        },
+        {
+          "key": "saas",
+          "n": 2,
+          "value": 53.5,
+          "low_sample": true
+        },
+        {
+          "key": "business_management",
+          "n": 1,
+          "value": 58,
+          "low_sample": true
+        },
+        {
+          "key": "iot_device",
+          "n": 2,
+          "value": 63,
+          "low_sample": true
+        }
+      ],
+      "top_reusability": [
+        {
+          "key": "website",
+          "n": 1,
+          "value": 65,
+          "low_sample": true
+        },
+        {
+          "key": "saas",
+          "n": 2,
+          "value": 61.5,
+          "low_sample": true
+        },
+        {
+          "key": "data_dashboard",
+          "n": 1,
+          "value": 60,
+          "low_sample": true
+        },
+        {
+          "key": "ecommerce",
+          "n": 1,
+          "value": 60,
+          "low_sample": true
+        },
+        {
+          "key": "platform_marketplace",
+          "n": 4,
+          "value": 57.5,
+          "low_sample": true
+        },
+        {
+          "key": "business_management",
+          "n": 1,
+          "value": 35,
+          "low_sample": true
+        },
+        {
+          "key": "automation_rpa",
+          "n": 2,
+          "value": 33.5,
+          "low_sample": true
+        },
+        {
+          "key": "iot_device",
+          "n": 2,
+          "value": 32.5,
+          "low_sample": true
+        }
+      ],
+      "top_learning": [
+        {
+          "key": "saas",
+          "n": 2,
+          "value": 65,
+          "low_sample": true
+        },
+        {
+          "key": "platform_marketplace",
+          "n": 4,
+          "value": 61.25,
+          "low_sample": true
+        },
+        {
+          "key": "iot_device",
+          "n": 2,
+          "value": 52.5,
+          "low_sample": true
+        },
+        {
+          "key": "data_dashboard",
+          "n": 1,
+          "value": 50,
+          "low_sample": true
+        },
+        {
+          "key": "business_management",
+          "n": 1,
+          "value": 45,
+          "low_sample": true
+        },
+        {
+          "key": "ecommerce",
+          "n": 1,
+          "value": 40,
+          "low_sample": true
+        },
+        {
+          "key": "website",
+          "n": 1,
+          "value": 35,
+          "low_sample": true
+        },
+        {
+          "key": "automation_rpa",
+          "n": 2,
+          "value": 25,
+          "low_sample": true
+        }
+      ],
+      "high_budget_low_difficulty": {
+        "thresholds": {
+          "median_budget": 10000000,
+          "avg_difficulty": 45.714285714285715,
+          "budget_source": "원본 외주(staffing 제외) 전체 예산 중앙값 / 분석 표본 평균 난이도"
+        },
+        "candidates": [
+          {
+            "key": "data_dashboard",
+            "n": 1,
+            "median_budget": 20000000,
+            "avg_difficulty": 38,
+            "low_sample": true
+          },
+          {
+            "key": "ecommerce",
+            "n": 1,
+            "median_budget": 15000000,
+            "avg_difficulty": 35,
+            "low_sample": true
+          },
+          {
+            "key": "website",
+            "n": 1,
+            "median_budget": 12000000,
+            "avg_difficulty": 22,
+            "low_sample": true
+          }
+        ]
+      }
+    }
+  },
+  "staffing": {
+    "segment": "staffing",
+    "n": 6,
+    "averages": {
+      "n": 6,
+      "avg_vibe_coding_difficulty": 52.833333333333336,
+      "avg_learning_value": 38.333333333333336,
+      "avg_reusability_value": 29.166666666666668,
+      "avg_market_value": 49.166666666666664
+    },
+    "reuse": {
+      "reuse_4": {
+        "low": 6
+      },
+      "reuse_3": {
+        "high": 0,
+        "medium": 0,
+        "low_reuse": 6
+      }
+    },
+    "types": [
+      {
+        "key": "automation_rpa",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 31.041666666666664,
+        "budget": {
+          "n": 1,
+          "mean": 5500000,
+          "median": 5500000,
+          "p25": 5500000,
+          "p75": 5500000
+        },
+        "avg_vibe_coding_difficulty": 50,
+        "avg_hours_min": 700,
+        "avg_hours_max": 850,
+        "avg_learning_value": 45,
+        "avg_reusability_value": 35,
+        "avg_market_value": 60,
+        "reuse_4": {
+          "low": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 0,
+          "low_reuse": 1
+        },
+        "low_sample": true
+      },
+      {
+        "key": "business_management",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 31.041666666666664,
+        "budget": {
+          "n": 1,
+          "mean": 10000000,
+          "median": 10000000,
+          "p25": 10000000,
+          "p75": 10000000
+        },
+        "avg_vibe_coding_difficulty": 60,
+        "avg_hours_min": 600,
+        "avg_hours_max": 900,
+        "avg_learning_value": 35,
+        "avg_reusability_value": 25,
+        "avg_market_value": 40,
+        "reuse_4": {
+          "low": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 0,
+          "low_reuse": 1
+        },
+        "low_sample": true
+      },
+      {
+        "key": "fintech_payment",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 31.041666666666664,
+        "budget": {
+          "n": 1,
+          "mean": 6000000,
+          "median": 6000000,
+          "p25": 6000000,
+          "p75": 6000000
+        },
+        "avg_vibe_coding_difficulty": 62,
+        "avg_hours_min": 900,
+        "avg_hours_max": 1300,
+        "avg_learning_value": 45,
+        "avg_reusability_value": 35,
+        "avg_market_value": 55,
+        "reuse_4": {
+          "low": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 0,
+          "low_reuse": 1
+        },
+        "low_sample": true
+      },
+      {
+        "key": "iot_device",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 31.041666666666664,
+        "budget": {
+          "n": 1,
+          "mean": 3000000,
+          "median": 3000000,
+          "p25": 3000000,
+          "p75": 3000000
+        },
+        "avg_vibe_coding_difficulty": 55,
+        "avg_hours_min": 400,
+        "avg_hours_max": 520,
+        "avg_learning_value": 35,
+        "avg_reusability_value": 25,
+        "avg_market_value": 35,
+        "reuse_4": {
+          "low": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 0,
+          "low_reuse": 1
+        },
+        "low_sample": true
+      },
+      {
+        "key": "mobile_app",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 31.041666666666664,
+        "budget": {
+          "n": 1,
+          "mean": 3000000,
+          "median": 3000000,
+          "p25": 3000000,
+          "p75": 3000000
+        },
+        "avg_vibe_coding_difficulty": 50,
+        "avg_hours_min": 900,
+        "avg_hours_max": 1100,
+        "avg_learning_value": 35,
+        "avg_reusability_value": 30,
+        "avg_market_value": 60,
+        "reuse_4": {
+          "low": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 0,
+          "low_reuse": 1
+        },
+        "low_sample": true
+      },
+      {
+        "key": "qa_testing",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "monthly_avg_in_sample": 0.08333333333333333,
+        "monthly_avg_estimated": 31.041666666666664,
+        "budget": {
+          "n": 1,
+          "mean": 5000000,
+          "median": 5000000,
+          "p25": 5000000,
+          "p75": 5000000
+        },
+        "avg_vibe_coding_difficulty": 40,
+        "avg_hours_min": 150,
+        "avg_hours_max": 180,
+        "avg_learning_value": 35,
+        "avg_reusability_value": 25,
+        "avg_market_value": 45,
+        "reuse_4": {
+          "low": 1
+        },
+        "reuse_3": {
+          "high": 0,
+          "medium": 0,
+          "low_reuse": 1
+        },
+        "low_sample": true
+      }
+    ],
+    "assets": [
+      {
+        "key": "legacy_enterprise",
+        "n": 5,
+        "share": 0.8333333333333334,
+        "budget": {
+          "n": 5,
+          "mean": 5500000,
+          "median": 5500000,
+          "p25": 3000000,
+          "p75": 6000000
+        },
+        "avg_vibe_coding_difficulty": 55.4,
+        "avg_learning_value": 39,
+        "avg_reusability_value": 30,
+        "low_sample": false
+      },
+      {
+        "key": "backend_api",
+        "n": 3,
+        "share": 0.5,
+        "budget": {
+          "n": 3,
+          "mean": 6333333.333333333,
+          "median": 6000000,
+          "p25": 4500000,
+          "p75": 8000000
+        },
+        "avg_vibe_coding_difficulty": 57.333333333333336,
+        "avg_learning_value": 38.333333333333336,
+        "avg_reusability_value": 30,
+        "low_sample": true
+      },
+      {
+        "key": "database",
+        "n": 3,
+        "share": 0.5,
+        "budget": {
+          "n": 3,
+          "mean": 6333333.333333333,
+          "median": 6000000,
+          "p25": 4500000,
+          "p75": 8000000
+        },
+        "avg_vibe_coding_difficulty": 57.333333333333336,
+        "avg_learning_value": 38.333333333333336,
+        "avg_reusability_value": 30,
+        "low_sample": true
+      },
+      {
+        "key": "core_web",
+        "n": 2,
+        "share": 0.3333333333333333,
+        "budget": {
+          "n": 2,
+          "mean": 8000000,
+          "median": 8000000,
+          "p25": 7000000,
+          "p75": 9000000
+        },
+        "avg_vibe_coding_difficulty": 61,
+        "avg_learning_value": 40,
+        "avg_reusability_value": 30,
+        "low_sample": true
+      },
+      {
+        "key": "hardware_iot",
+        "n": 2,
+        "share": 0.3333333333333333,
+        "budget": {
+          "n": 2,
+          "mean": 4000000,
+          "median": 4000000,
+          "p25": 3500000,
+          "p75": 4500000
+        },
+        "avg_vibe_coding_difficulty": 47.5,
+        "avg_learning_value": 35,
+        "avg_reusability_value": 25,
+        "low_sample": true
+      },
+      {
+        "key": "admin_system",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "budget": {
+          "n": 1,
+          "mean": 6000000,
+          "median": 6000000,
+          "p25": 6000000,
+          "p75": 6000000
+        },
+        "avg_vibe_coding_difficulty": 62,
+        "avg_learning_value": 45,
+        "avg_reusability_value": 35,
+        "low_sample": true
+      },
+      {
+        "key": "analytics_dashboard",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "budget": {
+          "n": 1,
+          "mean": 5500000,
+          "median": 5500000,
+          "p25": 5500000,
+          "p75": 5500000
+        },
+        "avg_vibe_coding_difficulty": 50,
+        "avg_learning_value": 45,
+        "avg_reusability_value": 35,
+        "low_sample": true
+      },
+      {
+        "key": "browser_automation",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "budget": {
+          "n": 1,
+          "mean": 5500000,
+          "median": 5500000,
+          "p25": 5500000,
+          "p75": 5500000
+        },
+        "avg_vibe_coding_difficulty": 50,
+        "avg_learning_value": 45,
+        "avg_reusability_value": 35,
+        "low_sample": true
+      },
+      {
+        "key": "cloud_infra",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "budget": {
+          "n": 1,
+          "mean": 3000000,
+          "median": 3000000,
+          "p25": 3000000,
+          "p75": 3000000
+        },
+        "avg_vibe_coding_difficulty": 50,
+        "avg_learning_value": 35,
+        "avg_reusability_value": 30,
+        "low_sample": true
+      },
+      {
+        "key": "data_pipeline",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "budget": {
+          "n": 1,
+          "mean": 6000000,
+          "median": 6000000,
+          "p25": 6000000,
+          "p75": 6000000
+        },
+        "avg_vibe_coding_difficulty": 62,
+        "avg_learning_value": 45,
+        "avg_reusability_value": 35,
+        "low_sample": true
+      },
+      {
+        "key": "workflow_automation",
+        "n": 1,
+        "share": 0.16666666666666666,
+        "budget": {
+          "n": 1,
+          "mean": 5500000,
+          "median": 5500000,
+          "p25": 5500000,
+          "p75": 5500000
+        },
+        "avg_vibe_coding_difficulty": 50,
+        "avg_learning_value": 45,
+        "avg_reusability_value": 35,
+        "low_sample": true
+      }
+    ],
+    "combos": [],
+    "watchlist": [
+      {
+        "assets": [
+          "core_web",
+          "admin_system"
+        ],
+        "n": 1,
+        "share": 0.16666666666666666,
+        "budget": {
+          "n": 1,
+          "mean": 6000000,
+          "median": 6000000,
+          "p25": 6000000,
+          "p75": 6000000
+        },
+        "avg_vibe_coding_difficulty": 62,
+        "avg_learning_value": 45,
+        "avg_reusability_value": 35
+      },
+      {
+        "assets": [
+          "core_web",
+          "payments",
+          "authentication_authorization"
+        ],
+        "n": 0,
+        "share": 0,
+        "budget": {
+          "n": 0,
+          "mean": null,
+          "median": null,
+          "p25": null,
+          "p75": null
+        },
+        "avg_vibe_coding_difficulty": null,
+        "avg_learning_value": null,
+        "avg_reusability_value": null
+      },
+      {
+        "assets": [
+          "ai_llm",
+          "rag_embeddings"
+        ],
+        "n": 0,
+        "share": 0,
+        "budget": {
+          "n": 0,
+          "mean": null,
+          "median": null,
+          "p25": null,
+          "p75": null
+        },
+        "avg_vibe_coding_difficulty": null,
+        "avg_learning_value": null,
+        "avg_reusability_value": null
+      },
+      {
+        "assets": [
+          "browser_automation",
+          "web_crawling"
+        ],
+        "n": 0,
+        "share": 0,
+        "budget": {
+          "n": 0,
+          "mean": null,
+          "median": null,
+          "p25": null,
+          "p75": null
+        },
+        "avg_vibe_coding_difficulty": null,
+        "avg_learning_value": null,
+        "avg_reusability_value": null
+      }
+    ],
+    "lists": null
+  }
+}

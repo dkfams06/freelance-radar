@@ -168,6 +168,20 @@ ANALYZER_BACKEND=claude-cli ANALYZER_MODEL=claude-sonnet-5-5 pnpm analyzer sampl
 - `docs/analyzer-v1-sample-20.*`, `docs/analyzer-v2-sample-20.*` 는 이전 기준 참고 자료. v1/v2/v3 결과는 `(project_id, analysis_version)` 로 따로 저장되어 서로 덮어쓰지 않는다.
 
 - 리포트/결과 파일: `apps/analyzer/.out/*.md|json` (gitignore)
+
+### 시장 통계 (market-stats)
+
+taxonomy 는 `v3.3` 으로 동결 (`docs/taxonomy-v3.3-freeze.md`). 전체 AI 분석 전에 원본 `projects` 와 현재 분석된 표본으로 분포부터 본다.
+
+```bash
+pnpm analyzer market-stats                       # docs/market-stats-v1.md + .json 생성 (DB 읽기 전용)
+pnpm analyzer market-stats --min-n 5 --min-combo 5 --version v3.3
+```
+
+- 원본 전체: 총계·플랫폼·월별·외주/staffing 비율·예산 존재율과 중앙값/p25/p75 (평균은 보조)
+- 일반 외주(staffing 제외)가 기본 화면이고 staffing(월 단가)은 따로 집계
+- 분석 표본 기반: project_type·technology_assets·자산 조합(최소 5건) 통계, reuse 4단계 + 보조 3단계(low_reuse = low + one_off)
+- 리포트는 원본 수 / 분석 수 / 커버리지 %를 항상 구분해 보여주고, 표본 부족은 ⚠ 로 표시. 최종 점수(매력도/수익성/공략)는 만들지 않는다.
 - 분류 체계·점수 기준: `packages/analysis/src/taxonomy.ts`, `prompt.ts`. 바꾸면 `ANALYSIS_VERSION` 을 올린다.
   `(project_id, analysis_version)` 단위로 저장되므로 원본 재수집 없이 새 기준으로 재분석할 수 있다.
 - 모든 응답은 structured output(JSON schema, enum 강제) + zod 재검증(점수 0~100 정수, 시간 min ≤ max, 코드 형식)을 거친다.

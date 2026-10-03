@@ -1,3 +1,5 @@
+import { reuseGroup } from "./taxonomy";
+
 /**
  * 분류 결과 분포 통계. 점수화 전에 "실제 분포"를 보기 위한 용도이며 점수/가중치는 만들지 않는다.
  *
@@ -116,6 +118,8 @@ export interface DistributionReport {
   by_engagement_type: GroupStats[];
   by_industry: GroupStats[];
   by_reuse_level: GroupStats[];
+  /** 보조 3단계: high / medium / low_reuse(= low + one_off) */
+  by_reuse_group: GroupStats[];
   technology_assets: OccurrenceStats[];
   complexity_types: OccurrenceStats[];
 }
@@ -127,6 +131,7 @@ export function computeDistribution(rows: StatsSourceRow[]): DistributionReport 
     by_engagement_type: groupBy(rows, "engagement_type"),
     by_industry: groupBy(rows, "industry"),
     by_reuse_level: groupBy(rows, "reuse_level"),
+    by_reuse_group: groupBy(rows.map((r) => ({ ...r, reuse_level: reuseGroup(r.reuse_level) })), "reuse_level"),
     technology_assets: occurrences(rows, "technology_assets"),
     complexity_types: occurrences(rows, "complexity_types"),
   };
@@ -163,6 +168,7 @@ export function renderDistribution(d: DistributionReport, title = "분류 분포
     ...groupTable("engagement_type 기준", d.by_engagement_type),
     ...groupTable("industry 기준", d.by_industry),
     ...groupTable("reuse_level 기준", d.by_reuse_level),
+    ...groupTable("reuse 보조 3단계 기준 (low_reuse = low + one_off)", d.by_reuse_group),
     ...occurrenceTable("technology_assets 등장 비율", d.technology_assets),
     ...occurrenceTable("complexity_types 등장 비율", d.complexity_types),
   ].join("\n");

@@ -11,6 +11,8 @@ import {
   buildProjectInput,
   buildUserMessage,
   computeDistribution,
+  computeMarketReport,
+  renderMarketReport,
   estimateCostUsd,
   estimateRun,
   renderDistribution,
@@ -54,6 +56,7 @@ commands:
   import <file>   결과 파일(.out/*.json)의 분석을 스키마 재검증 후 DB 저장
   report <file>   결과 파일로 Markdown 리포트 재생성
   compare <a> <b> 두 결과 파일의 분류 비교 (예: v2 → v3, 수동 샘플 → 실제 API)
+  market-stats    시장 통계 (원본 전체 + 분석 표본). docs/market-stats-v1.md|json 생성. 최종 점수는 만들지 않음
   validate <file> 결과 파일의 모든 분석을 현재 schema 로 검증 (DB 불필요). --report 를 붙이면 .out 에 md 리포트 생성
   classify        전체 수집 데이터 분류 준비: 기본은 대상 건수/토큰/비용/API 호출 수 추정만 출력
                   --execute 를 붙여야 실제 실행 (--batch: Batch API 로 제출)
@@ -73,7 +76,10 @@ options:
   --execute                     classify: 추정만 하지 않고 실제로 실행
   --batch                       classify --execute: Message Batches API 로 제출
   --yes                         run / batch-submit 에서 100건 초과 실행 확인
-  --version <v>                 stats: 분석 버전 (기본 현재 버전)
+  --version <v>                 stats / market-stats: 분석 버전 (기본 현재 버전)
+  --min-n <n>                   market-stats: 유형/자산 표본 기준 (기본 5, 미만은 ⚠)
+  --min-combo <n>               market-stats: 자산 조합 최소 등장 건수 (기본 5)
+  --out <path>                  market-stats: 출력 경로(확장자 제외, 기본 docs/market-stats-v1)
 
 env: ANTHROPIC_API_KEY, ANALYZER_MODEL (기본 claude-opus-5-5), ANALYZER_EFFORT (기본 low), ANALYZER_MAX_TOKENS (기본 8000)
      ANALYZER_BACKEND=claude-cli  → API 키 대신 Claude 구독제(claude -p) 로 sample/run 실행 (Batch 불가)
@@ -103,6 +109,9 @@ async function main() {
       yes: { type: "boolean" },
       version: { type: "string" },
       report: { type: "boolean" },
+      "min-n": { type: "string" },
+      "min-combo": { type: "string" },
+      out: { type: "string" },
       help: { type: "boolean", short: "h" },
     },
   });
@@ -149,6 +158,11 @@ async function main() {
     return;
   }
   const num = (v: string | undefined, d: number) => (v === undefined ? d : Number(v));
+  const positive = (v: string, flag: string) => {
+    const n = Number.parseInt(v, 10);
+    if (!Number.isFinite(n) || n < 1) throw new Error(`${flag} 는 1 이상의 정수여야 합니다`);
+    return n;
+  };
   const db = createServiceClient();
   const store = new AnalyzerStore(db);
   const dryRun = Boolean(values["dry-run"]);
@@ -240,6 +254,26 @@ async function main() {
       const projects = await store.projectsByIds(target);
       const items = await analyzeProjectsSync(llm, projects, { concurrency: num(values.concurrency, 4), maxAttempts: 3, store, log });
       finish({ model: llm.cfg.model, mode: "sync", items, name: `classify-${stamp()}`, batch: false });
+      return;
+    }
+
+    case "market-stats": {
+      const version = values.version ?? ANALYSIS_VERSION;
+      const { projects, analyzed } = await store.marketRows(version);
+      const report = computeMarketReport(projects, analyzed, {
+        version,
+        minN: values["min-n"] ? positive(values["min-n"], "--min-n") : undefined,
+        minCombo: values["min-combo"] ? positive(values["min-combo"], "--min-combo") : undefined,
+      });
+      const repoRoot = path.resolve(import.meta.dirname, "../../..");
+      const outBase = values.out ? path.resolve(process.env.INIT_CWD ?? process.cwd(), values.out) : path.join(repoRoot, "docs", "market-stats-v1");
+      mkdirSync(path.dirname(outBase), { recursive: true });
+      writeFileSync(`${outBase}.json`, `${JSON.stringify(report, null, 2)}\n`);
+      writeFileSync(`${outBase}.md`, `${renderMarketReport(report)}\n`);
+      log(`원본 ${report.base.total}건 / 분석(${version}) ${report.coverage.analyzed}건 / 커버리지 ${(report.coverage.coverage_rate * 100).toFixed(2)}%`);
+      for (const w of report.coverage.warnings) log(`⚠ ${w}`);
+      log(`→ ${outBase}.md`);
+      log(`→ ${outBase}.json`);
       return;
     }
 

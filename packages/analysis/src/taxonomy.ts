@@ -75,6 +75,18 @@ export const REUSE_LEVELS = {
 export type ReuseLevel = keyof typeof REUSE_LEVELS;
 export const REUSE_LEVEL_CODES = Object.keys(REUSE_LEVELS) as [ReuseLevel, ...ReuseLevel[]];
 
+/**
+ * 통계용 보조 3단계 (원본 4단계 reuse_level 은 그대로 저장하고, 집계할 때만 묶는다).
+ * low_reuse = low + one_off
+ */
+export const REUSE_GROUPS = ["high", "medium", "low_reuse"] as const;
+export type ReuseGroup = (typeof REUSE_GROUPS)[number];
+export function reuseGroup(level: string | null | undefined): ReuseGroup | null {
+  if (level === "high" || level === "medium") return level;
+  if (level === "low" || level === "one_off") return "low_reuse";
+  return null;
+}
+
 /** 수행 시 축적되는 기술자산 (복수) */
 export const TECHNOLOGY_ASSETS = [
   "core_web",

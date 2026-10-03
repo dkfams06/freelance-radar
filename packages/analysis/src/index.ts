@@ -6,3 +6,5 @@ export * from "./cost";
 export * from "./json-schema";
 export * from "./stats";
 export * from "./estimate";
+export * from "./market-stats";
+export * from "./market-report";

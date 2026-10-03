@@ -1,6 +1,9 @@
 import type { DbClient } from "@fr/db";
 import {
   ANALYSIS_SOURCE_COLUMNS,
+  type AnalyzedProject,
+  type MarketAnalysis,
+  type MarketProject,
   type AnalysisSourceProject,
   type BuiltInput,
   type ProjectAnalysis,
@@ -214,6 +217,34 @@ export class AnalyzerStore {
   }
 
   /** 통계용: 분석 결과 + 원본 예산 (projects join) */
+  /** 시장 통계용: 전체 원본 프로젝트 + 해당 버전 분석 결과(있는 것만) */
+  async marketRows(version: string): Promise<{ projects: MarketProject[]; analyzed: AnalyzedProject[] }> {
+    const projects = await this.pageAll<MarketProject>((f, t) =>
+      this.db
+        .from("projects")
+        .select("id,platform,registered_at,raw_type:project_type,budget_type,budget_min,budget_max")
+        .order("id")
+        .range(f, t) as unknown as PromiseLike<{ data: MarketProject[] | null; error: unknown }>,
+    );
+    const analyses = await this.pageAll<MarketAnalysis>((f, t) =>
+      this.db
+        .from("project_analyses")
+        .select(
+          "project_id,project_type,engagement_type,industry,technology_assets,reuse_level," +
+            "vibe_coding_difficulty,estimated_hours_min,estimated_hours_max,learning_value,reusability_value,market_value",
+        )
+        .eq("analysis_version", version)
+        .order("project_id")
+        .range(f, t) as unknown as PromiseLike<{ data: MarketAnalysis[] | null; error: unknown }>,
+    );
+    const byId = new Map(projects.map((p) => [p.id, p]));
+    const analyzed = analyses.flatMap((a) => {
+      const p = byId.get(a.project_id);
+      return p ? [{ ...p, ...a } as AnalyzedProject] : [];
+    });
+    return { projects, analyzed };
+  }
+
   async statsRows(version: string): Promise<StatsSourceRow[]> {
     const rows = await this.pageAll<StatsDbRow>((f, t) =>
       this.db
