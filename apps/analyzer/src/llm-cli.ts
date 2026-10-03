@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import {
@@ -28,7 +28,7 @@ export class ClaudeCliClient implements SyncLlm {
     readonly cfg: LlmConfig,
     opts: { bin?: string; timeoutMs?: number } = {},
   ) {
-    this.bin = opts.bin ?? process.env.CLAUDE_CLI_PATH ?? "claude";
+    this.bin = opts.bin ?? process.env.CLAUDE_CLI_PATH ?? resolveClaudeBin();
     this.timeoutMs = opts.timeoutMs ?? Number(process.env.ANALYZER_CLI_TIMEOUT_MS || 300_000);
     this.cwd = path.join(os.tmpdir(), "freelance-radar-analyzer");
     mkdirSync(this.cwd, { recursive: true });
@@ -90,6 +90,25 @@ export class ClaudeCliClient implements SyncLlm {
       child.stdin.end(stdin, "utf8");
     });
   }
+}
+
+/**
+ * Windows 에서는 spawn 이 PATHEXT(.cmd) 를 찾지 않고, npm 설치본은 claude.cmd shim 뿐이다.
+ * shell 을 거치면 시스템 프롬프트/JSON 인자가 깨지므로 shim 이 가리키는 claude.exe 를 직접 찾는다.
+ */
+export function resolveClaudeBin(env = process.env, exists: (p: string) => boolean = existsSync): string {
+  if (process.platform !== "win32") return "claude";
+  const dirs = (env.PATH ?? env.Path ?? "").split(path.delimiter).filter(Boolean);
+  for (const dir of dirs) {
+    const exe = path.join(dir, "claude.exe");
+    if (exists(exe)) return exe;
+    if (exists(path.join(dir, "claude.cmd"))) {
+      const shimTarget = path.join(dir, "node_modules", "@anthropic-ai", "claude-code", "bin", "claude.exe");
+      if (exists(shimTarget)) return shimTarget;
+    }
+  }
+  const local = path.join(env.USERPROFILE ?? os.homedir(), ".local", "bin", "claude.exe");
+  return exists(local) ? local : "claude";
 }
 
 interface CliResult {
