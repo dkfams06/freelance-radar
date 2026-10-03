@@ -1,10 +1,15 @@
 import {
+  CLASSIFICATION_FIELDS,
+  COMPLEXITY_TYPES,
   ENGAGEMENT_TYPES,
   FEATURE_VOCAB,
+  INDUSTRIES,
   INTEGRATION_VOCAB,
   PLATFORMS,
-  PROJECT_CATEGORIES,
+  PROJECT_TYPES,
+  REUSE_LEVELS,
   SKILL_VOCAB,
+  TECHNOLOGY_ASSETS,
 } from "./taxonomy";
 
 /**
@@ -12,7 +17,9 @@ import {
  * project_analyses 는 (project_id, analysis_version) 단위로 저장되므로
  * 버전을 올리면 원본 수집 없이 같은 projects 를 새 기준으로 다시 분석할 수 있다.
  */
-export const ANALYSIS_VERSION = "v1";
+export const ANALYSIS_VERSION = "v2";
+// v1: 최초 기준 (project_category 15종, engagement_type 7종)
+// v2: 통계용 6개 분류 추가 (project_type, engagement_type 재정의, complexity_types, reuse_level, technology_assets, industry)
 
 const list = (o: Record<string, string>) =>
   Object.entries(o)
@@ -29,17 +36,47 @@ export const SYSTEM_PROMPT = `당신은 한국 IT 외주 시장(위시캣, 프�
 
 # 출력 필드 규칙
 
-## project_category (아래 중 정확히 하나)
-${list(PROJECT_CATEGORIES)}
-- 결과물의 "주된 성격"으로 고릅니다. 예: 앱이 핵심인 예약 서비스 → reservation (플랫폼은 required_platforms 로 표현).
-- 기존 시스템의 유지보수/소규모 개선이 본질이면 maintenance.
-- 맞는 것이 정말 없을 때만 other 를 쓰고, project_subcategory 를 구체적으로 적습니다.
+## 분류 공통 규칙
+- 아래 6개 분류는 반드시 제시된 코드 안에서만 고릅니다. 새 코드를 만들지 않습니다.
+- 맞는 값이 정말 없을 때만 other 를 씁니다.
+- 배열(complexity_types, technology_assets)은 중복 없이, 공고에 근거가 있는 것만 넣습니다.
+- 공고에 없는 기능을 상상해서 분류하지 않습니다.
+- 판단이 애매했던 분류 필드는 uncertain_fields 에 필드 이름으로 적습니다 (확실하면 빈 배열).
+  사용 가능한 이름: ${CLASSIFICATION_FIELDS.join(", ")}
+
+## project_type (무엇을 만드는 일인지, 정확히 하나)
+${list(PROJECT_TYPES)}
+- 결과물의 "주된 성격" 하나만 고릅니다. 예: 앱이 핵심인 예약 서비스 → reservation (앱 여부는 required_platforms 와 complexity_types 로 표현).
+- 기존 시스템의 유지보수/소규모 수정이 본질이면 maintenance. 기존 시스템에 큰 기능을 붙이는 일이면 그 기능의 성격으로 고르고 engagement_type 을 feature_extension 으로.
+- 상주/인력 구인이라도 "투입되어 만드는 대상"의 성격으로 고릅니다 (예: 금융 정보계 EDW → data_dashboard, PG 결제 시스템 → other).
 
 ## project_subcategory
-카테고리 안의 세부 유형을 짧은 한국어 명사구로 (예: "병원 예약", "B2B 주문관리", "부동산 중개 플랫폼", "사내 문서 자동화"). 15자 이내 권장.
+project_type 안의 세부 유형을 짧은 한국어 명사구로 (예: "병원 예약", "B2B 주문관리", "부동산 중개 플랫폼"). 15자 이내. 새 분류 체계를 만들지 말고 설명용으로만 씁니다.
 
-## engagement_type (하나)
+## engagement_type (일의 형태, 정확히 하나)
 ${list(ENGAGEMENT_TYPES)}
+- 상주·기간제·월 단가·"인력 모집" 형태이면 업무 내용과 관계없이 staffing. 일반 외주와 분리하는 데 가장 중요한 값입니다.
+- 공고가 기능 추가와 유지보수를 함께 요구하면 이번 계약의 중심 작업으로 고릅니다.
+
+## industry (산업군, 정확히 하나)
+${list(INDUSTRIES)}
+- 클라이언트/서비스가 속한 산업입니다. 기술 난이도와 분리해서 판단합니다 (finance 라고 complexity 가 높다고 단정하지 않음).
+- 산업을 알 수 없거나 산업 무관 도구면 general.
+
+## complexity_types (AI coding agent 1인 개발 관점의 난이도 특성, 1개 이상)
+${list(COMPLEXITY_TYPES)}
+- 실제로 해당하는 특성만 넣습니다. 대부분의 프로젝트는 1~3개입니다.
+- 결제·인증 오류가 금전 손실로 직결되거나 금융/의료/보안 규제 대상일 때만 high_risk_domain.
+- 웹 + 네이티브 앱처럼 서로 다른 클라이언트를 함께 만들 때만 multi_platform (반응형 웹 + 관리자 웹은 해당 없음).
+
+## reuse_level (결과물 재사용 수준, 하나)
+${list(REUSE_LEVELS)}
+
+## technology_assets (수행 시 축적되는 기술자산, 복수)
+${TECHNOLOGY_ASSETS.join(", ")}
+- 이 프로젝트를 실제로 수행하면 남는 재사용 가능한 역량/코드 자산만 고릅니다.
+- 웹 화면이 있으면 core_web, 서버/API 가 있으면 backend_api, DB 설계가 있으면 database.
+- 상주 컨설팅처럼 코드 자산이 거의 남지 않으면 해당 영역 1~2개만 고르거나 legacy_enterprise 를 씁니다.
 
 ## summary
 무엇을, 누구를 위해, 어떤 형태로 만드는지 한국어 1~2문장. 예산·기간·지원 조건은 쓰지 않습니다.

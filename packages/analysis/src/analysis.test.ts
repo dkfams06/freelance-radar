@@ -12,9 +12,14 @@ import {
 } from "./index";
 
 export const sampleAnalysis = (): ProjectAnalysis => ({
-  project_category: "reservation",
+  project_type: "reservation",
   project_subcategory: "병원 예약",
-  engagement_type: "build",
+  engagement_type: "new_build",
+  industry: "healthcare",
+  complexity_types: ["standard_crud", "integration_heavy", "standard_crud"],
+  reuse_level: "high",
+  technology_assets: ["core_web", "backend_api", "admin_system"],
+  uncertain_fields: [],
   summary: "병원 환자가 진료를 예약하고 관리자가 일정을 관리하는 웹 서비스",
   required_features: ["authentication", "reservation", "admin_dashboard", "reservation"],
   required_integrations: ["kakao_alimtalk"],
@@ -73,14 +78,24 @@ describe("validateAnalysis", () => {
   it("accepts a valid analysis and de-duplicates arrays", () => {
     const r = validateAnalysis(sampleAnalysis());
     expect(r.ok).toBe(true);
-    if (r.ok) expect(r.value.required_features).toEqual(["authentication", "reservation", "admin_dashboard"]);
+    if (r.ok) {
+      expect(r.value.required_features).toEqual(["authentication", "reservation", "admin_dashboard"]);
+      expect(r.value.complexity_types).toEqual(["standard_crud", "integration_heavy"]);
+    }
   });
 
   it("rejects out-of-range scores, unknown category, bad codes, hours min > max", () => {
     expect(validateAnalysis({ ...sampleAnalysis(), market_value: 101 }).ok).toBe(false);
     expect(validateAnalysis({ ...sampleAnalysis(), vibe_coding_difficulty: 12.5 }).ok).toBe(false);
-    expect(validateAnalysis({ ...sampleAnalysis(), project_category: "bank" }).ok).toBe(false);
+    expect(validateAnalysis({ ...sampleAnalysis(), project_type: "bank" }).ok).toBe(false);
     expect(validateAnalysis({ ...sampleAnalysis(), required_features: ["Payment Gateway"] }).ok).toBe(false);
+    expect(validateAnalysis({ ...sampleAnalysis(), engagement_type: "build" }).ok).toBe(false);
+    expect(validateAnalysis({ ...sampleAnalysis(), industry: "banking" }).ok).toBe(false);
+    expect(validateAnalysis({ ...sampleAnalysis(), complexity_types: [] }).ok).toBe(false);
+    expect(validateAnalysis({ ...sampleAnalysis(), complexity_types: ["crud"] }).ok).toBe(false);
+    expect(validateAnalysis({ ...sampleAnalysis(), reuse_level: "very_high" }).ok).toBe(false);
+    expect(validateAnalysis({ ...sampleAnalysis(), technology_assets: ["kubernetes"] }).ok).toBe(false);
+    expect(validateAnalysis({ ...sampleAnalysis(), technology_assets: [] }).ok).toBe(true);
     const r = validateAnalysis({ ...sampleAnalysis(), estimated_hours_min: 100, estimated_hours_max: 50 });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toMatch(/estimated_hours_min/);
@@ -94,6 +109,16 @@ describe("validateAnalysis", () => {
 });
 
 describe("ANALYSIS_JSON_SCHEMA", () => {
+  it("enforces the classification enums in the API schema", () => {
+    const props = ANALYSIS_JSON_SCHEMA.properties as Record<string, { enum?: string[]; items?: { enum?: string[] } }>;
+    expect(props.project_type!.enum).toContain("crawler_data_collection");
+    expect(props.engagement_type!.enum).toContain("staffing");
+    expect(props.industry!.enum).toContain("finance");
+    expect(props.reuse_level!.enum).toEqual(["high", "medium", "low", "one_off"]);
+    expect(props.complexity_types!.items!.enum).toContain("high_risk_domain");
+    expect(props.technology_assets!.items!.enum).toContain("rag_embeddings");
+  });
+
   it("has exactly the same fields as the zod schema, all required", () => {
     const zodKeys = Object.keys(ProjectAnalysisSchema.shape).sort();
     const props = ANALYSIS_JSON_SCHEMA.properties as Record<string, unknown>;

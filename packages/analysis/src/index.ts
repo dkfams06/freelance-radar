@@ -4,3 +4,5 @@ export * from "./input";
 export * from "./prompt";
 export * from "./cost";
 export * from "./json-schema";
+export * from "./stats";
+export * from "./estimate";

@@ -1,12 +1,17 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
 import { buildRequestParams, interpretMessage } from "./llm";
-import { renderReport, type ResultsFile } from "./results";
+import { renderReport, reviewCases, type ResultsFile } from "./results";
 
 const analysis = {
-  project_category: "ecommerce",
+  project_type: "ecommerce",
   project_subcategory: "자사몰",
-  engagement_type: "build",
+  engagement_type: "new_build",
+  industry: "healthcare",
+  complexity_types: ["standard_crud", "integration_heavy", "standard_crud"],
+  reuse_level: "high",
+  technology_assets: ["core_web", "backend_api", "admin_system"],
+  uncertain_fields: [],
   summary: "의류 자사몰 구축과 관리자 페이지",
   required_features: ["product_catalog", "cart_checkout", "payment", "custom_size_guide"],
   required_integrations: ["payment_gateway"],
@@ -77,6 +82,26 @@ describe("interpretMessage", () => {
   });
 });
 
+describe("reviewCases", () => {
+  const item = (over: Record<string, unknown>, budget = "500만원") => ({
+    project: { id: "p", platform: "wishket", external_project_id: "1", title: "t", budget, project_duration: null },
+    input_meta: { truncated: false, limited_info: false, hash: "h", chars: 1 },
+    ok: true,
+    analysis: { ...analysis, ...over } as never,
+  });
+
+  it("flags other, empty assets, too many complexity types, staffing mismatch and AI-uncertain fields", () => {
+    expect(reviewCases([item({})])).toEqual([]);
+    const reasons = (over: Record<string, unknown>, budget?: string) => reviewCases([item(over, budget)])[0]?.reasons ?? [];
+    expect(reasons({ project_type: "other" })).toContain("project_type=other");
+    expect(reasons({ technology_assets: [] })).toContain("technology_assets 0개");
+    expect(reasons({ complexity_types: ["standard_crud", "realtime", "legacy_heavy", "multi_platform"] })).toContain("complexity_types 4개");
+    expect(reasons({}, "6,000,000원/월")).toContain("월 단가/상주 공고인데 engagement_type=new_build");
+    expect(reasons({ engagement_type: "staffing" }, "6,000,000원/월")).toEqual([]);
+    expect(reasons({ uncertain_fields: ["engagement_type"] })).toContain("AI 판단 애매: engagement_type");
+  });
+});
+
 describe("renderReport", () => {
   it("renders table, out-of-vocabulary codes and projection", () => {
     const r: ResultsFile = {
@@ -99,7 +124,9 @@ describe("renderReport", () => {
       ],
     };
     const md = renderReport(r);
-    expect(md).toContain("| 1 | wishket | 자사몰 | 500만원 | ecommerce / 자사몰 |");
+    expect(md).toContain("| 1 | 자사몰 | 500만원 | ecommerce | new_build | healthcare | standard_crud, integration_heavy, standard_crud | high |");
+    expect(md).toContain("## 분류가 애매한 케이스");
+    expect(md).toContain("- project_type: ecommerce 1");
     expect(md).toContain("custom_size_guide(1)");
     expect(md).toContain("전체 5,000건 분석 비용 추정");
   });

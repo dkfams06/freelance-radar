@@ -3,7 +3,7 @@ import path from "node:path";
 import {
   FEATURE_VOCAB,
   INTEGRATION_VOCAB,
-  PROJECT_CATEGORIES,
+  PROJECT_TYPES,
   SKILL_VOCAB,
   MODEL_PRICING,
   addUsage,
@@ -63,6 +63,34 @@ export function writeResults(r: ResultsFile, name: string): { json: string; md: 
 
 export function readResults(file: string): ResultsFile {
   return JSON.parse(readFileSync(file, "utf8")) as ResultsFile;
+}
+
+function countBy(lists: string[][]): string {
+  const m = new Map<string, number>();
+  for (const xs of lists) for (const x of new Set(xs)) m.set(x, (m.get(x) ?? 0) + 1);
+  return [...m].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([k, n]) => `${k} ${n}`).join(", ") || "-";
+}
+
+/** 사람 검토가 필요한 분류 케이스 */
+export function reviewCases(items: ResultItem[]): { project: ResultItem["project"]; reasons: string[] }[] {
+  const out: { project: ResultItem["project"]; reasons: string[] }[] = [];
+  for (const it of items) {
+    const a = it.analysis;
+    if (!a) continue;
+    const reasons: string[] = [];
+    if (a.project_type === "other") reasons.push("project_type=other");
+    if (a.engagement_type === "other") reasons.push("engagement_type=other");
+    if (a.industry === "other") reasons.push("industry=other");
+    if (a.complexity_types.includes("other")) reasons.push("complexity_types 에 other");
+    if (!a.technology_assets.length) reasons.push("technology_assets 0개");
+    if (a.complexity_types.length >= 4) reasons.push(`complexity_types ${a.complexity_types.length}개`);
+    // 월 단가 공고인데 staffing 이 아니거나, 반대인 경우
+    const monthly = /\/월|월\s*단가|상주/.test(`${it.project.budget ?? ""} ${it.project.title ?? ""}`);
+    if (monthly && a.engagement_type !== "staffing") reasons.push(`월 단가/상주 공고인데 engagement_type=${a.engagement_type}`);
+    if (a.uncertain_fields.length) reasons.push(`AI 판단 애매: ${a.uncertain_fields.join(", ")}`);
+    if (reasons.length) out.push({ project: it.project, reasons });
+  }
+  return out;
 }
 
 const esc = (s: unknown) => String(s ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
@@ -131,16 +159,32 @@ export function renderReport(r: ResultsFile): string {
     L.push("");
   }
 
-  L.push("## 프로젝트별 결과");
+  L.push("## 프로젝트별 분류");
   L.push("");
-  L.push("| # | 플랫폼 | 제목 | 예산 | 카테고리 | 유형 | 난이도 | 예상시간 | 학습 | 재사용 | 시장 | 위험 | 명확성 |");
-  L.push("|---|---|---|---|---|---|---|---|---|---|---|---|---|");
+  L.push("| # | 제목 | 예산 | project_type | engagement | industry | complexity_types | reuse | technology_assets | 난이도 | 예상시간 | 학습 | 재사용 | 시장 |");
+  L.push("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|");
   ok.forEach((it, i) => {
     const a = it.analysis!;
     L.push(
-      `| ${i + 1} | ${it.project.platform} | ${esc(it.project.title).slice(0, 40)} | ${esc(it.project.budget)} | ${a.project_category} / ${esc(a.project_subcategory)} | ${a.engagement_type} | ${a.vibe_coding_difficulty} | ${a.estimated_hours_min}~${a.estimated_hours_max}h | ${a.learning_value} | ${a.reusability_value} | ${a.market_value} | ${a.technical_risk} | ${a.requirement_clarity} |`,
+      `| ${i + 1} | ${esc(it.project.title).slice(0, 34)} | ${esc(it.project.budget)} | ${a.project_type} | ${a.engagement_type} | ${a.industry} | ${a.complexity_types.join(", ")} | ${a.reuse_level} | ${a.technology_assets.join(", ") || "-"} | ${a.vibe_coding_difficulty} | ${a.estimated_hours_min}~${a.estimated_hours_max}h | ${a.learning_value} | ${a.reusability_value} | ${a.market_value} |`,
     );
   });
+  L.push("");
+
+  const cases = reviewCases(ok);
+  L.push("## 분류가 애매한 케이스");
+  L.push("");
+  if (!cases.length) L.push("- 없음");
+  for (const c of cases) L.push(`- [${c.project.platform}:${c.project.external_project_id}] ${esc(c.project.title)} — ${c.reasons.join("; ")}`);
+  L.push("");
+
+  L.push("## 분류별 샘플 건수");
+  L.push("");
+  for (const field of ["project_type", "engagement_type", "industry", "reuse_level"] as const) {
+    L.push(`- ${field}: ${countBy(ok.map((it) => [it.analysis![field]]))}`);
+  }
+  L.push(`- complexity_types: ${countBy(ok.map((it) => it.analysis!.complexity_types))}`);
+  L.push(`- technology_assets: ${countBy(ok.map((it) => it.analysis!.technology_assets))}`);
   L.push("");
 
   L.push("## 상세");
@@ -150,7 +194,9 @@ export function renderReport(r: ResultsFile): string {
     L.push(`### ${i + 1}. [${it.project.platform}:${it.project.external_project_id}] ${it.project.title ?? ""}`);
     L.push("");
     L.push(`- 예산: ${it.project.budget ?? "-"} · 기간: ${it.project.project_duration ?? "-"}${it.input_meta.limited_info ? " · ⚠ 공개 정보 제한" : ""}${it.input_meta.truncated ? " · 설명 일부 생략" : ""}`);
-    L.push(`- 분류: **${a.project_category}** (${PROJECT_CATEGORIES[a.project_category]}) / ${a.project_subcategory} · ${a.engagement_type}`);
+    L.push(`- 분류: **${a.project_type}** (${PROJECT_TYPES[a.project_type]}) / ${a.project_subcategory} · ${a.engagement_type} · ${a.industry} · reuse ${a.reuse_level}`);
+    L.push(`- complexity_types: ${a.complexity_types.join(", ")} · technology_assets: ${a.technology_assets.join(", ") || "-"}`);
+    if (a.uncertain_fields.length) L.push(`- 판단 애매: ${a.uncertain_fields.join(", ")}`);
     L.push(`- 요약: ${a.summary}`);
     L.push(`- 기능: ${a.required_features.join(", ") || "-"}`);
     L.push(`- 연동: ${a.required_integrations.join(", ") || "-"}`);
@@ -174,9 +220,6 @@ export function renderReport(r: ResultsFile): string {
 
   L.push("## 분포");
   L.push("");
-  const cats = new Map<string, number>();
-  ok.forEach((it) => cats.set(it.analysis!.project_category, (cats.get(it.analysis!.project_category) ?? 0) + 1));
-  L.push(`- 카테고리: ${[...cats].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ${n}`).join(", ")}`);
   const pick = (f: (a: ProjectAnalysis) => number) => ok.map((it) => f(it.analysis!));
   L.push(`- vibe_coding_difficulty: ${stat(pick((a) => a.vibe_coding_difficulty))}`);
   L.push(`- estimated_hours_max: ${stat(pick((a) => a.estimated_hours_max))}`);

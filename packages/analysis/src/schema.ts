@@ -1,5 +1,15 @@
 import * as z from "zod/v4";
-import { CODE_PATTERN, ENGAGEMENT_TYPE_CODES, PLATFORM_CODES, PROJECT_CATEGORY_CODES } from "./taxonomy";
+import {
+  CLASSIFICATION_FIELDS,
+  CODE_PATTERN,
+  COMPLEXITY_TYPE_CODES,
+  ENGAGEMENT_TYPE_CODES,
+  INDUSTRY_CODES,
+  PLATFORM_CODES,
+  PROJECT_TYPE_CODES,
+  REUSE_LEVEL_CODES,
+  TECHNOLOGY_ASSETS,
+} from "./taxonomy";
 
 const score = z.number().int().min(0).max(100);
 const code = z.string().regex(CODE_PATTERN);
@@ -10,9 +20,17 @@ const codes = z.array(code).max(30);
  * Structured output 스키마로도 그대로 쓰이고(제약 일부는 API 에서 제거됨), 응답은 반드시 이 스키마로 다시 검증한다.
  */
 export const ProjectAnalysisSchema = z.object({
-  project_category: z.enum(PROJECT_CATEGORY_CODES),
+  // --- 분류 (통계용, 모두 enum 강제) ---
+  project_type: z.enum(PROJECT_TYPE_CODES),
   project_subcategory: z.string().min(1).max(60),
   engagement_type: z.enum(ENGAGEMENT_TYPE_CODES),
+  industry: z.enum(INDUSTRY_CODES),
+  complexity_types: z.array(z.enum(COMPLEXITY_TYPE_CODES)).min(1).max(COMPLEXITY_TYPE_CODES.length),
+  reuse_level: z.enum(REUSE_LEVEL_CODES),
+  technology_assets: z.array(z.enum(TECHNOLOGY_ASSETS)).max(TECHNOLOGY_ASSETS.length),
+  /** 판단이 애매했던 분류 필드 (사람 검토 대상) */
+  uncertain_fields: z.array(z.enum(CLASSIFICATION_FIELDS)).max(CLASSIFICATION_FIELDS.length),
+
   summary: z.string().min(10).max(400),
 
   required_features: codes,
@@ -67,6 +85,9 @@ export function validateAnalysis(input: unknown): ValidationResult {
     ok: true,
     value: {
       ...v,
+      complexity_types: uniq(v.complexity_types),
+      technology_assets: uniq(v.technology_assets),
+      uncertain_fields: uniq(v.uncertain_fields),
       required_features: uniq(v.required_features),
       required_integrations: uniq(v.required_integrations),
       required_platforms: uniq(v.required_platforms),

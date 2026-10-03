@@ -3,9 +3,18 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { createServiceClient } from "@fr/db";
 import {
+  ANALYSIS_JSON_SCHEMA,
   ANALYSIS_VERSION,
+  DEFAULT_OUTPUT_TOKENS,
+  SYSTEM_PROMPT,
+  approxTokens,
   buildProjectInput,
+  buildUserMessage,
+  computeDistribution,
   estimateCostUsd,
+  estimateRun,
+  renderDistribution,
+  renderEstimate,
   validateAnalysis,
   type AnalysisSourceProject,
   type TokenUsage,
@@ -28,6 +37,9 @@ commands:
   export-inputs   샘플 프로젝트의 분석 입력 텍스트를 파일로 저장 (프롬프트 검토용)
   import <file>   결과 파일(.out/*.json)의 분석을 스키마 재검증 후 DB 저장
   report <file>   결과 파일로 Markdown 리포트 재생성
+  classify        전체 수집 데이터 분류 준비: 기본은 대상 건수/토큰/비용/API 호출 수 추정만 출력
+                  --execute 를 붙여야 실제 실행 (--batch: Batch API 로 제출)
+  stats           분류 결과 분포 통계 (project_type / engagement_type / industry / reuse_level / technology_assets)
 
 options:
   --wishket <n> --freemoa <n>   sample / export-inputs 건수
@@ -38,6 +50,12 @@ options:
   --concurrency <n>             동기 분석 동시 요청 수 (기본 4)
   --dry-run                     DB 에 쓰지 않음 (결과 파일만)
   --wait                        batch-collect: 완료까지 1분 간격 대기
+  --ids-from <file>             sample: 결과 파일과 같은 프로젝트들을 다시 분석 (샘플 고정)
+  --all                         classify: 이미 분석된 프로젝트도 포함 (--force 와 같음)
+  --execute                     classify: 추정만 하지 않고 실제로 실행
+  --batch                       classify --execute: Message Batches API 로 제출
+  --yes                         run / batch-submit 에서 100건 초과 실행 확인
+  --version <v>                 stats: 분석 버전 (기본 현재 버전)
 
 env: ANTHROPIC_API_KEY, ANALYZER_MODEL (기본 claude-opus-5-5), ANALYZER_EFFORT (기본 low), ANALYZER_MAX_TOKENS (기본 8000)
 `;
@@ -58,6 +76,12 @@ async function main() {
       concurrency: { type: "string" },
       "dry-run": { type: "boolean" },
       wait: { type: "boolean" },
+      "ids-from": { type: "string" },
+      all: { type: "boolean" },
+      execute: { type: "boolean" },
+      batch: { type: "boolean" },
+      yes: { type: "boolean" },
+      version: { type: "string" },
       help: { type: "boolean", short: "h" },
     },
   });
@@ -74,6 +98,10 @@ async function main() {
   const dryRun = Boolean(values["dry-run"]);
 
   const sampleProjects = async () => {
+    if (values["ids-from"]) {
+      const file = readResults(path.resolve(process.env.INIT_CWD ?? process.cwd(), values["ids-from"]));
+      return store.projectsByIds(file.items.map((i) => i.project.id));
+    }
     const w = await store.latestProjects("wishket", num(values.wishket, 10));
     const f = await store.latestProjects("freemoa", num(values.freemoa, 10));
     return [...w, ...f];
@@ -104,7 +132,9 @@ async function main() {
           retryFailed: Boolean(values["retry-failed"]),
           force: Boolean(values.force),
         });
-        projects = await store.projectsByIds(ids.slice(0, num(values.limit, ids.length)));
+        const target = ids.slice(0, num(values.limit, ids.length));
+        if (target.length > 100 && !values.yes) return log(`${target.length}건입니다. 실행하려면 --yes 를 붙이세요 (추정은 pnpm analyzer classify)`);
+        projects = await store.projectsByIds(target);
       }
       log(`analyze ${projects.length} projects with ${llm.cfg.model} (effort ${llm.cfg.effort})${dryRun ? " [dry-run]" : ""}`);
       const items = await analyzeProjectsSync(llm, projects, {
@@ -127,18 +157,46 @@ async function main() {
       });
       const target = ids.slice(0, num(values.limit, ids.length));
       if (!target.length) return log("분석할 프로젝트가 없습니다");
-      // 한 batch 당 최대 100,000건/256MB. 실패 시 영향 범위를 줄이려고 2,000건 단위로 나눈다
-      for (let i = 0; i < target.length; i += 2000) {
-        const chunk = await store.projectsByIds(target.slice(i, i + 2000));
-        const batch = await llm.submitBatch(chunk.map((p) => ({ customId: p.id, inputText: buildProjectInput(p).text })));
-        const id = await store.createBatch({
-          provider_batch_id: batch.id,
-          analysis_version: ANALYSIS_VERSION,
-          model: llm.cfg.model,
-          project_ids: chunk.map((p) => p.id),
-        });
-        log(`submitted batch ${batch.id} (${chunk.length} requests) → analysis_batches.${id}`);
+      if (target.length > 100 && !values.yes) return log(`${target.length}건입니다. 실행하려면 --yes 를 붙이세요 (추정은 pnpm analyzer classify)`);
+      await submitBatches(llm, store, target);
+      return;
+    }
+
+    case "classify": {
+      const ids = await candidateIds(store, {
+        platform: values.platform,
+        retryFailed: Boolean(values["retry-failed"]),
+        force: Boolean(values.all || values.force),
+      });
+      const target = ids.slice(0, num(values.limit, ids.length));
+      if (!values.execute) {
+        log(await estimateFor(store, target));
+        log(`\n실행하려면: pnpm analyzer classify${values.all ? " --all" : ""} --execute --batch   (동기 실행은 --batch 생략)`);
+        return;
       }
+      if (!target.length) return log("분석할 프로젝트가 없습니다");
+      const llm = new LlmClient(loadLlmConfig());
+      if (values.batch) {
+        await submitBatches(llm, store, target);
+        log("결과 회수: pnpm analyzer batch-collect --wait");
+        return;
+      }
+      const projects = await store.projectsByIds(target);
+      const items = await analyzeProjectsSync(llm, projects, { concurrency: num(values.concurrency, 4), maxAttempts: 3, store, log });
+      finish({ model: llm.cfg.model, mode: "sync", items, name: `classify-${stamp()}`, batch: false });
+      return;
+    }
+
+    case "stats": {
+      const version = values.version ?? ANALYSIS_VERSION;
+      const rows = await store.statsRows(version);
+      if (!rows.length) return log(`${version} 분석 결과가 없습니다`);
+      const md = renderDistribution(computeDistribution(rows), `분류 분포 통계 (${version})`);
+      mkdirSync(OUT_DIR, { recursive: true });
+      const file = path.join(OUT_DIR, `stats-${version}-${stamp()}.md`);
+      writeFileSync(file, md);
+      log(md);
+      log(`\n→ ${file}`);
       return;
     }
 
@@ -220,6 +278,61 @@ async function candidateIds(
   const analyzed = opts.force ? new Map() : await store.analyzedHashes(ANALYSIS_VERSION);
   const failed = opts.retryFailed ? await store.unresolvedErrorProjectIds(ANALYSIS_VERSION) : null;
   return all.filter((id) => !inFlight.has(id) && !analyzed.has(id) && (!failed || failed.has(id)));
+}
+
+/** Batch API 제출. 한 batch 당 최대 100,000건/256MB 이지만 실패 영향 범위를 줄이려고 BATCH_CHUNK 단위로 나눈다 */
+const BATCH_CHUNK = 2000;
+async function submitBatches(llm: LlmClient, store: AnalyzerStore, target: string[]) {
+  for (let i = 0; i < target.length; i += BATCH_CHUNK) {
+    const chunk = await store.projectsByIds(target.slice(i, i + BATCH_CHUNK));
+    const batch = await llm.submitBatch(chunk.map((p) => ({ customId: p.id, inputText: buildProjectInput(p).text })));
+    const id = await store.createBatch({
+      provider_batch_id: batch.id,
+      analysis_version: ANALYSIS_VERSION,
+      model: llm.cfg.model,
+      project_ids: chunk.map((p) => p.id),
+    });
+    log(`submitted batch ${batch.id} (${chunk.length} requests) → analysis_batches.${id}`);
+  }
+}
+
+/**
+ * 실행 전 추정 (분석 API 호출 없음). 입력은 실제 projects 로 만든 프롬프트의 문자 수 기반 근사치이고,
+ * ANTHROPIC_API_KEY 가 있으면 count_tokens(무료)로 샘플 10건을 세어 보정 계수를 적용한다.
+ */
+async function estimateFor(store: AnalyzerStore, ids: string[]): Promise<string> {
+  const systemText = SYSTEM_PROMPT + JSON.stringify(ANALYSIS_JSON_SCHEMA);
+  let totalInput = 0;
+  const samples: string[] = [];
+  for (let i = 0; i < ids.length; i += 500) {
+    for (const p of await store.projectsByIds(ids.slice(i, i + 500))) {
+      const msg = buildUserMessage(buildProjectInput(p).text);
+      totalInput += approxTokens(msg);
+      if (samples.length < 10) samples.push(msg);
+    }
+  }
+  let ratio = 1;
+  let note = "토큰은 문자 수 기반 근사치 (ANTHROPIC_API_KEY 가 있으면 count_tokens 로 보정)";
+  if (process.env.ANTHROPIC_API_KEY && samples.length) {
+    const llm = new LlmClient(loadLlmConfig());
+    let counted = 0;
+    let approx = 0;
+    for (const text of samples) {
+      const r = await llm.client.messages.countTokens({ model: llm.cfg.model, system: SYSTEM_PROMPT, messages: [{ role: "user", content: text }] });
+      counted += r.input_tokens;
+      approx += approxTokens(SYSTEM_PROMPT) + approxTokens(text);
+    }
+    ratio = counted / approx;
+    note = `토큰은 count_tokens 샘플 ${samples.length}건으로 보정 (계수 ${ratio.toFixed(2)}, ${llm.cfg.model} 토크나이저 기준)`;
+  }
+  const est = estimateRun({
+    projectCount: ids.length,
+    systemTokens: Math.round(approxTokens(systemText) * ratio),
+    totalInputTokens: Math.round(totalInput * ratio),
+    outputTokensPerItem: DEFAULT_OUTPUT_TOKENS,
+    batchChunkSize: BATCH_CHUNK,
+  });
+  return `# ${ANALYSIS_VERSION} 전체 분류 실행 추정\n\n${renderEstimate(est, `${note}. 출력 토큰은 건당 가정치(${JSON.stringify(DEFAULT_OUTPUT_TOKENS)}) — 20건 실제 실행 후 교체`)}`;
 }
 
 async function collectBatch(

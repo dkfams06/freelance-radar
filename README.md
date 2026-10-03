@@ -135,14 +135,23 @@ pnpm --filter @fr/collector exec tsx e2e/list-dates.ts freemoa 30 40 50
 수집한 `projects` 를 읽어 프로젝트마다 비교 가능한 구조화 데이터(`project_analyses`)를 만든다. `projects` 는 수정하지 않는다.
 
 ```bash
-pnpm db:migrate                                   # supabase/migrations/20261003000000_analyzer_v1.sql 적용
+pnpm db:migrate                                   # analyzer_v1 + analyzer_v2_classification migration 적용
 pnpm analyzer sample                              # wishket 10 + freemoa 10 동기 분석 → DB 저장 + 리포트
 pnpm analyzer sample --dry-run                    # DB 에 쓰지 않고 리포트만
 pnpm analyzer batch-submit                        # 미분석 전체를 Message Batches API 로 제출 (50% 할인)
 pnpm analyzer batch-collect --wait                # 결과 회수 → 검증 → 저장
 pnpm analyzer run --retry-failed                  # 실패 건만 동기 재시도
-pnpm analyzer import docs/analyzer-v1-sample-20.json   # 결과 파일 재검증 후 저장
+pnpm analyzer sample --ids-from docs/analyzer-v2-sample-20.json   # 같은 20건을 실제 API 로 재분석
+pnpm analyzer classify                            # 전체 분류 추정만 (대상 건수/토큰/비용/API 호출 수)
+pnpm analyzer classify --execute --batch          # 실제 전체 분류 (승인 후에만)
+pnpm analyzer stats                               # 분류 분포 통계 (project_type/engagement/industry/reuse/technology_assets)
 ```
+
+- 현재 기준은 `v2`: 통계용 6개 분류 `project_type`, `engagement_type`, `industry`, `complexity_types[]`, `reuse_level`, `technology_assets[]`
+  (enum 은 `packages/analysis/src/taxonomy.ts`). 판단이 애매한 분류는 `uncertain_fields` 로 표시되고 리포트 "분류가 애매한 케이스"에 모인다.
+- 점수(종합점수·빈도/견적/구현 용이성/반복률 점수)는 아직 만들지 않는다. 수집 → 분류 → 분포 확인 → 배점 결정 → 전체 점수화 순서.
+- `run` / `batch-submit` 은 100건을 넘으면 `--yes` 가 있어야 실행된다.
+- `docs/analyzer-v1-sample-20.*` 는 v1 기준 참고 자료 (v2 schema 로는 import 되지 않음).
 
 - 리포트/결과 파일: `apps/analyzer/.out/*.md|json` (gitignore)
 - 분류 체계·점수 기준: `packages/analysis/src/taxonomy.ts`, `prompt.ts`. 바꾸면 `ANALYSIS_VERSION` 을 올린다.

@@ -1,4 +1,13 @@
-import { ENGAGEMENT_TYPE_CODES, PLATFORM_CODES, PROJECT_CATEGORY_CODES } from "./taxonomy";
+import {
+  CLASSIFICATION_FIELDS,
+  COMPLEXITY_TYPE_CODES,
+  ENGAGEMENT_TYPE_CODES,
+  INDUSTRY_CODES,
+  PLATFORM_CODES,
+  PROJECT_TYPE_CODES,
+  REUSE_LEVEL_CODES,
+  TECHNOLOGY_ASSETS,
+} from "./taxonomy";
 
 /**
  * Structured output 용 JSON schema (API 가 디코딩 단계에서 강제).
@@ -16,9 +25,14 @@ const obj = (properties: Record<string, unknown>) => ({
 });
 
 export const ANALYSIS_JSON_SCHEMA: Record<string, unknown> = obj({
-  project_category: { type: "string", enum: PROJECT_CATEGORY_CODES },
+  project_type: { type: "string", enum: PROJECT_TYPE_CODES },
   project_subcategory: str,
   engagement_type: { type: "string", enum: ENGAGEMENT_TYPE_CODES },
+  industry: { type: "string", enum: INDUSTRY_CODES },
+  complexity_types: { type: "array", items: { type: "string", enum: COMPLEXITY_TYPE_CODES } },
+  reuse_level: { type: "string", enum: REUSE_LEVEL_CODES },
+  technology_assets: { type: "array", items: { type: "string", enum: TECHNOLOGY_ASSETS } },
+  uncertain_fields: { type: "array", items: { type: "string", enum: CLASSIFICATION_FIELDS } },
   summary: str,
   required_features: strArr,
   required_integrations: strArr,

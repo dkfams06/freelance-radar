@@ -96,7 +96,7 @@ export async function analyzeProjectsSync(llm: LlmClient, projects: AnalysisSour
       done++;
       log(
         `[${done}/${projects.length}] ${item.ok ? "ok  " : "FAIL"} ${p.platform}:${p.external_project_id} ${p.title?.slice(0, 40) ?? ""}` +
-          (item.ok ? ` → ${item.analysis!.project_category} d=${item.analysis!.vibe_coding_difficulty}` : ` → ${item.error_type}`),
+          (item.ok ? ` → ${item.analysis!.project_type} d=${item.analysis!.vibe_coding_difficulty}` : ` → ${item.error_type}`),
       );
     }
   };

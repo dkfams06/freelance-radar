@@ -4,6 +4,7 @@ import {
   type AnalysisSourceProject,
   type BuiltInput,
   type ProjectAnalysis,
+  type StatsSourceRow,
   type TokenUsage,
 } from "@fr/analysis";
 
@@ -12,8 +13,13 @@ export interface SavedAnalysisRow {
   analysis_version: string;
   model: string;
   analyzed_at: string;
-  project_category: string;
+  project_type: string | null;
   project_subcategory: string | null;
+  engagement_type: string | null;
+  industry: string | null;
+  complexity_types: string[];
+  reuse_level: string | null;
+  technology_assets: string[];
   summary: string;
   required_features: string[];
   required_integrations: string[];
@@ -32,6 +38,10 @@ export interface SavedAnalysisRow {
   usage: TokenUsage | null;
   cost_usd: number | null;
 }
+
+type StatsDbRow = Omit<StatsSourceRow, "platform" | "budget_min" | "budget_max" | "budget_type"> & {
+  projects: Pick<StatsSourceRow, "platform" | "budget_min" | "budget_max" | "budget_type"> | null;
+};
 
 const PAGE = 1000;
 
@@ -113,9 +123,13 @@ export class AnalyzerStore {
       analysis_version: args.version,
       model: args.model,
       analyzed_at: new Date().toISOString(),
-      project_category: a.project_category,
+      project_type: a.project_type,
       project_subcategory: a.project_subcategory,
       engagement_type: a.engagement_type,
+      industry: a.industry,
+      complexity_types: a.complexity_types,
+      reuse_level: a.reuse_level,
+      technology_assets: a.technology_assets,
       summary: a.summary,
       required_features: a.required_features,
       required_integrations: a.required_integrations,
@@ -197,6 +211,23 @@ export class AnalyzerStore {
   async updateBatch(id: string, patch: Record<string, unknown>) {
     const { error } = await this.db.from("analysis_batches").update(patch).eq("id", id);
     if (error) throw new Error(`update batch: ${JSON.stringify(error)}`);
+  }
+
+  /** 통계용: 분석 결과 + 원본 예산 (projects join) */
+  async statsRows(version: string): Promise<StatsSourceRow[]> {
+    const rows = await this.pageAll<StatsDbRow>((f, t) =>
+      this.db
+        .from("project_analyses")
+        .select(
+          "project_id,project_type,engagement_type,industry,complexity_types,reuse_level,technology_assets," +
+            "vibe_coding_difficulty,estimated_hours_min,estimated_hours_max,reusability_value,learning_value,market_value," +
+            "projects(platform,budget_min,budget_max,budget_type)",
+        )
+        .eq("analysis_version", version)
+        .order("project_id")
+        .range(f, t) as unknown as PromiseLike<{ data: StatsDbRow[] | null; error: unknown }>,
+    );
+    return rows.map(({ projects, ...a }) => ({ ...a, ...(projects ?? { platform: null, budget_min: null, budget_max: null, budget_type: null }) }));
   }
 
   async analysesFor(version: string, projectIds?: string[]): Promise<SavedAnalysisRow[]> {
