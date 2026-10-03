@@ -6,7 +6,7 @@ import { ClaudeCliClient, interpretCliOutput } from "./llm-cli";
 const sample = JSON.parse(
   readFileSync(path.resolve(import.meta.dirname, "../../../docs/analyzer-v3-sample-20.json"), "utf8"),
 ) as { items: Array<{ analysis: Record<string, unknown> }> };
-const validAnalysis = sample.items[0]!.analysis;
+const validAnalysis = sample.items.find((i) => i.analysis.project_type !== "maintenance")!.analysis;
 
 const cliJson = (over: Record<string, unknown>) =>
   JSON.stringify({

@@ -23,7 +23,6 @@ export const PROJECT_TYPES = {
   crawler_data_collection: "크롤러/데이터 수집기",
   automation_rpa: "브라우저 자동화/RPA/업무 자동화 프로그램",
   data_dashboard: "BI/통계/대시보드/데이터 분석",
-  maintenance: "기존 시스템 유지보수가 본질",
   fintech_payment: "PG/선불/결제 인프라/핀테크 시스템",
   iot_device: "실제 물리 장치(센서/장비/프린터/락커/키오스크/주변기기/산업장비)와의 통신·제어가 핵심인 시스템",
   media_processing: "녹취/영상·음성 처리/미디어 분석 파이프라인",
@@ -69,8 +68,8 @@ export const COMPLEXITY_TYPE_CODES = Object.keys(COMPLEXITY_TYPES) as [Complexit
 /** 결과물 재사용 수준 (이후 프로젝트 간 feature overlap 통계로 보정 예정) */
 export const REUSE_LEVELS = {
   high: "만든 구조/코드의 상당 부분을 다른 외주에서 그대로 또는 약간 수정해 재사용 가능 (인증/권한·관리자·CRUD·예약·결제·SaaS 공통 구조·일반적인 API 연동·범용 자동화)",
-  medium: "일부 구조/컴포넌트/패턴은 재사용 가능하지만 도메인 커스텀이 상당함",
-  low: "일반적인 개발 경험은 남지만 실제 코드/구조 재사용은 제한적 (특정 기업 시스템·특정 SDK·특정 legacy extension·특정 플랫폼 승인 대응)",
+  medium: "프로젝트 도메인은 달라도 실제 코드/컴포넌트/아키텍처의 의미 있는 부분을 다른 외주에 재사용할 수 있음",
+  low: "일반적인 경험이나 아이디어는 남지만 실제 코드/구조 재사용은 제한적 (특정 기업 환경·특정 SDK·특정 승인 대응·특정 레거시 수정)",
   one_off: "특정 기업/장비/폐쇄망/레거시 환경에 강하게 종속되어 다른 외주에 거의 재사용 불가능",
 } as const;
 export type ReuseLevel = keyof typeof REUSE_LEVELS;
@@ -105,6 +104,7 @@ export const TECHNOLOGY_ASSETS = [
   "computer_vision",
   "speech_audio_ai",
   "ocr_document_ai",
+  "test_automation",
   "other",
 ] as const;
 export type TechnologyAsset = (typeof TECHNOLOGY_ASSETS)[number];

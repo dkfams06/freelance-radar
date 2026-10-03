@@ -17,13 +17,15 @@ import {
  * project_analyses 는 (project_id, analysis_version) 단위로 저장되므로
  * 버전을 올리면 원본 수집 없이 같은 projects 를 새 기준으로 다시 분석할 수 있다.
  */
-export const ANALYSIS_VERSION = "v3.1";
+export const ANALYSIS_VERSION = "v3.2";
 // v1: 최초 기준 (project_category 15종, engagement_type 7종)
 // v2: 통계용 6개 분류 추가 (project_type, engagement_type 재정의, complexity_types, reuse_level, technology_assets, industry)
 // v3: project_type 4종(fintech_payment, iot_device, media_processing, enterprise_infra), technology_assets 3종
 //     (computer_vision, speech_audio_ai, ocr_document_ai) 추가, engagement_type 경계 규칙 명시
 // v3.1: project_type 에 qa_testing 추가, reuse_level 기준 강화(학습가치와 분리), iot_device 경계 명시,
 //       작업시간을 클라이언트 예산과 분리, uncertain_fields 사용 조건 강화, 기능추가/QA 상주 예시 추가
+// v3.2: project_type 에서 maintenance 제거(유지보수는 engagement_type 에만), technology_assets 에 test_automation 추가,
+//       complexity_types 선택 규칙 강화(근거 필수, 4개 이상은 독립적 복잡성일 때만), reuse_level low/medium 경계 명시
 
 const list = (o: Record<string, string>) =>
   Object.entries(o)
@@ -54,7 +56,9 @@ export const SYSTEM_PROMPT = `당신은 한국 IT 외주 시장(위시캣, 프�
 ## project_type (무엇을 만드는 일인지, 정확히 하나)
 ${list(PROJECT_TYPES)}
 - 결과물의 "주된 성격" 하나만 고릅니다. 예: 앱이 핵심인 예약 서비스 → reservation (앱 여부는 required_platforms 와 complexity_types 로 표현).
-- 기존 시스템의 유지보수/소규모 수정이 본질이면 maintenance. 기존 시스템에 큰 기능을 붙이는 일이면 그 기능의 성격으로 고르고 engagement_type 을 feature_extension 으로.
+- 유지보수는 결과물 유형이 아니라 작업 형태입니다. 기존 시스템의 유지보수/수정/기능 추가라도 project_type 은 그 시스템의 실제 결과물 유형으로 고릅니다
+  (예: 기존 홈페이지 유지보수 → website, 기존 모바일앱 유지보수 → mobile_app, 기존 관리자 시스템 유지보수 → admin_backoffice).
+  작업 형태는 engagement_type(maintenance 또는 feature_extension)으로 표현합니다. 결과물 유형을 공고에서 알 수 없을 때만 가장 가까운 유형을 고르고 uncertain_fields 에 project_type 을 적습니다.
 - 상주/인력 구인이라도 "투입되어 만드는 대상"의 성격으로 고릅니다 (예: 금융 정보계 EDW → data_dashboard, PG 결제 시스템 → fintech_payment).
 - PG/선불결제/결제 인프라 → fintech_payment. 단, 일반 쇼핑몰·예약 서비스에 결제를 붙이는 것은 그 서비스 유형(ecommerce, reservation)입니다.
 - iot_device: 센서·장비·프린터·락커·키오스크·주변기기·산업장비 등 실제 물리 장치와의 통신/제어가 프로젝트의 핵심이면 iot_device.
@@ -94,22 +98,31 @@ ${list(INDUSTRIES)}
 
 ## complexity_types (AI coding agent 1인 개발 관점의 난이도 특성, 1개 이상)
 ${list(COMPLEXITY_TYPES)}
-- 실제로 해당하는 특성만 넣습니다. 대부분의 프로젝트는 1~3개입니다.
+- 각 특성은 공고 본문에 근거가 있을 때만 넣습니다. "어려워 보인다"는 인상만으로 넣지 않습니다.
+- 대부분의 프로젝트는 1~3개입니다. 4개 이상은 서로 독립적인 복잡성이 실제로 각각 존재할 때만 허용합니다.
+- high_risk_domain, workflow_complex, integration_heavy 를 습관적으로 함께 붙이지 않습니다. 셋 중 둘 이상을 쓸 때는 각각의 근거가 서로 다른 내용이어야 합니다.
+- workflow_complex: 다단계 승인/상태 전이/역할별 업무 프로세스가 공고에 구체적으로 있을 때만. 단순한 관리자 기능이나 화면 여러 개는 해당 없음.
+- integration_heavy: 외부 시스템/API 연동이 여러 개이거나 연동 자체가 핵심 산출물일 때만. 연동이 하나 있는 정도는 해당 없음.
+- legacy_heavy: 남이 만든 기존 소스를 분석·수정해야 한다고 공고에 명시되었을 때만.
 - 결제·인증 오류가 금전 손실로 직결되거나 금융/의료/보안 규제 대상일 때만 high_risk_domain.
 - 웹 + 네이티브 앱처럼 서로 다른 클라이언트를 함께 만들 때만 multi_platform (반응형 웹 + 관리자 웹은 해당 없음).
 
 ## reuse_level (결과물 재사용 수준, 하나)
 ${list(REUSE_LEVELS)}
 - 기준은 "이 프로젝트에서 만든 코드/구조/패턴을 다른 외주나 자체 서비스에서 실제로 다시 쓸 수 있는가" 하나뿐입니다.
-- "배울 것이 많다"와 "재사용할 수 있다"를 혼동하지 않습니다. 어렵거나 새로운 기술을 익힌다고 reuse_level 을 올리지 않습니다 (그것은 learning_value 의 몫).
-- 상주/인력 투입이라도 투입 대상이 특정 기업의 시스템·SDK·레거시이면 low 또는 one_off 입니다. 고객 전용 시스템에 결제·금융 도메인이 들어 있어도 코드 재사용이 제한적이면 low 입니다.
-- 특정 기업의 기존 시스템 수정/보안 개선/플랫폼 승인 대응은 low, 특정 장비·폐쇄망·레거시 환경에 묶여 있으면 one_off.
+- "배운다"는 learning_value 의 몫이고, "다른 데 그대로 써먹는다"가 reuse_level 의 몫입니다. 어렵거나 새로운 기술을 익힌다고 reuse_level 을 올리지 않습니다.
+- medium 과 low 의 경계: 프로젝트 도메인이 달라도 실제 코드/컴포넌트/아키텍처의 의미 있는 부분을 다른 외주에서 쓸 수 있으면 medium.
+  일반적인 경험이나 아이디어만 남고 코드/구조 재사용이 제한적이면 low.
+- 특정 기업 환경, 특정 SDK, 특정 승인 대응, 특정 레거시 수정은 기본적으로 low 쪽으로 봅니다. 상주/인력 투입이라도 투입 대상이 특정 기업의 시스템이면 같습니다.
+  결제·금융 도메인이 들어 있어도 고객 전용 시스템이라 코드 재사용이 제한적이면 low 입니다.
+- 특정 장비·폐쇄망·레거시 환경에 강하게 묶여 다른 외주에 거의 쓸 수 없으면 one_off.
 
 ## technology_assets (수행 시 축적되는 기술자산, 복수)
 ${TECHNOLOGY_ASSETS.join(", ")}
 - 이 프로젝트를 실제로 수행하면 남는 재사용 가능한 역량/코드 자산만 고릅니다.
 - 웹 화면이 있으면 core_web, 서버/API 가 있으면 backend_api, DB 설계가 있으면 database.
 - 상주 컨설팅처럼 코드 자산이 거의 남지 않으면 해당 영역 1~2개만 고르거나 legacy_enterprise 를 씁니다.
+- test_automation: QA 자동화, E2E 테스트, 자동 검증 체계 구축이 핵심 자산일 때만. 수동 QA·수동 검수만 하는 경우에는 넣지 않습니다.
 - 영상 객체 인식 → computer_vision, 음성 인식/녹취 → speech_audio_ai, 문서·이미지 OCR → ocr_document_ai. ai_llm 과 함께 고를 수 있습니다 (예: LLM + OCR → ai_llm, ocr_document_ai).
 
 ## summary
