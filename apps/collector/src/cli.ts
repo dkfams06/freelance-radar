@@ -24,6 +24,7 @@ commands:
   backfill      최신 → 과거 방향 백필 (기본 cutoff 2025-10-02 KST)
   new           신규 프로젝트 확인 (CHECK_NEW)
   resume        마지막으로 중단된 백필을 checkpoint 부터 재개
+  retry-failed  미해결 오류(crawl_errors)가 남은 프로젝트를 다시 수집 (성공 시 오류 해결 처리)
   login-check   로그인 상태만 확인
 
 options:
@@ -32,6 +33,7 @@ options:
   --start-page <n>   백필 시작 페이지
   --max-pages <n>    최대 페이지 수
   --refresh-known    new: 이미 있는 프로젝트도 다시 조회해서 상태 변화 반영
+  --limit <n>        retry-failed: 한 번에 재시도할 최대 프로젝트 수 (기본 200)
   --queue            직접 실행하지 않고 crawl_jobs 에 등록만 (worker 가 처리)
   --dry-run          DB 대신 메모리에 저장하고 결과를 apps/collector/.debug/dry-run/*.json 으로 저장
 
@@ -44,6 +46,7 @@ const COMMAND_TO_JOB: Record<string, JobType> = {
   backfill: "BACKFILL",
   new: "CHECK_NEW",
   resume: "RESUME",
+  "retry-failed": "RETRY_ERRORS",
 };
 
 async function main() {
@@ -55,6 +58,7 @@ async function main() {
       "start-page": { type: "string" },
       "max-pages": { type: "string" },
       "refresh-known": { type: "boolean" },
+      limit: { type: "string" },
       queue: { type: "boolean" },
       "dry-run": { type: "boolean" },
       platforms: { type: "string" },
@@ -141,6 +145,7 @@ async function main() {
   if (values["start-page"]) params.start_page = positiveInt(values["start-page"], "--start-page");
   if (values["max-pages"]) params.max_pages = positiveInt(values["max-pages"], "--max-pages");
   if (values["refresh-known"]) params.refresh_known = true;
+  if (values.limit) params.retry_limit = positiveInt(values.limit, "--limit");
 
   const jobIds: Array<{ platform: PlatformName; id: string }> = [];
   for (const platform of platforms) {

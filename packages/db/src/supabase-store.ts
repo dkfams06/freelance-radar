@@ -9,7 +9,14 @@ import type {
   CrawlJobRow,
   CrawlLogWrite,
 } from "./rows";
-import type { CollectorStore, JobPatch, NewJobInput, UpsertProjectResult } from "./store";
+import {
+  dedupeErrorTargets,
+  type CollectorStore,
+  type ErrorTarget,
+  type JobPatch,
+  type NewJobInput,
+  type UpsertProjectResult,
+} from "./store";
 
 const RESUMABLE_STATUSES = ["PAUSED", "FAILED", "LOGIN_REQUIRED"] as const;
 
@@ -230,6 +237,21 @@ export class SupabaseCollectorStore implements CollectorStore {
         .is("resolved_at", null),
       "crawl_errors.resolve",
     );
+  }
+
+  async listUnresolvedErrorTargets(platform: PlatformName, limit: number): Promise<ErrorTarget[]> {
+    const rows = check(
+      await this.db
+        .from("crawl_errors")
+        .select("external_project_id, url, page")
+        .eq("platform", platform)
+        .is("resolved_at", null)
+        .not("external_project_id", "is", null)
+        .order("occurred_at", { ascending: false })
+        .limit(Math.max(limit * 5, 100)),
+      "crawl_errors.unresolved",
+    ) as Array<{ external_project_id: string | null; url: string | null; page: number | null }>;
+    return dedupeErrorTargets(rows, limit);
   }
 
   async updateCollectorStatus(platform: PlatformName, patch: CollectorStatusPatch): Promise<void> {

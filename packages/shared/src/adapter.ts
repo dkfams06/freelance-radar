@@ -23,6 +23,9 @@ export interface FreelancePlatformAdapter {
   readonly platform: PlatformName;
   readonly displayName: string;
 
+  /** 외부 프로젝트 ID → 상세 URL (목록을 거치지 않는 재수집에 사용) */
+  projectUrl(externalId: string): string;
+
   checkLogin(): Promise<LoginCheckResult>;
   login(): Promise<LoginResult>;
 

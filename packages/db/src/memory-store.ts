@@ -11,7 +11,14 @@ import type {
   CrawlLogWrite,
   ProjectWrite,
 } from "./rows";
-import type { CollectorStore, JobPatch, NewJobInput, UpsertProjectResult } from "./store";
+import {
+  dedupeErrorTargets,
+  type CollectorStore,
+  type ErrorTarget,
+  type JobPatch,
+  type NewJobInput,
+  type UpsertProjectResult,
+} from "./store";
 
 type StoredProject = ProjectWrite & { id: string; first_seen_at: string };
 
@@ -161,6 +168,14 @@ export class MemoryCollectorStore implements CollectorStore {
     for (const e of this.errors) {
       if (e.platform === platform && e.external_project_id === externalProjectId && !e.resolved_at) e.resolved_at = now;
     }
+  }
+
+  async listUnresolvedErrorTargets(platform: PlatformName, limit: number): Promise<ErrorTarget[]> {
+    const rows = this.errors
+      .filter((e) => e.platform === platform && !e.resolved_at)
+      .slice()
+      .reverse();
+    return dedupeErrorTargets(rows, limit);
   }
 
   async updateCollectorStatus(platform: PlatformName, patch: CollectorStatusPatch): Promise<void> {

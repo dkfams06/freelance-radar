@@ -5,6 +5,7 @@ import {
   LoginRequiredError,
   emptyNormalizedProject,
   type FreelancePlatformAdapter,
+  type JobType,
   type LoginCheckResult,
   type ProjectListItem,
   type RawProjectDetail,
@@ -144,6 +145,9 @@ class FakeAdapter implements FreelancePlatformAdapter {
     private readonly listHasDates = true,
   ) {}
 
+  projectUrl(id: string) {
+    return `https://fake/${id}`;
+  }
   async checkLogin() {
     return this.loginState;
   }
@@ -205,7 +209,7 @@ function runner(store: MemoryCollectorStore, adapter: FakeAdapter, signal?: Abor
   });
 }
 
-async function claim(store: MemoryCollectorStore, jobType: "BACKFILL" | "CHECK_NEW" | "RESUME", params = {}) {
+async function claim(store: MemoryCollectorStore, jobType: JobType, params = {}) {
   await store.createJob({ platform: "wishket", job_type: jobType, params: { cutoff: CUTOFF, ...params } });
   return (await store.claimNextPendingJob("test", ["wishket"]))!;
 }
@@ -355,5 +359,35 @@ describe("JobRunner CHECK_NEW", () => {
     expect(store.projects.size - before).toBe(3);
     expect(adapter.listCalls).toEqual([1, 2]);
     expect(adapter.detailCalls).toEqual(["1000", "999", "998"]);
+  });
+});
+
+describe("JobRunner RETRY_ERRORS", () => {
+  it("미해결 오류 프로젝트를 다시 수집하고 오류를 해결 처리", async () => {
+    const dates = ["2026-09-30T00:00:00Z", "2026-09-29T00:00:00Z", "2026-09-28T00:00:00Z"];
+    const store = new MemoryCollectorStore();
+    const adapter = new FakeAdapter(makePages(5, dates));
+    adapter.failDetail.set("999", () => new CrawlError("TIMEOUT", "timeout"));
+    await runner(store, adapter).run(await claim(store, "BACKFILL"));
+    expect(store.errors.filter((e) => !e.resolved_at)).toHaveLength(1);
+    expect(store.projects.size).toBe(2);
+
+    adapter.failDetail.clear();
+    adapter.detailCalls = [];
+    adapter.listCalls = [];
+    const out = await runner(store, adapter).run(await claim(store, "RETRY_ERRORS"));
+    expect(out.status).toBe("COMPLETED");
+    expect(out.reason).toBe("retried 1, recovered 1");
+    expect(adapter.listCalls).toEqual([]); // 목록을 거치지 않음
+    expect(adapter.detailCalls).toEqual(["999"]);
+    expect(store.projects.size).toBe(3);
+    expect(store.errors.every((e) => e.resolved_at)).toBe(true);
+  });
+
+  it("재시도할 오류가 없으면 바로 완료", async () => {
+    const store = new MemoryCollectorStore();
+    const adapter = new FakeAdapter(makePages(5, ["2026-09-30T00:00:00Z"]));
+    const out = await runner(store, adapter).run(await claim(store, "RETRY_ERRORS"));
+    expect(out).toMatchObject({ status: "COMPLETED", reason: "no unresolved errors" });
   });
 });

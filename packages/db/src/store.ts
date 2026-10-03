@@ -9,6 +9,31 @@ import type {
   JobParams,
 } from "./rows";
 
+export interface ErrorTarget {
+  externalProjectId: string;
+  url: string | null;
+  page: number | null;
+  errorCount: number;
+}
+
+export function dedupeErrorTargets(
+  rows: Array<{ external_project_id: string | null; url: string | null; page: number | null }>,
+  limit: number,
+): ErrorTarget[] {
+  const byId = new Map<string, ErrorTarget>();
+  for (const r of rows) {
+    if (!r.external_project_id) continue;
+    const t = byId.get(r.external_project_id);
+    if (t) {
+      t.errorCount++;
+      t.url ??= r.url;
+    } else {
+      byId.set(r.external_project_id, { externalProjectId: r.external_project_id, url: r.url, page: r.page, errorCount: 1 });
+    }
+  }
+  return [...byId.values()].slice(0, limit);
+}
+
 export interface UpsertProjectResult {
   id: string;
   inserted: boolean;
@@ -67,6 +92,8 @@ export interface CollectorStore {
   // errors
   insertError(error: CrawlErrorWrite): Promise<void>;
   resolveErrors(platform: PlatformName, externalProjectId: string): Promise<void>;
+  /** 미해결 오류가 남아 있는 프로젝트 (프로젝트 단위, 최근 순, 중복 제거) */
+  listUnresolvedErrorTargets(platform: PlatformName, limit: number): Promise<ErrorTarget[]>;
 
   // runtime status / logs
   updateCollectorStatus(platform: PlatformName, patch: CollectorStatusPatch): Promise<void>;

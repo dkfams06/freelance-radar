@@ -91,6 +91,8 @@ export interface JobParams {
   known_streak_stop?: number;
   /** CHECK_NEW: 만난 기존 프로젝트도 상세 재조회해서 상태 변화 반영 */
   refresh_known?: boolean;
+  /** RETRY_ERRORS: 한 번에 재시도할 최대 프로젝트 수 (기본 200) */
+  retry_limit?: number;
   [key: string]: unknown;
 }
 

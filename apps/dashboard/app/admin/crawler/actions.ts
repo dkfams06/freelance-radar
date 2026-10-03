@@ -5,7 +5,7 @@ import { getProjectById, runDashboardCommand, type DashboardCommand } from "@fr/
 import { isPlatformName } from "@fr/shared";
 import { getDb } from "@/lib/db";
 
-const COMMANDS: DashboardCommand[] = ["backfill", "pause", "resume", "check_new"];
+const COMMANDS: DashboardCommand[] = ["backfill", "pause", "resume", "check_new", "retry_errors"];
 
 export interface CommandState {
   message: string | null;

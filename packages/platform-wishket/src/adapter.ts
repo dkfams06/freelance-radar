@@ -28,6 +28,10 @@ export class WishketAdapter implements FreelancePlatformAdapter {
 
   constructor(private readonly ctx: AdapterContext) {}
 
+  projectUrl(externalId: string): string {
+    return `${WISHKET_BASE_URL}/project/${encodeURIComponent(externalId)}/`;
+  }
+
   /** 같은 origin fetch 를 위해 위시캣 페이지가 열려 있어야 한다 */
   private async ensureOnSite(force = false): Promise<void> {
     if (this.onSite && !force) return;

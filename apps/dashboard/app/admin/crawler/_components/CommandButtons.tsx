@@ -8,6 +8,7 @@ const BUTTONS = [
   { command: "pause", label: "중지" },
   { command: "resume", label: "재개" },
   { command: "check_new", label: "신규 확인" },
+  { command: "retry_errors", label: "실패 재시도" },
 ] as const;
 
 export function CommandButtons({ platform }: { platform: string }) {

@@ -30,6 +30,10 @@ export class FreemoaAdapter implements FreelancePlatformAdapter {
 
   constructor(private readonly ctx: AdapterContext) {}
 
+  projectUrl(externalId: string): string {
+    return freemoaProjectUrl(externalId);
+  }
+
   private async ensureOnSite(force = false): Promise<void> {
     if (this.onSite && !force) return;
     const nav = await this.ctx.page.goto(`${FREEMOA_BASE_URL}/m4/s41`);

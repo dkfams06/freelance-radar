@@ -5,7 +5,8 @@ export function isPlatformName(value: unknown): value is PlatformName {
   return typeof value === "string" && (PLATFORMS as readonly string[]).includes(value);
 }
 
-export const JOB_TYPES = ["BACKFILL", "CHECK_NEW", "RESUME"] as const;
+/** RETRY_ERRORS: 미해결 crawl_errors 의 프로젝트를 다시 수집 */
+export const JOB_TYPES = ["BACKFILL", "CHECK_NEW", "RESUME", "RETRY_ERRORS"] as const;
 export type JobType = (typeof JOB_TYPES)[number];
 
 export const JOB_STATUSES = [

@@ -147,7 +147,7 @@ export async function getRecentJobs(db: DbClient, limit = 20): Promise<CrawlJobR
 // 대시보드 명령: job row 를 만들거나 제어 요청을 남긴다. 실제 실행은 Collector 가 한다.
 // ---------------------------------------------------------------------------
 
-export type DashboardCommand = "backfill" | "pause" | "resume" | "check_new";
+export type DashboardCommand = "backfill" | "pause" | "resume" | "check_new" | "retry_errors";
 
 export async function runDashboardCommand(
   db: DbClient,
@@ -176,6 +176,10 @@ export async function runDashboardCommand(
       if (active.some((j) => j.job_type === "CHECK_NEW")) return "신규 확인이 이미 대기/진행 중입니다";
       await insert("CHECK_NEW");
       return "신규 확인 작업을 등록했습니다";
+    case "retry_errors":
+      if (active.some((j) => j.job_type === "RETRY_ERRORS")) return "실패 재시도가 이미 대기/진행 중입니다";
+      await insert("RETRY_ERRORS");
+      return "실패 재시도 작업을 등록했습니다 (진행 중인 작업이 끝난 뒤 실행됩니다)";
     case "resume":
       if (active.some((j) => j.job_type === "BACKFILL" || j.job_type === "RESUME")) return "이미 백필이 대기/진행 중입니다";
       await insert("RESUME");

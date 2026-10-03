@@ -57,6 +57,8 @@ cp .env.example .env   # SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 입력
 pnpm collector wishket backfill --max 20     # 소량 검증 (성공 20건 후 종료)
 pnpm collector all backfill                  # 2025-10-02 이후 전체 백필 (최신 → 과거)
 pnpm collector freemoa resume                # 중단된 백필을 checkpoint 부터 재개
+pnpm collector wishket retry-failed          # 미해결 오류가 남은 프로젝트만 다시 수집 (성공 시 오류 해결 처리)
+pnpm collector all retry-failed --queue      # worker 에 맡김 (진행 중인 백필이 끝난 뒤 실행)
 pnpm collector all new                       # 신규 프로젝트 확인 (기존 프로젝트를 연속 5건 만나면 종료)
 pnpm collector all new --refresh-known       # 만난 기존 프로젝트도 다시 조회해 상태 변화 반영
 pnpm collector all login-check               # 로그인 상태만 확인

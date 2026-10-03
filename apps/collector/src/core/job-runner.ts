@@ -190,7 +190,12 @@ export class JobRunner {
     let outcome: JobOutcome;
     try {
       await this.ensureLoggedIn();
-      const reason = job.job_type === "CHECK_NEW" ? await this.runCheckNew() : await this.runBackfill();
+      const reason =
+        job.job_type === "CHECK_NEW"
+          ? await this.runCheckNew()
+          : job.job_type === "RETRY_ERRORS"
+            ? await this.runRetryErrors()
+            : await this.runBackfill();
       outcome = { status: "COMPLETED", reason, counters: { ...this.counters } };
     } catch (e) {
       if (e instanceof StopJob) {
@@ -309,6 +314,27 @@ export class JobRunner {
       if (!list.hasNextPage) return `last page ${page}`;
     }
     return `max_pages=${maxPages} checked`;
+  }
+
+  // ---------------------------------------------------------------------------
+  // RETRY_ERRORS: 미해결 오류가 남은 프로젝트를 다시 수집. 성공하면 오류가 해결 처리된다.
+  // 목록을 거치지 않으므로 cutoff 판정은 하지 않는다 (이미 수집 대상이었던 프로젝트).
+  // ---------------------------------------------------------------------------
+  private async runRetryErrors(): Promise<string> {
+    const targets = await this.store.listUnresolvedErrorTargets(this.platform, this.job.params.retry_limit ?? 200);
+    this.log.info("RETRY_TARGETS", { count: targets.length }, true);
+    if (!targets.length) return "no unresolved errors";
+    let recovered = 0;
+    for (const t of targets) {
+      await this.checkControl();
+      const result = await this.processItem(
+        { externalId: t.externalProjectId, url: t.url ?? this.adapter.projectUrl(t.externalProjectId) },
+        t.page ?? 0,
+        null,
+      );
+      if (result.kind === "saved") recovered++;
+    }
+    return `retried ${targets.length}, recovered ${recovered}`;
   }
 
   // ---------------------------------------------------------------------------
