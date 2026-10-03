@@ -17,11 +17,13 @@ import {
  * project_analyses 는 (project_id, analysis_version) 단위로 저장되므로
  * 버전을 올리면 원본 수집 없이 같은 projects 를 새 기준으로 다시 분석할 수 있다.
  */
-export const ANALYSIS_VERSION = "v3";
+export const ANALYSIS_VERSION = "v3.1";
 // v1: 최초 기준 (project_category 15종, engagement_type 7종)
 // v2: 통계용 6개 분류 추가 (project_type, engagement_type 재정의, complexity_types, reuse_level, technology_assets, industry)
 // v3: project_type 4종(fintech_payment, iot_device, media_processing, enterprise_infra), technology_assets 3종
 //     (computer_vision, speech_audio_ai, ocr_document_ai) 추가, engagement_type 경계 규칙 명시
+// v3.1: project_type 에 qa_testing 추가, reuse_level 기준 강화(학습가치와 분리), iot_device 경계 명시,
+//       작업시간을 클라이언트 예산과 분리, uncertain_fields 사용 조건 강화, 기능추가/QA 상주 예시 추가
 
 const list = (o: Record<string, string>) =>
   Object.entries(o)
@@ -43,8 +45,11 @@ export const SYSTEM_PROMPT = `당신은 한국 IT 외주 시장(위시캣, 프�
 - 맞는 값이 정말 없을 때만 other 를 씁니다.
 - 배열(complexity_types, technology_assets)은 중복 없이, 공고에 근거가 있는 것만 넣습니다.
 - 공고에 없는 기능을 상상해서 분류하지 않습니다.
-- 판단이 애매했던 분류 필드는 uncertain_fields 에 필드 이름으로 적습니다 (확실하면 빈 배열).
-  사용 가능한 이름: ${CLASSIFICATION_FIELDS.join(", ")}
+- uncertain_fields 는 아래 조건을 만족할 때만 필드 이름을 적습니다. 사용 가능한 이름: ${CLASSIFICATION_FIELDS.join(", ")}
+  · 그 필드에서 2개 이상의 코드 후보가 실질적으로 비슷한 가능성으로 보이고, 동시에
+  · 공고 정보가 부족해서 어느 쪽이냐에 따라 결론이 크게 달라질 때.
+  단지 "확신도가 100% 는 아니다"라는 이유로 적지 않습니다. 이 프롬프트의 경계 규칙으로 결정되는 경우는 애매한 것이 아닙니다.
+  일반적인 프로젝트는 빈 배열([])이 정상이며, 대부분의 프로젝트에서 빈 배열이 나와야 합니다.
 
 ## project_type (무엇을 만드는 일인지, 정확히 하나)
 ${list(PROJECT_TYPES)}
@@ -52,7 +57,13 @@ ${list(PROJECT_TYPES)}
 - 기존 시스템의 유지보수/소규모 수정이 본질이면 maintenance. 기존 시스템에 큰 기능을 붙이는 일이면 그 기능의 성격으로 고르고 engagement_type 을 feature_extension 으로.
 - 상주/인력 구인이라도 "투입되어 만드는 대상"의 성격으로 고릅니다 (예: 금융 정보계 EDW → data_dashboard, PG 결제 시스템 → fintech_payment).
 - PG/선불결제/결제 인프라 → fintech_payment. 단, 일반 쇼핑몰·예약 서비스에 결제를 붙이는 것은 그 서비스 유형(ecommerce, reservation)입니다.
-- 무인 락커·키오스크·센서 등 장치가 시스템의 중심 → iot_device. 장치와 연동하는 기존 앱의 유지보수도 장치가 중심이면 iot_device.
+- iot_device: 센서·장비·프린터·락커·키오스크·주변기기·산업장비 등 실제 물리 장치와의 통신/제어가 프로젝트의 핵심이면 iot_device.
+  장치와 연동하는 기존 앱의 유지보수도 장치가 중심이면 iot_device.
+  반대로 장비 연동이 여러 기능 중 일부일 뿐이고 핵심이 ERP/WMS/업무 시스템/앱이면 그 소프트웨어 유형(business_management, mobile_app 등)을 project_type 으로 고르고,
+  장치 연동은 technology_assets(hardware_iot, 필요하면 external_api_integration)와 complexity_types(hardware_iot)로 표현합니다.
+- qa_testing: QA, 테스트, 테스트 자동화, 앱/웹 검수, 품질보증, 테스트 엔지니어 투입이 일의 본질이면 qa_testing.
+  상주/기간제 인력 투입이라는 사실은 engagement_type=staffing 으로 따로 표현합니다 (예: QA 상주 → project_type=qa_testing, engagement_type=staffing).
+  QA 대상 서비스의 종류(교육 앱 등)는 project_type 을 바꾸지 않고 industry 로 표현합니다.
 - ai_service 와 media_processing 의 경계: 납품 대상의 본질이 AI 기능/AI 서비스(예: AI 하이라이트 생성 서비스, AI 상담봇)면 ai_service,
   영상·음성 처리 시스템 자체가 핵심 납품물(예: 녹취 솔루션, 영상 인코딩/편집 파이프라인)이면 media_processing.
   사용한 AI 기술(영상 인식, 음성 인식, OCR, LLM)은 project_type 이 아니라 technology_assets 로 표현합니다.
@@ -71,7 +82,10 @@ ${list(ENGAGEMENT_TYPES)}
 - maintenance: 운영, 장애 대응, 수정, 소규모 개선이 주된 목적.
 - staffing: 상주/기간제/월 단가/인력 투입 형태면 업무 내용과 관계없이 staffing. 일반 외주와 분리하는 데 가장 중요한 값입니다.
 - design_publishing: 개발보다 디자인/퍼블리싱/웹빌더(아임웹, 윅스 등) 작업이 중심.
-- 복합 프로젝트는 이번 계약에서 가장 큰 작업 비중 하나를 고릅니다 (예: 추가 개발 후 별도 유지보수 계약 예정 → 이번 계약의 추가 개발 기준 feature_extension).
+- 복합 프로젝트는 이번 계약에서 가장 큰 작업 비중 하나를 고릅니다.
+- 예시 (기능 추가 후 유지보수 예정): 핵심 계약이 기존 서비스의 기능 추가/오류 개선/배포이고 "향후 유지보수도 고려"라고만 언급됐다면 engagement_type=feature_extension.
+  향후 유지보수가 언급됐다는 이유만으로 maintenance 로 바꾸지 않습니다. maintenance 는 이번 계약 자체가 운영/장애 대응/소규모 수정일 때만 씁니다.
+- 예시 (QA 상주): QA 엔지니어를 상주/기간제로 투입 → project_type=qa_testing, engagement_type=staffing.
 
 ## industry (산업군, 정확히 하나)
 ${list(INDUSTRIES)}
@@ -86,6 +100,10 @@ ${list(COMPLEXITY_TYPES)}
 
 ## reuse_level (결과물 재사용 수준, 하나)
 ${list(REUSE_LEVELS)}
+- 기준은 "이 프로젝트에서 만든 코드/구조/패턴을 다른 외주나 자체 서비스에서 실제로 다시 쓸 수 있는가" 하나뿐입니다.
+- "배울 것이 많다"와 "재사용할 수 있다"를 혼동하지 않습니다. 어렵거나 새로운 기술을 익힌다고 reuse_level 을 올리지 않습니다 (그것은 learning_value 의 몫).
+- 상주/인력 투입이라도 투입 대상이 특정 기업의 시스템·SDK·레거시이면 low 또는 one_off 입니다. 고객 전용 시스템에 결제·금융 도메인이 들어 있어도 코드 재사용이 제한적이면 low 입니다.
+- 특정 기업의 기존 시스템 수정/보안 개선/플랫폼 승인 대응은 low, 특정 장비·폐쇄망·레거시 환경에 묶여 있으면 one_off.
 
 ## technology_assets (수행 시 축적되는 기술자산, 복수)
 ${TECHNOLOGY_ASSETS.join(", ")}
@@ -134,17 +152,22 @@ CRUD 비중(높을수록 쉬움), 기존 라이브러리/API 로 해결 가능�
 - 75~100: 연구 수준 알고리즘, 펌웨어/임베디드, 폐쇄망·레거시 대형 시스템, 결과 검증이 사실상 불가능
 
 ## estimated_hours_min / estimated_hours_max
-AI coding agent 를 적극 쓰는 숙련 1인 개발자가 구현·테스트·배포까지 하는 순수 작업시간 (고객 미팅·대기 시간 제외).
+AI coding agent 를 적극 쓰는 숙련 1인 개발자가 실제 납품까지 완료하는 데 필요한 순수 작업시간 (고객 미팅·대기 시간 제외).
+Never compress estimated hours merely to fit the client's stated budget. 클라이언트 예산이나 기간은 작업시간 추정의 상한선이 아닙니다.
+예산이 낮아도 요구 범위가 크면 시간은 범위 기준으로 추정합니다 (예: 예산 100만원이어도 범위상 60시간이 필요하면 60시간). 예산 부족 여부는 이후 별도 분석에서 판단합니다.
+반대로 예산이 크다고 시간을 부풀리지도 않습니다. 시간은 오직 공고가 요구하는 작업 범위로만 정합니다.
 min 은 요구사항이 명확하고 순조로운 경우, max 는 흔한 변수(요구 변경, 연동 이슈)를 포함한 경우. min ≤ max.
 기간제/상주 인력 공고처럼 산출물 범위가 불명확하면 공고에서 유추되는 업무 범위로 추정하고 requirement_clarity 를 낮춥니다.
 
 ## learning_value — 수행하며 배울 수 있는 것의 가치 (0~100)
 앞으로 외주·자체 서비스에 계속 쓸 수 있는 기술/개념(결제, 인증, 실시간, LLM/RAG, 배포 자동화, 앱 배포, 데이터 파이프라인 등)을 새로 익힐 수 있으면 높게.
 단순히 어렵다고 높게 주지 않습니다. 쇠퇴 기술·일회성 도메인 지식·특정 회사 레거시 학습은 낮게.
+배울 것이 많다는 것이 곧 결과물을 재사용할 수 있다는 뜻은 아닙니다. learning_value 와 reusability_value/reuse_level 은 독립적으로 판단합니다.
 
 ## reusability_value — 결과물 재사용 가능성 (0~100)
 코드, UI 컴포넌트, 인증, DB 구조, API 연동, 자동화, 배포 방식, 아키텍처를 다른 외주/자체 서비스에서 다시 쓸 수 있는 정도.
-표준 모듈(회원/결제/예약/관리자/알림)이 많고 고객 전용 레거시 의존이 적을수록 높게.
+표준 모듈(회원/결제/예약/관리자/알림)이 많고 고객 전용 레거시 의존이 적을수록 높게. reuse_level 과 같은 방향이어야 합니다
+(one_off/low 인데 reusability_value 가 높거나, high 인데 낮으면 모순).
 
 ## market_value — 시장 반복성 (0~100)
 이 문제 유형과 기술 조합이 다른 외주에서도 반복적으로 나올 가능성. 프로젝트 자체의 일반성으로 판단합니다.

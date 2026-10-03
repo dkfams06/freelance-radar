@@ -144,7 +144,8 @@ pnpm analyzer batch-submit                        # 미분석 전체를 Message 
 pnpm analyzer batch-collect --wait                # 결과 회수 → 검증 → 저장
 pnpm analyzer run --retry-failed                  # 실패 건만 동기 재시도
 pnpm analyzer sample --ids-from docs/analyzer-v3-sample-20.json   # 같은 20건을 실제 API 로 재분석
-pnpm analyzer compare docs/analyzer-v3-sample-20.json apps/analyzer/.out/sample-*.json   # 두 결과의 분류 비교
+pnpm analyzer compare docs/analyzer-v3.1-manual-sample-20.json apps/analyzer/.out/sample-*.json   # 두 결과의 분류 비교
+pnpm analyzer validate docs/analyzer-v3.1-manual-sample-20.json   # 결과 파일 schema 검증 (DB 불필요)
 pnpm analyzer classify                            # 전체 분류 추정만 (대상 건수/토큰/비용/API 호출 수)
 pnpm analyzer classify --execute --batch          # 실제 전체 분류 (승인 후에만)
 pnpm analyzer stats                               # 분류 분포 통계 (project_type/engagement/industry/reuse/technology_assets)
@@ -160,7 +161,7 @@ ANALYZER_BACKEND=claude-cli ANALYZER_MODEL=claude-sonnet-5-5 pnpm analyzer sampl
 - `ANTHROPIC_API_KEY` 는 자식 프로세스에서 제거해 구독 인증을 쓴다. 리포트의 비용은 API 단가 환산 추정치이며 실제 청구는 없다 (구독 사용량 한도에 반영).
 - Batch API(`batch-submit`, `classify --batch`)는 API 키가 필요하다.
 
-- 현재 기준은 `v3` (v2 에 project_type 4종·technology_assets 3종·engagement 경계 규칙 추가): 통계용 6개 분류 `project_type`, `engagement_type`, `industry`, `complexity_types[]`, `reuse_level`, `technology_assets[]`
+- 현재 기준은 `v3.1` (v3 에 project_type `qa_testing` 추가, reuse_level 기준 강화, iot_device 경계, 예산과 작업시간 분리, uncertain_fields 조건 강화). v3 = v2 에 project_type 4종·technology_assets 3종·engagement 경계 규칙 추가: 통계용 6개 분류 `project_type`, `engagement_type`, `industry`, `complexity_types[]`, `reuse_level`, `technology_assets[]`
   (enum 은 `packages/analysis/src/taxonomy.ts`). 판단이 애매한 분류는 `uncertain_fields` 로 표시되고 리포트 "분류가 애매한 케이스"에 모인다.
 - 점수(종합점수·빈도/견적/구현 용이성/반복률 점수)는 아직 만들지 않는다. 수집 → 분류 → 분포 확인 → 배점 결정 → 전체 점수화 순서.
 - `run` / `batch-submit` 은 100건을 넘으면 `--yes` 가 있어야 실행된다.

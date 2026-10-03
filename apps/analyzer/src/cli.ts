@@ -54,6 +54,7 @@ commands:
   import <file>   결과 파일(.out/*.json)의 분석을 스키마 재검증 후 DB 저장
   report <file>   결과 파일로 Markdown 리포트 재생성
   compare <a> <b> 두 결과 파일의 분류 비교 (예: v2 → v3, 수동 샘플 → 실제 API)
+  validate <file> 결과 파일의 모든 분석을 현재 schema 로 검증 (DB 불필요). --report 를 붙이면 .out 에 md 리포트 생성
   classify        전체 수집 데이터 분류 준비: 기본은 대상 건수/토큰/비용/API 호출 수 추정만 출력
                   --execute 를 붙여야 실제 실행 (--batch: Batch API 로 제출)
   stats           분류 결과 분포 통계 (project_type / engagement_type / industry / reuse_level / technology_assets)
@@ -101,6 +102,7 @@ async function main() {
       batch: { type: "boolean" },
       yes: { type: "boolean" },
       version: { type: "string" },
+      report: { type: "boolean" },
       help: { type: "boolean", short: "h" },
     },
   });
@@ -109,6 +111,28 @@ async function main() {
   const resolveArg = (a?: string) => (a ? path.resolve(process.env.INIT_CWD ?? process.cwd(), a) : undefined);
   const arg = resolveArg(rawArg);
   const arg2 = resolveArg(rawArg2);
+  if (command === "validate") {
+    // DB 불필요
+    if (!arg) throw new Error("validate <results.json> [--report]");
+    const r = readResults(arg);
+    let bad = 0;
+    for (const it of r.items) {
+      if (!it.analysis) continue;
+      const v = validateAnalysis(it.analysis);
+      if (!v.ok) {
+        bad++;
+        log(`FAIL ${it.project.platform}:${it.project.external_project_id} ${v.error}`);
+      }
+    }
+    const checked = r.items.filter((i) => i.analysis).length;
+    log(`schema 검증: ${checked - bad}/${checked} 통과 (analysis_version=${r.analysis_version})`);
+    if (values.report) {
+      const out = writeResults(r, `validated-${stamp()}`);
+      log(`report → ${out.md}`);
+    }
+    process.exitCode = bad ? 1 : 0;
+    return;
+  }
   if (command === "compare") {
     // DB 불필요
     if (!arg || !arg2) throw new Error("compare <base.json> <next.json>");

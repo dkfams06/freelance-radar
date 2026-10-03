@@ -25,9 +25,10 @@ export const PROJECT_TYPES = {
   data_dashboard: "BI/통계/대시보드/데이터 분석",
   maintenance: "기존 시스템 유지보수가 본질",
   fintech_payment: "PG/선불/결제 인프라/핀테크 시스템",
-  iot_device: "무인 기기/장치/센서 중심 시스템 (기기 + 서버/앱)",
+  iot_device: "실제 물리 장치(센서/장비/프린터/락커/키오스크/주변기기/산업장비)와의 통신·제어가 핵심인 시스템",
   media_processing: "녹취/영상·음성 처리/미디어 분석 파이프라인",
   enterprise_infra: "DR/관제/인프라 설계 등 엔터프라이즈 인프라",
+  qa_testing: "QA/테스트/테스트 자동화/앱·웹 검수/품질보증/테스트 엔지니어 투입",
   other: "위 어디에도 정말 맞지 않음",
 } as const;
 export type ProjectType = keyof typeof PROJECT_TYPES;
@@ -67,10 +68,10 @@ export const COMPLEXITY_TYPE_CODES = Object.keys(COMPLEXITY_TYPES) as [Complexit
 
 /** 결과물 재사용 수준 (이후 프로젝트 간 feature overlap 통계로 보정 예정) */
 export const REUSE_LEVELS = {
-  high: "구조/코드를 다른 프로젝트에서 상당 부분 재사용 (관리자·인증·권한·결제·예약·CRUD·통계·일반 SaaS)",
-  medium: "일부 구조·컴포넌트는 재사용, 커스텀 비중이 큼",
-  low: "재사용할 부분이 적음",
-  one_off: "특정 회사/장비/레거시에 종속된 사실상 일회성",
+  high: "만든 구조/코드의 상당 부분을 다른 외주에서 그대로 또는 약간 수정해 재사용 가능 (인증/권한·관리자·CRUD·예약·결제·SaaS 공통 구조·일반적인 API 연동·범용 자동화)",
+  medium: "일부 구조/컴포넌트/패턴은 재사용 가능하지만 도메인 커스텀이 상당함",
+  low: "일반적인 개발 경험은 남지만 실제 코드/구조 재사용은 제한적 (특정 기업 시스템·특정 SDK·특정 legacy extension·특정 플랫폼 승인 대응)",
+  one_off: "특정 기업/장비/폐쇄망/레거시 환경에 강하게 종속되어 다른 외주에 거의 재사용 불가능",
 } as const;
 export type ReuseLevel = keyof typeof REUSE_LEVELS;
 export const REUSE_LEVEL_CODES = Object.keys(REUSE_LEVELS) as [ReuseLevel, ...ReuseLevel[]];

@@ -1,0 +1,1818 @@
+{
+  "analysis_version": "v3.1",
+  "model": "claude-sonnet-5-5",
+  "mode": "sync",
+  "created_at": "2026-10-03T03:30:27.274Z",
+  "note": "backend=claude-cli (claude -p, Claude 구독제). 비용은 API 단가 환산 추정치이며 실제 청구되지 않음 (구독 사용량 한도에 반영)",
+  "usage_total": {
+    "input_tokens": 160,
+    "output_tokens": 51583,
+    "cache_creation_input_tokens": 108823,
+    "cache_read_input_tokens": 739615
+  },
+  "cost_usd_total": 0.9361305,
+  "projection_total": 5287,
+  "items": [
+    {
+      "project": {
+        "id": "1da4e1f4-64f2-4e5d-8b4d-dda2e12f41fd",
+        "platform": "wishket",
+        "external_project_id": "158857",
+        "title": ".NET 기반 기능 수정 및 보안 개발",
+        "budget": "350,000원",
+        "project_duration": "3일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "d75229f83ec150189fef8945f2f32de7",
+        "chars": 2568
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "maintenance",
+        "project_subcategory": ".NET 조회제한·보안 개선",
+        "engagement_type": "feature_extension",
+        "industry": "professional_services",
+        "complexity_types": [
+          "legacy_heavy",
+          "workflow_complex"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "backend_api",
+          "database",
+          "security",
+          "legacy_enterprise",
+          "core_web"
+        ],
+        "uncertain_fields": [],
+        "summary": "운영 중인 .NET 법조인 검색 시스템에 IP·채널별 조회량 탐지, 단계별 접속 차단(429), 관리자 이메일 알림 기능을 추가하고 현직 선택 항목 3개를 추가한다.",
+        "required_features": [
+          "security_hardening",
+          "notification_email",
+          "admin_dashboard",
+          "bug_fix_maintenance",
+          "statistics_reporting"
+        ],
+        "required_integrations": [
+          "email_service"
+        ],
+        "required_platforms": [
+          "web",
+          "admin_web"
+        ],
+        "required_skills": [
+          "backend",
+          "database",
+          "security",
+          "legacy_tech"
+        ],
+        "suggested_stack": [
+          "ASP.NET",
+          "C#",
+          "MSSQL",
+          "Visual Studio 2019",
+          "Windows Server"
+        ],
+        "vibe_coding_difficulty": 55,
+        "estimated_hours_min": 24,
+        "estimated_hours_max": 40,
+        "learning_value": 30,
+        "reusability_value": 30,
+        "market_value": 45,
+        "technical_risk": 55,
+        "requirement_clarity": 75,
+        "rationale": {
+          "vibe_coding_difficulty": "기존 .NET 레거시 분석과 운영 서비스 수정이 필요해 중상 난이도.",
+          "estimated_hours": "분석, 탐지·차단·알림 기능, 항목 추가, 검증까지 약 24~40시간.",
+          "learning_value": "레이트리밋 개념은 유용하나 레거시 .NET 중심이라 제한적.",
+          "reusability_value": "특정 고객 레거시 코드에 묶여 재사용이 제한적.",
+          "market_value": "레거시 .NET 보안·수정 수요는 있으나 범위가 특정적.",
+          "technical_risk": "운영 환경 접근, 짧은 일정, 데이터 훼손 우려가 있음."
+        }
+      },
+      "usage": {
+        "input_tokens": 12,
+        "output_tokens": 5235,
+        "cache_creation_input_tokens": 16360,
+        "cache_read_input_tokens": 56774
+      },
+      "cost_usd": 0.10462880000000001,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "13bd73d3-a800-4c27-8c32-32e2f63b2992",
+        "platform": "wishket",
+        "external_project_id": "158882",
+        "title": "Spring Boot 기반 PG사 선불시스템 구축 개발",
+        "budget": "6,000,000원/월",
+        "project_duration": "210일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "397f139f29757339750effdc0655582d",
+        "chars": 779
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "fintech_payment",
+        "project_subcategory": "PG사 선불시스템",
+        "engagement_type": "staffing",
+        "industry": "finance",
+        "complexity_types": [
+          "high_risk_domain",
+          "integration_heavy",
+          "workflow_complex"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "backend_api",
+          "database",
+          "payments",
+          "external_api_integration",
+          "security"
+        ],
+        "uncertain_fields": [],
+        "summary": "PG사의 선불결제 시스템 구축 프로젝트에 Spring Boot 개발자가 공덕역 인근에 상주하며 PG결제 영역을 개발한다.",
+        "required_features": [
+          "payment",
+          "settlement",
+          "point_coupon",
+          "user_management",
+          "admin_dashboard",
+          "security_hardening"
+        ],
+        "required_integrations": [
+          "payment_gateway"
+        ],
+        "required_platforms": [
+          "backend_api",
+          "admin_web"
+        ],
+        "required_skills": [
+          "backend",
+          "database",
+          "payment",
+          "security"
+        ],
+        "suggested_stack": [
+          "Spring Boot",
+          "Java",
+          "PostgreSQL",
+          "Redis",
+          "Docker"
+        ],
+        "vibe_coding_difficulty": 68,
+        "estimated_hours_min": 900,
+        "estimated_hours_max": 1300,
+        "learning_value": 65,
+        "reusability_value": 30,
+        "market_value": 55,
+        "technical_risk": 60,
+        "requirement_clarity": 20,
+        "rationale": {
+          "vibe_coding_difficulty": "금융 결제 도메인과 상주 환경, 범위 불명확으로 난이도가 높음.",
+          "estimated_hours": "약 7개월 상주 기간제를 기준으로 범위를 추정함.",
+          "learning_value": "PG·선불 결제 구조 경험은 가치가 크지만 범위가 한정적임.",
+          "reusability_value": "고객 전용 시스템이라 코드 재사용이 제한적임.",
+          "market_value": "결제 개발 수요는 있으나 PG사 선불은 특수함.",
+          "technical_risk": "오류 비용이 크고 요구사항이 불명확함."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1069,
+        "cache_creation_input_tokens": 13346,
+        "cache_read_input_tokens": 11839
+      },
+      "cost_usd": 0.046434800000000005,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "d091ca09-5d97-41e8-a548-1bc23cb083dc",
+        "platform": "wishket",
+        "external_project_id": "158896",
+        "title": "Java 기반 녹취 솔루션 구축 PL",
+        "budget": "5,500,000원/월",
+        "project_duration": "180일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "65ea2d7013d2cea2e112c8a52fb132a2",
+        "chars": 1313
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "media_processing",
+        "project_subcategory": "콜센터 녹취 솔루션 PL",
+        "engagement_type": "staffing",
+        "industry": "general",
+        "complexity_types": [
+          "integration_heavy",
+          "legacy_heavy",
+          "workflow_complex"
+        ],
+        "reuse_level": "one_off",
+        "technology_assets": [
+          "legacy_enterprise",
+          "backend_api",
+          "speech_audio_ai"
+        ],
+        "uncertain_fields": [],
+        "summary": "콜센터 녹취 솔루션 구축 사업에서 녹취 영역을 총괄하는 시니어 PL을 폐쇄망 상주로 투입하는 기간제 공고. 고객 협의, 분석·설계 조율, 일정 관리, 내부 Java 개발자 커뮤니케이션을 맡는다.",
+        "required_features": [
+          "speech_processing",
+          "approval_workflow",
+          "legacy_migration"
+        ],
+        "required_integrations": [
+          "hardware_device"
+        ],
+        "required_platforms": [
+          "backend_api",
+          "web"
+        ],
+        "required_skills": [
+          "project_management",
+          "backend",
+          "legacy_tech"
+        ],
+        "suggested_stack": [
+          "Java",
+          "Spring Boot",
+          "PostgreSQL",
+          "Oracle"
+        ],
+        "vibe_coding_difficulty": 70,
+        "estimated_hours_min": 900,
+        "estimated_hours_max": 1100,
+        "learning_value": 30,
+        "reusability_value": 12,
+        "market_value": 25,
+        "technical_risk": 55,
+        "requirement_clarity": 35,
+        "rationale": {
+          "vibe_coding_difficulty": "폐쇄망 상주, CTI·교환기 도메인 이해와 PL 협의 업무 비중이 커 AI 활용이 제한적.",
+          "estimated_hours": "6개월 상주 기간제로 월 150~180시간 기준, 범위가 불명확해 추정함.",
+          "learning_value": "CTI·녹취 도메인 지식은 얻지만 특정 분야에 한정되고 PL 업무 위주.",
+          "reusability_value": "자체 엔진과 폐쇄망 환경에 종속되어 코드 재사용이 거의 불가능.",
+          "market_value": "녹취·콜센터 PL 수요는 좁은 틈새 시장에 해당.",
+          "technical_risk": "고객 요구 협의, 폐쇄망, 자체 엔진 의존으로 불확실성이 있음."
+        }
+      },
+      "usage": {
+        "input_tokens": 12,
+        "output_tokens": 4546,
+        "cache_creation_input_tokens": 4376,
+        "cache_read_input_tokens": 62777
+      },
+      "cost_usd": 0.0689794,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "1008c262-2351-486e-b162-d018f03d907b",
+        "platform": "wishket",
+        "external_project_id": "158891",
+        "title": "물류 자동화 설비 연동 WMS 반품 자동화 백엔드 개발",
+        "budget": "7,000,000원/월",
+        "project_duration": "120일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "3ba11ca397b7e0473766aeab3e4fadff",
+        "chars": 1140
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "WMS 반품 설비 연동",
+        "engagement_type": "staffing",
+        "industry": "logistics",
+        "complexity_types": [
+          "hardware_iot",
+          "integration_heavy",
+          "legacy_heavy"
+        ],
+        "reuse_level": "one_off",
+        "technology_assets": [
+          "hardware_iot",
+          "backend_api",
+          "legacy_enterprise",
+          "core_web"
+        ],
+        "uncertain_fields": [],
+        "summary": "홈쇼핑 WMS 반품 자동화 설비(소터, 바코드리더기)를 TCP/IP·RS-232·PLC로 연동하는 백엔드와 WMS 화면을 개발하고, 설비 테스트부터 오픈까지 상주 수행하는 인력 투입 프로젝트입니다.",
+        "required_features": [
+          "hardware_integration",
+          "iot_device_control",
+          "admin_dashboard",
+          "order_management",
+          "inventory_management"
+        ],
+        "required_integrations": [
+          "hardware_device",
+          "erp_external"
+        ],
+        "required_platforms": [
+          "backend_api",
+          "web"
+        ],
+        "required_skills": [
+          "backend",
+          "embedded",
+          "legacy_tech",
+          "frontend"
+        ],
+        "suggested_stack": [
+          "Java",
+          "Spring Boot",
+          "React",
+          "Oracle",
+          "TCP Socket"
+        ],
+        "vibe_coding_difficulty": 72,
+        "estimated_hours_min": 450,
+        "estimated_hours_max": 650,
+        "learning_value": 38,
+        "reusability_value": 15,
+        "market_value": 30,
+        "technical_risk": 70,
+        "requirement_clarity": 50,
+        "rationale": {
+          "vibe_coding_difficulty": "실설비·PLC 연동과 현장 통합테스트, 상주 환경이라 AI 단독 수행이 어렵다.",
+          "estimated_hours": "4개월 상주, 설비 연동·WMS 화면·테스트·오픈 범위로 추정.",
+          "learning_value": "소켓·전문 파싱은 배우지만 특정 설비·레거시 지식 중심이다.",
+          "reusability_value": "특정 설비와 고객 WMS에 종속되어 재사용이 제한된다.",
+          "market_value": "물류 설비 연동 수요는 있으나 특수 도메인이라 반복성이 낮다.",
+          "technical_risk": "실장비 의존, 현장 테스트, 오픈 일정 리스크가 크다."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1182,
+        "cache_creation_input_tokens": 3072,
+        "cache_read_input_tokens": 23104
+      },
+      "cost_usd": 0.0241328,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "236f77cf-8b20-4744-a8a2-fb2da4c4f648",
+        "platform": "wishket",
+        "external_project_id": "158892",
+        "title": "스크린 파크골프 브랜드 신규 홈페이지 제작",
+        "budget": "1,000,000원",
+        "project_duration": "14일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "2a10a3545897292626db0d3ba3d14347",
+        "chars": 1644
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "website",
+        "project_subcategory": "브랜드 홈페이지",
+        "engagement_type": "design_publishing",
+        "industry": "sports",
+        "complexity_types": [
+          "standard_crud"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web"
+        ],
+        "uncertain_fields": [],
+        "summary": "스크린 파크골프 시스템 제조·판매 기업을 위해 아임웹 등 웹빌더로 회사/제품/렌탈 안내와 문의 폼을 갖춘 반응형 브랜드 홈페이지를 기획·디자인·구축한다.",
+        "required_features": [
+          "landing_page",
+          "cms",
+          "admin_dashboard"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "mobile_web"
+        ],
+        "required_skills": [
+          "frontend",
+          "ui_design"
+        ],
+        "suggested_stack": [
+          "아임웹",
+          "Figma"
+        ],
+        "vibe_coding_difficulty": 8,
+        "estimated_hours_min": 25,
+        "estimated_hours_max": 45,
+        "learning_value": 8,
+        "reusability_value": 35,
+        "market_value": 60,
+        "technical_risk": 12,
+        "requirement_clarity": 55,
+        "rationale": {
+          "vibe_coding_difficulty": "웹빌더 기반 홈페이지로 코딩 거의 없는 단순 작업.",
+          "estimated_hours": "기획·디자인·세팅 포함 페이지 수 개 구성 약 25~45시간.",
+          "learning_value": "웹빌더 작업이라 새로 배울 기술이 적음.",
+          "reusability_value": "디자인 원본과 구성 경험은 일부 재사용 가능.",
+          "market_value": "웹빌더 홈페이지 제작 외주는 반복 수요가 많음.",
+          "technical_risk": "기술 위험은 낮고 10월 15일 기한 엄수가 변수."
+        }
+      },
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 3304,
+        "cache_creation_input_tokens": 4100,
+        "cache_read_input_tokens": 50421
+      },
+      "cost_usd": 0.053394199999999996,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "3ab289d6-e629-4b12-80d1-8736c052af73",
+        "platform": "wishket",
+        "external_project_id": "158884",
+        "title": "Oracle 기반 생산계획 시스템 구축 PL",
+        "budget": "8,000,000원/월",
+        "project_duration": "90일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "c671f51994f9e4e267c7d17880e5ef69",
+        "chars": 1117
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "business_management",
+        "project_subcategory": "제조 생산계획 시스템",
+        "engagement_type": "staffing",
+        "industry": "manufacturing",
+        "complexity_types": [
+          "workflow_complex",
+          "legacy_heavy",
+          "algorithmic_specialized"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "database",
+          "legacy_enterprise",
+          "analytics_dashboard",
+          "backend_api"
+        ],
+        "uncertain_fields": [],
+        "summary": "제조업 생산계획 영역 시스템 구축에 상주 투입되어 납기 지연 사유 분석, 납기 시뮬레이션, Early Warning, 대시보드를 개발하고 파트를 리딩하는 PL 인력 구인입니다.",
+        "required_features": [
+          "statistics_reporting",
+          "admin_dashboard",
+          "data_pipeline",
+          "scheduling_calendar",
+          "notification_push"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "backend_api"
+        ],
+        "required_skills": [
+          "database",
+          "backend",
+          "legacy_tech",
+          "project_management",
+          "data_engineering"
+        ],
+        "suggested_stack": [
+          "Oracle",
+          "PL/SQL",
+          "Java Spring",
+          "Grafana"
+        ],
+        "vibe_coding_difficulty": 62,
+        "estimated_hours_min": 480,
+        "estimated_hours_max": 620,
+        "learning_value": 35,
+        "reusability_value": 25,
+        "market_value": 45,
+        "technical_risk": 55,
+        "requirement_clarity": 40,
+        "rationale": {
+          "vibe_coding_difficulty": "기존 Oracle 환경 상주, 시뮬레이션 로직과 도메인 이해가 필요함.",
+          "estimated_hours": "90일 상주 풀타임에 리딩 업무를 포함해 추정.",
+          "learning_value": "Oracle/PL-SQL 및 제조 도메인 중심이라 범용 학습은 제한적.",
+          "reusability_value": "고객 전용 시스템이라 코드 재사용이 제한적.",
+          "market_value": "제조 생산계획 인력 수요는 있으나 특수 도메인.",
+          "technical_risk": "기존 시스템과 데이터 불확실성, 납기 시뮬레이션 정확도 위험."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1134,
+        "cache_creation_input_tokens": 2860,
+        "cache_read_input_tokens": 23048
+      },
+      "cost_usd": 0.0231116,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "0ba35f4b-c0e5-411b-b60a-a8f7ea57a6f0",
+        "platform": "wishket",
+        "external_project_id": "158850",
+        "title": "예약 플랫폼 프론트/백엔드 연동 및 해외 결제 시스템 구축",
+        "budget": "15,000,000원",
+        "project_duration": "60일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "49c7ce4e15486e8dcf55d6f7bead99f9",
+        "chars": 2541
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "reservation",
+        "project_subcategory": "시간 단위 예약 플랫폼",
+        "engagement_type": "new_build",
+        "industry": "general",
+        "complexity_types": [
+          "integration_heavy",
+          "high_risk_domain",
+          "workflow_complex"
+        ],
+        "reuse_level": "high",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "payments",
+          "external_api_integration",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [],
+        "summary": "파트너와 글로벌 고객을 연결하는 시간 단위 예약 플랫폼의 백엔드를 구축하고, 기존 React 프로토타입 3종(고객·파트너·관리자)을 연동합니다. 중복 예약 방지와 해외 결제 PG 통합 및 배포까지 포함합니다.",
+        "required_features": [
+          "authentication",
+          "role_permission",
+          "reservation",
+          "scheduling_calendar",
+          "payment",
+          "admin_dashboard",
+          "order_management",
+          "search_filter",
+          "statistics_reporting",
+          "infra_devops"
+        ],
+        "required_integrations": [
+          "payment_gateway",
+          "easy_pay",
+          "aws"
+        ],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "mobile_web",
+          "backend_api"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "payment",
+          "authentication",
+          "devops_infra"
+        ],
+        "suggested_stack": [
+          "Next.js",
+          "TypeScript",
+          "Supabase",
+          "PostgreSQL",
+          "Stripe/PayPal",
+          "Vercel"
+        ],
+        "vibe_coding_difficulty": 48,
+        "estimated_hours_min": 200,
+        "estimated_hours_max": 320,
+        "learning_value": 72,
+        "reusability_value": 78,
+        "market_value": 80,
+        "technical_risk": 52,
+        "requirement_clarity": 72,
+        "rationale": {
+          "vibe_coding_difficulty": "3종 웹 연동, 동시성 제어, 다중 해외 PG로 중상 난이도.",
+          "estimated_hours": "백엔드, 3종 화면 연동, 해외 결제 5종, 배포 포함 200~320시간.",
+          "learning_value": "동시성 제어와 글로벌 결제 연동은 재활용도가 높은 경험.",
+          "reusability_value": "예약, 결제, 권한, 관리자 구조는 다른 외주에 재사용 가능.",
+          "market_value": "예약 플랫폼과 결제 연동은 반복 수요가 많음.",
+          "technical_risk": "위챗·라인페이 가맹 심사와 중복 예약 방지의 정확성이 위험 요소."
+        }
+      },
+      "usage": {
+        "input_tokens": 14,
+        "output_tokens": 6516,
+        "cache_creation_input_tokens": 6043,
+        "cache_read_input_tokens": 82881
+      },
+      "cost_usd": 0.09687169999999999,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "3f72e352-609f-48be-bc1f-d3862787aa05",
+        "platform": "wishket",
+        "external_project_id": "158890",
+        "title": "APM/DR 기반 금융권 차세대 인프라 관제 및 금융보안 분석·설계",
+        "budget": "7,000,000원/월",
+        "project_duration": "810일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "68958af7c2dd9257bd4f36efaa1e3753",
+        "chars": 1337
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "enterprise_infra",
+        "project_subcategory": "금융 APM/DR 관제 설계",
+        "engagement_type": "staffing",
+        "industry": "finance",
+        "complexity_types": [
+          "high_risk_domain",
+          "legacy_heavy"
+        ],
+        "reuse_level": "one_off",
+        "technology_assets": [
+          "legacy_enterprise",
+          "security",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [],
+        "summary": "예탁결제원 차세대 시스템의 E2E 거래추적, APM, 인프라 관제, DR 시나리오, 금융보안 체계를 분석·설계하는 시니어 PL급 상주 인력 투입.",
+        "required_features": [
+          "infra_devops",
+          "security_hardening"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "other"
+        ],
+        "required_skills": [
+          "devops_infra",
+          "security",
+          "legacy_tech",
+          "project_management"
+        ],
+        "suggested_stack": [
+          "SiteScope",
+          "APM",
+          "Unix",
+          "ELK"
+        ],
+        "vibe_coding_difficulty": 80,
+        "estimated_hours_min": 3000,
+        "estimated_hours_max": 4200,
+        "learning_value": 35,
+        "reusability_value": 10,
+        "market_value": 30,
+        "technical_risk": 65,
+        "requirement_clarity": 35,
+        "rationale": {
+          "vibe_coding_difficulty": "금융 대형 레거시 상주 설계로 AI 활용 여지가 작음",
+          "estimated_hours": "27개월 상주 중 약 18~24개월분 설계 업무 추정",
+          "learning_value": "특정 제품·금융 도메인 중심이라 범용 학습은 제한적",
+          "reusability_value": "고객 전용 설계 문서 중심이라 재사용 어려움",
+          "market_value": "금융권 관제/DR 인력 수요는 있으나 특수함",
+          "technical_risk": "제안 단계라 투입 불확실하고 규제 도메인임"
+        }
+      },
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 3347,
+        "cache_creation_input_tokens": 3699,
+        "cache_read_input_tokens": 49194
+      },
+      "cost_usd": 0.052576300000000006,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "db8889e6-4e5d-4b08-a8f4-d13efcdd3e28",
+        "platform": "wishket",
+        "external_project_id": "158888",
+        "title": "EDW/CDC·ETL 기반 금융권 차세대 정보계 분석·설계",
+        "budget": "7,000,000원/월",
+        "project_duration": "810일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "7c1d9f183d931837c45ef02c94993164",
+        "chars": 1383
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "data_dashboard",
+        "project_subcategory": "금융 정보계 EDW 설계",
+        "engagement_type": "staffing",
+        "industry": "finance",
+        "complexity_types": [
+          "legacy_heavy",
+          "high_risk_domain",
+          "integration_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "data_pipeline",
+          "database",
+          "analytics_dashboard",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "예탁결제원 차세대 정보계(EDW, OLAP, CDC/ETL) 개편 프로젝트의 분석·설계 인력을 여의도 상주 기간제로 모집한다. 데이터 모델링, CDC/OGG 실시간 복제, 배치 ETL, OLAP 아키텍처 설계를 담당한다.",
+        "required_features": [
+          "data_pipeline",
+          "statistics_reporting",
+          "legacy_migration"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "backend_api"
+        ],
+        "required_skills": [
+          "data_engineering",
+          "database",
+          "legacy_tech",
+          "project_management"
+        ],
+        "suggested_stack": [
+          "Oracle GoldenGate",
+          "Oracle DB",
+          "Informatica",
+          "Mondrian OLAP",
+          "ERwin"
+        ],
+        "vibe_coding_difficulty": 70,
+        "estimated_hours_min": 3000,
+        "estimated_hours_max": 4500,
+        "learning_value": 35,
+        "reusability_value": 20,
+        "market_value": 30,
+        "technical_risk": 60,
+        "requirement_clarity": 45,
+        "rationale": {
+          "vibe_coding_difficulty": "금융 레거시 정보계 설계로 상주·폐쇄환경, AI 활용 제한적.",
+          "estimated_hours": "27개월 상주 중 분석·설계 단계 위주로 추정, 범위 불명확.",
+          "learning_value": "CDC/ETL 지식은 유용하나 특정 기관 레거시 중심.",
+          "reusability_value": "고객 전용 시스템 설계라 코드 재사용이 제한적.",
+          "market_value": "금융 EDW 인력 수요는 있으나 시장 한정적.",
+          "technical_risk": "제안 단계라 투입 불확실, 대형 금융 시스템 위험."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1152,
+        "cache_creation_input_tokens": 3122,
+        "cache_read_input_tokens": 23310
+      },
+      "cost_usd": 0.023999,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "2cae2789-2516-48df-ac5a-74d832ced423",
+        "platform": "wishket",
+        "external_project_id": "158878",
+        "title": "중등 온라인 교육 서비스 모바일 앱·반응형 웹 QA",
+        "budget": "4,000,000원/월",
+        "project_duration": "60일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "7b7f542e2a101c2f64ff48e23804f35a",
+        "chars": 1349
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "qa_testing",
+        "project_subcategory": "교육 앱·웹 QA 상주",
+        "engagement_type": "staffing",
+        "industry": "education",
+        "complexity_types": [
+          "multi_platform"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "other"
+        ],
+        "uncertain_fields": [],
+        "summary": "중학생 대상 온라인 동영상 강의 서비스의 iOS/Android 앱과 반응형 웹을 검증하는 QA 엔지니어를 2개월간 서초 상주로 투입한다. 테스트 계획·케이스 작성, 결함 관리, 크로스 브라우저/디바이스 테스트를 수행한다.",
+        "required_features": [
+          "bug_fix_maintenance"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "ios",
+          "android",
+          "web",
+          "mobile_web"
+        ],
+        "required_skills": [
+          "qa_testing"
+        ],
+        "suggested_stack": [
+          "Jira",
+          "Playwright",
+          "BrowserStack",
+          "Postman",
+          "TestRail"
+        ],
+        "vibe_coding_difficulty": 25,
+        "estimated_hours_min": 320,
+        "estimated_hours_max": 380,
+        "learning_value": 25,
+        "reusability_value": 25,
+        "market_value": 50,
+        "technical_risk": 20,
+        "requirement_clarity": 60,
+        "rationale": {
+          "vibe_coding_difficulty": "코딩보다 수동 기능·디바이스 테스트 중심이라 AI 활용 여지가 제한적이다.",
+          "estimated_hours": "2개월 상주 풀타임 기준 약 320~380시간으로 추정.",
+          "learning_value": "QA 프로세스 경험은 있으나 코드 자산 학습은 적다.",
+          "reusability_value": "테스트 케이스 템플릿 외 재사용 가능한 코드가 거의 없다.",
+          "market_value": "앱·웹 QA 상주 수요는 꾸준하나 개발 외주와는 결이 다르다.",
+          "technical_risk": "기술 위험은 낮고 일정 압박과 상주 조건 정도만 있다."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1108,
+        "cache_creation_input_tokens": 3152,
+        "cache_read_input_tokens": 23319
+      },
+      "cost_usd": 0.0236358,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "40c0129d-39d0-42cd-8edd-3f85159199a9",
+        "platform": "freemoa",
+        "external_project_id": "48504",
+        "title": "유소년 스포츠 등번호 AI 하이라이트 웹 MVP 개발",
+        "budget": "5,000,000원",
+        "project_duration": "45일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "eed5ca9f9d0d8c52c32cca790e99d8c4",
+        "chars": 3391
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "ai_service",
+        "project_subcategory": "등번호 AI 하이라이트",
+        "engagement_type": "new_build",
+        "industry": "sports",
+        "complexity_types": [
+          "algorithmic_specialized",
+          "workflow_complex"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "computer_vision",
+          "ocr_document_ai",
+          "data_pipeline",
+          "backend_api",
+          "core_web",
+          "database",
+          "admin_system",
+          "cloud_infra",
+          "docker"
+        ],
+        "uncertain_fields": [],
+        "summary": "유소년 축구 경기 영상을 업로드하면 등번호를 인식해 선수별 구간을 추출하고 하이라이트 영상을 만든다. 학부모는 앱형 모바일 웹(PWA)에서 자녀 영상을 시청하며, 관리자 웹과 확장형 비동기 파이프라인 설계 문서도 포함한다.",
+        "required_features": [
+          "admin_dashboard",
+          "file_upload",
+          "media_processing",
+          "computer_vision",
+          "video_streaming",
+          "data_pipeline",
+          "user_management",
+          "public_api",
+          "document_generation"
+        ],
+        "required_integrations": [
+          "aws"
+        ],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "mobile_web"
+        ],
+        "required_skills": [
+          "backend",
+          "frontend",
+          "computer_vision",
+          "ai_ml",
+          "devops_infra",
+          "database"
+        ],
+        "suggested_stack": [
+          "Next.js",
+          "TypeScript",
+          "Python FastAPI",
+          "YOLO",
+          "PaddleOCR",
+          "FFmpeg",
+          "AWS S3",
+          "Redis/Celery"
+        ],
+        "vibe_coding_difficulty": 62,
+        "estimated_hours_min": 130,
+        "estimated_hours_max": 220,
+        "learning_value": 72,
+        "reusability_value": 52,
+        "market_value": 48,
+        "technical_risk": 66,
+        "requirement_clarity": 72,
+        "rationale": {
+          "vibe_coding_difficulty": "실제 경기 영상에서 등번호 인식 정확도 검증이 어렵고 비동기 영상 파이프라인이 필요하다.",
+          "estimated_hours": "관리자 웹, PWA, 영상 처리 파이프라인, 설계 문서까지 범위가 넓다.",
+          "learning_value": "YOLO/OCR, 영상 큐 처리, PWA 등 재활용 가능한 기술을 익힌다.",
+          "reusability_value": "업로드·큐·관리자 구조는 재사용되지만 인식 모듈은 도메인 특화다.",
+          "market_value": "스포츠 AI 영상은 수요가 있으나 반복 빈도는 중간이다.",
+          "technical_risk": "등번호 가림·저해상도로 정확도 불확실하고 90분 영상 처리 비용 부담이 있다."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1741,
+        "cache_creation_input_tokens": 5419,
+        "cache_read_input_tokens": 25266
+      },
+      "cost_usd": 0.0360227,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "88d955ad-d3f9-4fbd-8781-3c11e0522319",
+        "platform": "freemoa",
+        "external_project_id": "48502",
+        "title": "언론 웹사이트 추가 개발 및 유지보수",
+        "budget": "10,000원 ~ 1,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "a723d00169c8cf77d512da0a661ba602",
+        "chars": 2672
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "website",
+        "project_subcategory": "언론 사이트 기능 추가",
+        "engagement_type": "feature_extension",
+        "industry": "media_content",
+        "complexity_types": [
+          "legacy_heavy",
+          "integration_heavy"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "cloud_infra",
+          "external_api_integration",
+          "admin_system"
+        ],
+        "uncertain_fields": [],
+        "summary": "중단된 해외 언론사 기사 발행 웹사이트의 기존 소스를 인수해 다중 이미지 횡스크롤/라이트박스 UI와 AWS S3/CloudFront 기반 대량 이미지 업로드 최적화를 구현하고, 이후 월 유지보수를 담당합니다.",
+        "required_features": [
+          "file_upload",
+          "cms",
+          "admin_dashboard",
+          "media_processing",
+          "bug_fix_maintenance",
+          "infra_devops"
+        ],
+        "required_integrations": [
+          "aws"
+        ],
+        "required_platforms": [
+          "web",
+          "admin_web"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "devops_infra",
+          "legacy_tech"
+        ],
+        "suggested_stack": [
+          "기존 스택 유지",
+          "AWS S3",
+          "CloudFront",
+          "TypeScript",
+          "Tailwind"
+        ],
+        "vibe_coding_difficulty": 45,
+        "estimated_hours_min": 40,
+        "estimated_hours_max": 90,
+        "learning_value": 45,
+        "reusability_value": 50,
+        "market_value": 60,
+        "technical_risk": 45,
+        "requirement_clarity": 50,
+        "rationale": {
+          "vibe_coding_difficulty": "미확인 기존 코드 인수와 S3 대량 업로드 최적화가 포함됨.",
+          "estimated_hours": "코드 파악, UI 구현, 업로드 최적화, 인프라 점검 범위로 추정.",
+          "learning_value": "S3/CloudFront 대용량 미디어 처리 경험은 유용함.",
+          "reusability_value": "업로드·갤러리 패턴은 재사용 가능하나 기존 코드에 종속.",
+          "market_value": "인수인계 유지보수와 미디어 업로드 최적화는 흔한 수요.",
+          "technical_risk": "기존 소스 상태와 스택이 불명확하고 명세서가 없음."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1161,
+        "cache_creation_input_tokens": 4399,
+        "cache_read_input_tokens": 24506
+      },
+      "cost_usd": 0.027520700000000002,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "abd6f57f-3676-4af8-a5db-1732d385d877",
+        "platform": "freemoa",
+        "external_project_id": "48501",
+        "title": "기존 웹/앱 서비스 고도화 및 추가 개발",
+        "budget": "2,500,000원 ~ 5,000,000원",
+        "project_duration": "40일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "47ea799e2eb884d544f90e62f197b45b",
+        "chars": 2650
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "장치연동 웹앱 고도화",
+        "engagement_type": "feature_extension",
+        "industry": "general",
+        "complexity_types": [
+          "hardware_iot",
+          "legacy_heavy",
+          "multi_platform"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "hardware_iot",
+          "backend_api",
+          "mobile",
+          "core_web",
+          "database",
+          "legacy_enterprise",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [
+          "engagement_type"
+        ],
+        "summary": "Vue 웹 2종과 AOS/iOS 앱, Supabase 백엔드로 운영 중인 장치 연동 서비스에 기능 추가와 오류 개선, TCP 세션 처리 개선을 하고 스토어 배포까지 진행합니다.",
+        "required_features": [
+          "user_management",
+          "notification_push",
+          "iot_device_control",
+          "hardware_integration",
+          "bug_fix_maintenance",
+          "app_store_release",
+          "legacy_migration"
+        ],
+        "required_integrations": [
+          "hardware_device",
+          "aws"
+        ],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "ios",
+          "android",
+          "backend_api"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "mobile_native",
+          "database",
+          "legacy_tech",
+          "embedded"
+        ],
+        "suggested_stack": [
+          "Vue",
+          "Supabase",
+          "TypeScript",
+          "Naver Cloud",
+          "Android Studio",
+          "Xcode"
+        ],
+        "vibe_coding_difficulty": 68,
+        "estimated_hours_min": 130,
+        "estimated_hours_max": 240,
+        "learning_value": 45,
+        "reusability_value": 30,
+        "market_value": 45,
+        "technical_risk": 70,
+        "requirement_clarity": 62,
+        "rationale": {
+          "vibe_coding_difficulty": "기존 코드 분석, 장치 TCP 세션 디버깅, 웹 2종과 앱 2종 동시 수정이 필요합니다.",
+          "estimated_hours": "기능 수정이 많고 장치 테스트와 스토어 배포까지 포함해 130~240시간으로 봤습니다.",
+          "learning_value": "TCP 세션과 장치 연동, 앱 배포 경험은 남지만 특정 서비스에 한정됩니다.",
+          "reusability_value": "특정 서비스의 레거시 코드와 장치 프로토콜에 묶여 재사용이 제한적입니다.",
+          "market_value": "장치 연동 앱 유지보수 수요는 있으나 도메인이 한정적입니다.",
+          "technical_risk": "실장치 의존, 재현이 어려운 LTE TCP 오류, 롤백 이력, 스토어 심사 위험이 있습니다."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1839,
+        "cache_creation_input_tokens": 4596,
+        "cache_read_input_tokens": 24414
+      },
+      "cost_usd": 0.0347748,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "dce4c6ad-51ce-4f32-91f8-eb668477297a",
+        "platform": "freemoa",
+        "external_project_id": "48495",
+        "title": "자사 iOS 앱 승인 대응",
+        "budget": "18,000,000원 ~ 18,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": true,
+        "hash": "4efc2c09771e65ba1e48131c20830e4d",
+        "chars": 561
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "mobile_app",
+        "project_subcategory": "iOS 인앱결제 도입",
+        "engagement_type": "feature_extension",
+        "industry": "education",
+        "complexity_types": [
+          "integration_heavy",
+          "legacy_heavy",
+          "high_risk_domain"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "mobile",
+          "payments",
+          "external_api_integration",
+          "backend_api",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "비상교육 온리원 중등 2.0 레슨 앱에 iOS 인앱 결제(상품 구매, 복원, 내역)와 이용권 연동, 애플 결제 검증 서버 연동을 추가하고 앱 심사 승인에 대응한다.",
+        "required_features": [
+          "payment",
+          "subscription_billing",
+          "order_management",
+          "app_store_release",
+          "user_management",
+          "bug_fix_maintenance"
+        ],
+        "required_integrations": [
+          "erp_external"
+        ],
+        "required_platforms": [
+          "ios",
+          "backend_api"
+        ],
+        "required_skills": [
+          "mobile_native",
+          "backend",
+          "payment",
+          "legacy_tech"
+        ],
+        "suggested_stack": [
+          "Swift",
+          "StoreKit 2",
+          "SwiftUI",
+          "Apple App Store Server API",
+          "기존 서버 스택"
+        ],
+        "vibe_coding_difficulty": 55,
+        "estimated_hours_min": 120,
+        "estimated_hours_max": 240,
+        "learning_value": 65,
+        "reusability_value": 40,
+        "market_value": 55,
+        "technical_risk": 60,
+        "requirement_clarity": 55,
+        "rationale": {
+          "vibe_coding_difficulty": "기존 앱·서버 코드에 StoreKit 결제와 서버 검증을 붙이고 심사 대응까지 해야 함.",
+          "estimated_hours": "앱 결제 UI, 이용권 연동, 서버 검증, 심사 대응을 합쳐 약 120~240시간.",
+          "learning_value": "StoreKit 인앱결제와 영수증 검증, 심사 대응은 다른 외주에도 쓸 수 있음.",
+          "reusability_value": "결제 패턴은 재사용할 수 있지만 고객사 앱·이용권 체계에 종속됨.",
+          "market_value": "iOS 인앱결제 도입 수요는 꾸준하지만 공고 하나가 특정 기업 건임.",
+          "technical_risk": "애플 심사 승인 의존, 결제 오류 비용, 기존 시스템 불확실성이 있음."
+        }
+      },
+      "usage": {
+        "input_tokens": 8,
+        "output_tokens": 2438,
+        "cache_creation_input_tokens": 2910,
+        "cache_read_input_tokens": 34499
+      },
+      "cost_usd": 0.0385708,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "5a737ba4-2a2b-433e-b582-857790a04c6d",
+        "platform": "freemoa",
+        "external_project_id": "48491",
+        "title": "위하고 세무 업무 자동화 PC 프로그램 구축",
+        "budget": "25,000,000원 ~ 40,000,000원",
+        "project_duration": "93일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "80b9aa24d61d97f147eed55606004e6b",
+        "chars": 2732
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "automation_rpa",
+        "project_subcategory": "세무 업무 자동화 PC앱",
+        "engagement_type": "new_build",
+        "industry": "professional_services",
+        "complexity_types": [
+          "integration_heavy",
+          "legacy_heavy",
+          "high_risk_domain"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "browser_automation",
+          "web_crawling",
+          "workflow_automation",
+          "security",
+          "database",
+          "external_api_integration",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "세무사무소용 위하고·홈택스 연동 부가세/원천세 신고 자동화 로직(클라이언트 제공 Claude 스크립트)을 상용 Windows PC 프로그램으로 리팩토링하고 GUI, 보안, 라이선스, 인스톨러까지 턴키 구축한다.",
+        "required_features": [
+          "authentication",
+          "role_permission",
+          "crawling_scraping",
+          "statistics_reporting",
+          "admin_dashboard",
+          "security_hardening",
+          "legacy_migration",
+          "document_generation"
+        ],
+        "required_integrations": [
+          "erp_external"
+        ],
+        "required_platforms": [
+          "desktop"
+        ],
+        "required_skills": [
+          "desktop_app",
+          "backend",
+          "crawling",
+          "security",
+          "frontend",
+          "database",
+          "ui_design"
+        ],
+        "suggested_stack": [
+          "Electron",
+          "TypeScript",
+          "Playwright",
+          "SQLite (SQLCipher)",
+          "React",
+          "electron-builder"
+        ],
+        "vibe_coding_difficulty": 62,
+        "estimated_hours_min": 320,
+        "estimated_hours_max": 560,
+        "learning_value": 60,
+        "reusability_value": 38,
+        "market_value": 50,
+        "technical_risk": 68,
+        "requirement_clarity": 55,
+        "rationale": {
+          "vibe_coding_difficulty": "비공식 연동·2차 인증 대응과 기존 스크립트 분석, 세무 정확성 검증이 어렵다.",
+          "estimated_hours": "분석·리팩토링, GUI, 라이선스, 인스톨러, 보안, 문서화 포함 약 320~560시간.",
+          "learning_value": "데스크톱 패키징, 라이선스, 자동화 예외 처리를 익힐 수 있다.",
+          "reusability_value": "라이선스·인스톨러 구조는 재사용되나 위하고 전용 로직이 많다.",
+          "market_value": "세무 자동화 특화라 반복성은 중간 수준이다.",
+          "technical_risk": "위하고·홈택스 UI 변경, 2차 인증, 약관 문제와 세무 오류 위험이 있다."
+        }
+      },
+      "usage": {
+        "input_tokens": 8,
+        "output_tokens": 3154,
+        "cache_creation_input_tokens": 4996,
+        "cache_read_input_tokens": 38625
+      },
+      "cost_usd": 0.051771,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "8a7a86d1-6abe-46f1-a897-72d27cc884e3",
+        "platform": "freemoa",
+        "external_project_id": "48488",
+        "title": "[상주] AI Agent 구축 상주 인력 모집",
+        "budget": "5,000,000원 ~ 10,000,000원",
+        "project_duration": "240일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "547aea458e15bb4fd5277ddc12eddc8e",
+        "chars": 2207
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "ai_service",
+        "project_subcategory": "금융사 AI Agent 개발",
+        "engagement_type": "staffing",
+        "industry": "finance",
+        "complexity_types": [
+          "integration_heavy",
+          "high_risk_domain"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "ai_llm",
+          "rag_embeddings",
+          "ai_agents",
+          "external_api_integration",
+          "backend_api"
+        ],
+        "uncertain_fields": [],
+        "summary": "부산 소재 금융회사의 업무 혁신을 위해 SDS FabriX 플랫폼 위에서 공통 Agent 12종과 업무 Agent 26종을 개발하는 8개월 상주 인력 투입 건입니다.",
+        "required_features": [
+          "llm_generation",
+          "rag_search",
+          "search_filter",
+          "document_generation",
+          "llm_chatbot"
+        ],
+        "required_integrations": [
+          "erp_external"
+        ],
+        "required_platforms": [
+          "backend_api"
+        ],
+        "required_skills": [
+          "backend",
+          "llm_integration",
+          "ai_ml",
+          "legacy_tech"
+        ],
+        "suggested_stack": [
+          "Python",
+          "FabriX",
+          "MCP",
+          "LLM API",
+          "Vector DB"
+        ],
+        "vibe_coding_difficulty": 58,
+        "estimated_hours_min": 1100,
+        "estimated_hours_max": 1400,
+        "learning_value": 60,
+        "reusability_value": 30,
+        "market_value": 55,
+        "technical_risk": 50,
+        "requirement_clarity": 50,
+        "rationale": {
+          "vibe_coding_difficulty": "사내 플랫폼 FabriX 종속, 금융권 폐쇄환경 상주로 난이도 중상.",
+          "estimated_hours": "1인 8개월 상주 기준(약 160~175시간/월) 범위로 추정.",
+          "learning_value": "LLM/RAG/MCP Agent 개발 경험은 가치 있으나 특정 플랫폼 중심.",
+          "reusability_value": "SDS FabriX와 고객 전용 환경에 묶여 재사용 제한적.",
+          "market_value": "기업용 AI Agent 수요는 높으나 FabriX 특화 수요는 제한적.",
+          "technical_risk": "폐쇄망, 플랫폼 문서 부족, 금융권 보안 요건 불확실."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1145,
+        "cache_creation_input_tokens": 3634,
+        "cache_read_input_tokens": 23854
+      },
+      "cost_usd": 0.025317799999999998,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "75807eba-dcd1-4dd2-855c-33ccf5988ed8",
+        "platform": "freemoa",
+        "external_project_id": "48487",
+        "title": "AI 기반 주거형 종합공조 토탈 플랫폼 신규 구축",
+        "budget": "10,000,000원 ~ 20,000,000원",
+        "project_duration": "90일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "5a2cbb6733fad922f2d27da1492c7068",
+        "chars": 3075
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "platform_marketplace",
+        "project_subcategory": "공조 판매·시공 플랫폼",
+        "engagement_type": "new_build",
+        "industry": "real_estate",
+        "complexity_types": [
+          "integration_heavy",
+          "workflow_complex"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "payments",
+          "external_api_integration",
+          "analytics_dashboard"
+        ],
+        "uncertain_fields": [],
+        "summary": "주거형 종합공조 견적·판매·시공 파트너 매칭·A/S를 잇는 반응형 웹 플랫폼을 신규 구축한다. 고객/판매자/파트너/관리자 권한 분리, PG 결제, 고객사 AI 시스템 3종 API 연동을 포함한다.",
+        "required_features": [
+          "authentication",
+          "user_management",
+          "role_permission",
+          "product_catalog",
+          "cart_checkout",
+          "order_management",
+          "payment",
+          "matching",
+          "scheduling_calendar",
+          "settlement",
+          "admin_dashboard",
+          "statistics_reporting",
+          "cms",
+          "external_api_integration"
+        ],
+        "required_integrations": [
+          "payment_gateway"
+        ],
+        "required_platforms": [
+          "web",
+          "mobile_web",
+          "admin_web"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "authentication",
+          "payment",
+          "ui_design",
+          "project_management"
+        ],
+        "suggested_stack": [
+          "Next.js",
+          "TypeScript",
+          "Supabase",
+          "Tailwind",
+          "토스페이먼츠",
+          "Vercel"
+        ],
+        "vibe_coding_difficulty": 48,
+        "estimated_hours_min": 300,
+        "estimated_hours_max": 480,
+        "learning_value": 50,
+        "reusability_value": 62,
+        "market_value": 66,
+        "technical_risk": 42,
+        "requirement_clarity": 52,
+        "rationale": {
+          "vibe_coding_difficulty": "다중 권한 커머스·정산·AI API 연동이 결합된 중간 난이도.",
+          "estimated_hours": "4개 역할 화면과 결제·정산·기획·디자인 포함 범위 기준.",
+          "learning_value": "멀티롤 마켓플레이스와 PG 연동 경험은 유용하나 새 기술은 적음.",
+          "reusability_value": "커머스·권한·관리자는 재사용 가능하나 공조 도메인 커스텀이 큼.",
+          "market_value": "멀티롤 커머스·O2O 매칭 플랫폼 수요는 반복적임.",
+          "technical_risk": "AI API 명세 미확정과 범위 불명확, 예산 대비 범위 위험이 있음."
+        }
+      },
+      "usage": {
+        "input_tokens": 8,
+        "output_tokens": 3235,
+        "cache_creation_input_tokens": 5366,
+        "cache_read_input_tokens": 39397
+      },
+      "cost_usd": 0.053660400000000004,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "843275a7-1a6e-4a3e-9575-e2933f94bbea",
+        "platform": "freemoa",
+        "external_project_id": "48479",
+        "title": "삼성 안드로이드 태블릿 웹사이트 출력 연동 APK 개발",
+        "budget": "800,000원 ~ 1,000,000원",
+        "project_duration": "7일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "59a08ca40d17cbcf0dee4605a23e3d35",
+        "chars": 2630
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "웹-프린터 출력 브릿지 APK",
+        "engagement_type": "new_build",
+        "industry": "general",
+        "complexity_types": [
+          "hardware_iot"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "mobile",
+          "hardware_iot"
+        ],
+        "uncertain_fields": [],
+        "summary": "기존 웹사이트를 삼성 Android 태블릿 WebView APK로 실행하고, 출력 버튼 클릭 시 생성된 PDF를 JavaScript Bridge로 전달받아 지정된 삼성 무선 레이저 프린터로 팝업 없이 바로 출력하는 경량 앱을 개발한다.",
+        "required_features": [
+          "hardware_integration",
+          "file_upload",
+          "bug_fix_maintenance"
+        ],
+        "required_integrations": [
+          "hardware_device"
+        ],
+        "required_platforms": [
+          "android"
+        ],
+        "required_skills": [
+          "mobile_native",
+          "frontend"
+        ],
+        "suggested_stack": [
+          "Kotlin",
+          "Android WebView",
+          "Android Print Framework",
+          "Samsung Mobile Print SDK"
+        ],
+        "vibe_coding_difficulty": 52,
+        "estimated_hours_min": 30,
+        "estimated_hours_max": 60,
+        "learning_value": 40,
+        "reusability_value": 35,
+        "market_value": 40,
+        "technical_risk": 55,
+        "requirement_clarity": 65,
+        "rationale": {
+          "vibe_coding_difficulty": "WebView 자체는 쉬우나 무팝업 프린터 직접 출력과 실기기 의존이 있다.",
+          "estimated_hours": "WebView·브릿지·PDF 전달·프린터 연동·실기기 테스트로 30~60시간.",
+          "learning_value": "Android 프린트 연동은 배우나 적용 범위가 좁다.",
+          "reusability_value": "WebView 브릿지는 재사용되나 프린터 연동은 장비에 종속된다.",
+          "market_value": "웹-프린터 브릿지 수요는 있으나 틈새 영역이다.",
+          "technical_risk": "프린터 모델 미정이고 무팝업 출력 가능 여부가 불확실하다."
+        }
+      },
+      "usage": {
+        "input_tokens": 6,
+        "output_tokens": 1137,
+        "cache_creation_input_tokens": 4205,
+        "cache_read_input_tokens": 24343
+      },
+      "cost_usd": 0.026763099999999998,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "7fcdab91-6caf-406f-812f-63064dd4abae",
+        "platform": "freemoa",
+        "external_project_id": "48472",
+        "title": "해외(태국) 무인 생수 락커 SW 및 제어보드 통합 개발",
+        "budget": "50,000,000원 ~ 100,000,000원",
+        "project_duration": "180일"
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "aee9a4e503975c54ce1bc4cc616a4f67",
+        "chars": 5145
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "무인 락커 판매 시스템",
+        "engagement_type": "new_build",
+        "industry": "commerce",
+        "complexity_types": [
+          "hardware_iot",
+          "integration_heavy",
+          "workflow_complex",
+          "high_risk_domain",
+          "multi_platform"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "payments",
+          "external_api_integration",
+          "realtime",
+          "hardware_iot",
+          "security",
+          "cloud_infra",
+          "ci_cd"
+        ],
+        "uncertain_fields": [],
+        "summary": "태국 콘도 설치용 30칸 무인 생수 락커의 고객 결제 PWA, 주문·관제 서버, 관리자 대시보드, ESP32-S3 펌웨어, PCB 설계와 부품 조달까지 통합 개발한다.",
+        "required_features": [
+          "authentication",
+          "multilingual",
+          "payment",
+          "order_management",
+          "admin_dashboard",
+          "role_permission",
+          "inventory_management",
+          "statistics_reporting",
+          "notification_push",
+          "iot_device_control",
+          "hardware_integration",
+          "security_hardening",
+          "infra_devops",
+          "product_catalog"
+        ],
+        "required_integrations": [
+          "payment_gateway",
+          "easy_pay",
+          "hardware_device",
+          "aws",
+          "slack"
+        ],
+        "required_platforms": [
+          "mobile_web",
+          "admin_web",
+          "backend_api",
+          "embedded"
+        ],
+        "required_skills": [
+          "frontend",
+          "backend",
+          "database",
+          "payment",
+          "security",
+          "embedded",
+          "devops_infra",
+          "realtime"
+        ],
+        "suggested_stack": [
+          "Next.js",
+          "TypeScript",
+          "Node.js",
+          "PostgreSQL",
+          "Redis",
+          "MQTT(EMQX)",
+          "ESP32-S3 FreeRTOS"
+        ],
+        "vibe_coding_difficulty": 72,
+        "estimated_hours_min": 700,
+        "estimated_hours_max": 1100,
+        "learning_value": 70,
+        "reusability_value": 35,
+        "market_value": 35,
+        "technical_risk": 75,
+        "requirement_clarity": 80,
+        "rationale": {
+          "vibe_coding_difficulty": "펌웨어·PCB·mTLS·결제 상태머신·현지 검증이 결합되어 AI 단독 수행이 어렵다.",
+          "estimated_hours": "SW 전체에 펌웨어, PCB, 부품 조달, 통합시험까지 포함해 범위가 크다.",
+          "learning_value": "MQTT 보안, 결제 웹훅, ESP32 OTA 등 재활용 가능한 기술을 익힌다.",
+          "reusability_value": "결제·관리자 부분은 재사용되나 장비와 PCB는 이 프로젝트에 종속된다.",
+          "market_value": "무인 락커 IoT 결제는 수요가 제한적이고 틈새 시장이다.",
+          "technical_risk": "실기기 의존, 해외 결제 연동, 현지 인증, 반옥외 환경 때문에 위험이 크다."
+        }
+      },
+      "usage": {
+        "input_tokens": 10,
+        "output_tokens": 4219,
+        "cache_creation_input_tokens": 7869,
+        "cache_read_input_tokens": 60108
+      },
+      "cost_usd": 0.0739041,
+      "attempts": 1
+    },
+    {
+      "project": {
+        "id": "8ffd2169-3f46-41d9-9323-8ba6dec41740",
+        "platform": "freemoa",
+        "external_project_id": "48470",
+        "title": "거래소 신규 공지사항 실시간 감지 파이썬 코드 개발",
+        "budget": "10,000원 ~ 1,000,000원",
+        "project_duration": null
+      },
+      "input_meta": {
+        "truncated": false,
+        "limited_info": false,
+        "hash": "38409309619a781610caea9262b4c6dc",
+        "chars": 1648
+      },
+      "ok": true,
+      "analysis": {
+        "project_type": "crawler_data_collection",
+        "project_subcategory": "거래소 공지 감지기",
+        "engagement_type": "new_build",
+        "industry": "finance",
+        "complexity_types": [
+          "algorithmic_specialized",
+          "integration_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "web_crawling",
+          "backend_api",
+          "external_api_integration"
+        ],
+        "uncertain_fields": [],
+        "summary": "업비트·빗썸의 신규 공지가 목록에 노출되기 전 선생성되는 공지번호를 선제 탐색해 1초 이내에 제목 등을 감지하는 Python 모니터링 프로그램을 개발한다. 차단 회피와 24시간 안정 동작, 출력/알림 파이프라인을 포함한다.",
+        "required_features": [
+          "crawling_scraping",
+          "data_pipeline",
+          "notification_push"
+        ],
+        "required_integrations": [],
+        "required_platforms": [
+          "backend_api"
+        ],
+        "required_skills": [
+          "backend",
+          "crawling"
+        ],
+        "suggested_stack": [
+          "Python",
+          "asyncio",
+          "aiohttp",
+          "httpx",
+          "Redis",
+          "Docker"
+        ],
+        "vibe_coding_difficulty": 62,
+        "estimated_hours_min": 30,
+        "estimated_hours_max": 80,
+        "learning_value": 45,
+        "reusability_value": 35,
+        "market_value": 40,
+        "technical_risk": 75,
+        "requirement_clarity": 50,
+        "rationale": {
+          "vibe_coding_difficulty": "비공개 번호 패턴 역분석과 1초 이내 감지, 차단 회피가 필요해 어렵다.",
+          "estimated_hours": "두 거래소 패턴 분석, 고속 비동기 수집기, 알림 구현으로 30~80시간.",
+          "learning_value": "비동기 고속 수집과 차단 회피는 유용하나 도메인이 좁다.",
+          "reusability_value": "거래소별 패턴에 종속되어 비동기 수집 골격만 재사용 가능하다.",
+          "market_value": "거래소 공지 감지 수요는 있으나 틈새 시장이다.",
+          "technical_risk": "패턴 재현 보장이 없고 거래소 차단 정책과 변경에 취약하다."
+        }
+      },
+      "usage": {
+        "input_tokens": 8,
+        "output_tokens": 2921,
+        "cache_creation_input_tokens": 5299,
+        "cache_read_input_tokens": 37936
+      },
+      "cost_usd": 0.0500607,
+      "attempts": 1
+    }
+  ]
+}
