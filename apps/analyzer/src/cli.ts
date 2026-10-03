@@ -26,6 +26,12 @@ import {
   type TokenUsage,
   computeOpportunityScoreReport,
   renderOpportunityScoreReport,
+  FEATURE_VERSION,
+  analysisSegment,
+  computeRepetitionReport,
+  extractFeatures,
+  renderRepetitionReport,
+  type FeatureRow,
 } from "@fr/analysis";
 import { LlmClient, llmBackend, loadLlmConfig, type SyncLlm } from "./llm";
 import { ClaudeCliClient } from "./llm-cli";
@@ -68,6 +74,8 @@ commands:
   compare <a> <b> 두 결과 파일의 분류 비교 (예: v2 → v3, 수동 샘플 → 실제 API)
   market-stats    시장 통계 (원본 전체 + 분석 표본). docs/market-stats-v1.md|json 생성. 최종 점수는 만들지 않음
   opportunity-score 495건 분석으로 공략 점수 v0.1 후보 + 이상치 포함/제외 + 민감도 리포트 생성
+  feature-repeat  일반 외주 분석 결과로 project_type 내부 기능 반복률/유사도/반복 bundle 리포트 (LLM 호출 없음)
+                  --save: project_features 테이블에도 저장 · --min-support <n> (기본 5) · --types a,b,c
   validate <file> 결과 파일의 모든 분석을 현재 schema 로 검증 (DB 불필요). --report 를 붙이면 .out 에 md 리포트 생성
   classify        전체 수집 데이터 분류 준비: 기본은 대상 건수/토큰/비용/API 호출 수 추정만 출력
                   --execute 를 붙여야 실제 실행 (--batch: Batch API 로 제출)
@@ -104,6 +112,18 @@ env: ANTHROPIC_API_KEY, ANALYZER_MODEL (일반 실행 기본 claude-opus-5-5), A
 `;
 
 const log = (m: string) => console.log(m);
+
+/** feature-repeat 기본 대상 (opportunity-score v0.1 상위 유형) */
+const FEATURE_REPEAT_TYPES = [
+  "business_management",
+  "platform_marketplace",
+  "ecommerce",
+  "website",
+  "admin_backoffice",
+  "reservation",
+  "saas",
+  "ai_service",
+];
 const stamp = () => new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 
 function readProjectIdsFile(file: string): string[] {
@@ -151,6 +171,9 @@ async function main() {
       "min-n": { type: "string" },
       "min-combo": { type: "string" },
       out: { type: "string" },
+      save: { type: "boolean" },
+      "min-support": { type: "string" },
+      types: { type: "string" },
       help: { type: "boolean", short: "h" },
     },
   });
@@ -476,6 +499,73 @@ async function main() {
       writeFileSync(`${outBase}.md`, `${renderOpportunityScoreReport(report)}\n`);
       log(`분석 성공 ${report.quality.analyzed_success}건 / 시간 이상치 ${report.quality.hours_outlier}건 / 최종 실패 ${report.quality.final_failed}건`);
       log(`기본 후보: 이상치 제외 + 균형형(v0.1), 일반 외주 ${report.modes.exclude_outliers.non_staffing.n}건`);
+      log(`→ ${outBase}.md`);
+      log(`→ ${outBase}.json`);
+      return;
+    }
+
+    case "feature-repeat": {
+      const version = values.version ?? ANALYSIS_VERSION;
+      const types = values.types ? values.types.split(",").map((t) => t.trim()).filter(Boolean) : FEATURE_REPEAT_TYPES;
+      const { analyzed: allAnalyzed } = await store.marketRows(version);
+      const sampleSet = values["sample-file"] ? new Set(readProjectIdsFile(resolveArg(values["sample-file"])!)) : null;
+      // 일반 외주만 (opportunity-score 와 같은 기준: engagement_type != staffing)
+      const analyzed = allAnalyzed.filter((a) => (!sampleSet || sampleSet.has(a.project_id)) && analysisSegment(a) === "non_staffing");
+      const projects = new Map((await store.projectsByIds(analyzed.map((a) => a.project_id))).map((p) => [p.id, p]));
+      const sources = { analysis_only: 0, text_only: 0, both: 0 };
+      const unmapped: string[][] = [];
+      const perProject = analyzed.map((a) => {
+        const raw = (a.raw_analysis ?? {}) as { required_features?: string[]; required_integrations?: string[] };
+        const p = projects.get(a.project_id);
+        const fs = extractFeatures({
+          required_features: raw.required_features,
+          required_integrations: raw.required_integrations,
+          title: p?.title,
+          description: p?.description,
+        });
+        for (const f of fs.features) {
+          const e = fs.evidence[f]!;
+          if (e.analysis.length && e.text.length) sources.both++;
+          else if (e.analysis.length) sources.analysis_only++;
+          else sources.text_only++;
+        }
+        if (types.includes(a.project_type ?? "")) unmapped.push(fs.unmapped);
+        return { project_id: a.project_id, project_type: a.project_type ?? "(none)", title: p?.title ?? null, platform: a.platform, ...fs };
+      });
+      const rows: FeatureRow[] = perProject.map((x) => ({ project_id: x.project_id, project_type: x.project_type, title: x.title, features: x.features }));
+      const report = computeRepetitionReport(rows, {
+        projectTypes: types,
+        analysisVersion: version,
+        featureVersion: FEATURE_VERSION,
+        scope: `analysis ${version} 일반 외주(engagement_type ≠ staffing)${sampleSet ? " · sample-file 제한" : ""}`,
+        minSupport: values["min-support"] ? positive(values["min-support"], "--min-support") : undefined,
+        unmapped,
+        sources,
+      });
+      if (values.save) {
+        await store.saveFeatureSets(
+          perProject.map((x) => ({
+            project_id: x.project_id,
+            analysis_version: version,
+            feature_version: FEATURE_VERSION,
+            features: x.features,
+            evidence: x.evidence,
+            unmapped_codes: x.unmapped,
+          })),
+        );
+        log(`project_features 저장: ${perProject.length}건 (${version}/${FEATURE_VERSION})`);
+      }
+      const repoRoot = path.resolve(import.meta.dirname, "../../..");
+      const outBase = values.out
+        ? path.resolve(process.env.INIT_CWD ?? process.cwd(), values.out)
+        : path.join(repoRoot, "docs", `feature-repetition-${FEATURE_VERSION}-${version}`);
+      mkdirSync(path.dirname(outBase), { recursive: true });
+      const projectRows = perProject
+        .filter((x) => types.includes(x.project_type))
+        .map(({ project_id, project_type, platform, title, features, evidence }) => ({ project_id, project_type, platform, title, features, evidence }));
+      writeFileSync(`${outBase}.json`, `${JSON.stringify({ ...report, projects: projectRows }, null, 2)}\n`);
+      writeFileSync(`${outBase}.md`, `${renderRepetitionReport(report)}\n`);
+      log(`일반 외주 ${analyzed.length}건 중 대상 유형 ${report.total}건 · 유형 ${report.types.length}개`);
       log(`→ ${outBase}.md`);
       log(`→ ${outBase}.json`);
       return;

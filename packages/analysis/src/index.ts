@@ -10,3 +10,5 @@ export * from "./market-stats";
 export * from "./market-report";
 export * from "./market-sample";
 export * from "./opportunity-score";
+export * from "./features";
+export * from "./feature-repetition";

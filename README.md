@@ -149,6 +149,8 @@ pnpm analyzer validate docs/analyzer-v3.1-manual-sample-20.json   # 결과 파�
 pnpm analyzer classify                            # 전체 분류 추정만 (대상 건수/토큰/비용/API 호출 수)
 pnpm analyzer classify --execute --batch          # 실제 전체 분류 (승인 후에만)
 pnpm analyzer stats                               # 분류 분포 통계 (project_type/engagement/industry/reuse/technology_assets)
+pnpm analyzer feature-repeat                      # 일반 외주 v3.3 분석 → project_type 내부 기능 반복률/유사도/반복 bundle (LLM 호출 없음)
+pnpm analyzer feature-repeat --save               # + project_features 테이블 저장 (migration 20261005000000 필요)
 ```
 
 API 키 대신 **Claude 구독제**로 동기 분석(`sample` / `run` / `classify --execute`)을 돌릴 수 있다. Claude Code 헤드리스 모드(`claude -p`)를 같은 시스템 프롬프트·JSON 스키마로 호출한다.
@@ -164,6 +166,7 @@ ANALYZER_BACKEND=claude-cli ANALYZER_MODEL=claude-sonnet-5-5 pnpm analyzer sampl
 - 현재 기준은 `v3.3` (v3.2 에서 reuse_level 규칙만 수정: medium 은 구체적 모듈 필요, one_off 는 아주 특수한 고객 종속만. v3.2 = v3.1 에 project_type `maintenance` 제거·`test_automation` 추가·complexity_types 규칙 강화·reuse low/medium 경계. v3.1 = v3 에 project_type `qa_testing` 추가, reuse_level 기준 강화, iot_device 경계, 예산과 작업시간 분리, uncertain_fields 조건 강화). v3 = v2 에 project_type 4종·technology_assets 3종·engagement 경계 규칙 추가: 통계용 6개 분류 `project_type`, `engagement_type`, `industry`, `complexity_types[]`, `reuse_level`, `technology_assets[]`
   (enum 은 `packages/analysis/src/taxonomy.ts`). 판단이 애매한 분류는 `uncertain_fields` 로 표시되고 리포트 "분류가 애매한 케이스"에 모인다.
 - 점수(종합점수·빈도/견적/구현 용이성/반복률 점수)는 아직 만들지 않는다. 수집 → 분류 → 분포 확인 → 배점 결정 → 전체 점수화 순서.
+- 표준 기능 vocabulary(f1, 51개)는 `docs/feature-vocabulary-f1.md`. taxonomy v3.3 과 독립이며 결과는 `docs/feature-repetition-f1-v3.3.md|json`.
 - `run` / `batch-submit` 은 100건을 넘으면 `--yes` 가 있어야 실행된다.
 - `docs/analyzer-v1-sample-20.*`, `docs/analyzer-v2-sample-20.*` 는 이전 기준 참고 자료. v1/v2/v3 결과는 `(project_id, analysis_version)` 로 따로 저장되어 서로 덮어쓰지 않는다.
 

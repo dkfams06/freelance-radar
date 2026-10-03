@@ -254,6 +254,18 @@ export class AnalyzerStore {
     return { projects, analyzed };
   }
 
+  /** 표준 기능 set 저장 (project_features). 같은 (project, analysis_version, feature_version) 은 덮어쓴다 */
+  async saveFeatureSets(
+    rows: { project_id: string; analysis_version: string; feature_version: string; features: string[]; evidence: unknown; unmapped_codes: string[] }[],
+  ): Promise<void> {
+    for (let i = 0; i < rows.length; i += 200) {
+      const { error } = await this.db
+        .from("project_features")
+        .upsert(rows.slice(i, i + 200), { onConflict: "project_id,analysis_version,feature_version" });
+      if (error) throw new Error(`save project_features: ${JSON.stringify(error)}`);
+    }
+  }
+
   async analysisErrors(version: string, projectIds?: string[]): Promise<Array<{ project_id: string; error_type: string; attempt: number; resolved_at: string | null }>> {
     const out: Array<{ project_id: string; error_type: string; attempt: number; resolved_at: string | null }> = [];
     if (!projectIds) {
