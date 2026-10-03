@@ -1,0 +1,1143 @@
+{
+  "analysis_version": "v3.3",
+  "model": "claude-code-session (manual, API 미호출)",
+  "mode": "import",
+  "created_at": "2026-10-03T03:53:44.230Z",
+  "note": "v3.3 holdout 20건 수동 기준. 이전 v3~v3.2 샘플과 겹치지 않음. Sonnet 결과를 보기 전에 확정·커밋. 작성자(Claude)의 판정이며 v3.3 프롬프트도 같은 작성자가 썼으므로 순환(자기일치) 위험이 있음. 분류 6개 필드가 비교 대상이고 점수/시간은 참고용 추정치. required_features/integrations/skills/suggested_stack 은 비교 대상이 아니라 비워 둠. 실제 API 결과 아님",
+  "usage_total": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  },
+  "cost_usd_total": 0,
+  "items": [
+    {
+      "project": {
+        "id": "43aadf81-b7ee-43d9-b3dd-ccd072636c16",
+        "platform": "freemoa",
+        "external_project_id": "48251",
+        "title": "별장/콘도 회원권 분양, 예약 관리 플랫폼 구축(Web/App)",
+        "budget": "50,000,000원 ~ 100,000,000원",
+        "project_duration": "121일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "reservation",
+        "project_subcategory": "회원권 분양·예약",
+        "engagement_type": "new_build",
+        "industry": "real_estate",
+        "complexity_types": [
+          "multi_platform",
+          "workflow_complex",
+          "integration_heavy"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "payments",
+          "mobile",
+          "external_api_integration"
+        ],
+        "uncertain_fields": [],
+        "summary": "별장/콘도 회원권 분양, 실시간 예약, 2차 지분 거래, 결제·정산을 제공하는 Web/App/Admin 플랫폼",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "cross_platform_app"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 55,
+        "estimated_hours_min": 700,
+        "estimated_hours_max": 1300,
+        "learning_value": 55,
+        "reusability_value": 55,
+        "market_value": 60,
+        "technical_risk": 55,
+        "requirement_clarity": 50,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "예약 엔진·결제/정산·관리자 구조는 재사용 가능하나 회원권/지분 도메인이 특수",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "ae121a16-33bd-4ca2-9fac-21735d8779f1",
+        "platform": "freemoa",
+        "external_project_id": "48011",
+        "title": "[신규/임베디드] Raspberry Pi 센서 연동 프로토타입 개발",
+        "budget": "5,000,000원 ~ 7,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "RPi 센서 프로토타입",
+        "engagement_type": "new_build",
+        "industry": "general",
+        "complexity_types": [
+          "hardware_iot"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "hardware_iot"
+        ],
+        "uncertain_fields": [],
+        "summary": "Raspberry Pi에 센서 2~3종을 연동해 데이터를 수집·통합하고 기초 분석 로직을 구현하는 프로토타입",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "embedded"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 55,
+        "estimated_hours_min": 40,
+        "estimated_hours_max": 120,
+        "learning_value": 45,
+        "reusability_value": 25,
+        "market_value": 25,
+        "technical_risk": 55,
+        "requirement_clarity": 45,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "센서 연동 경험은 남지만 클라이언트 지정 하드웨어에 맞춘 코드라 재사용 제한적",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "7110502c-494a-42e1-abaf-2d7d0db97ab7",
+        "platform": "freemoa",
+        "external_project_id": "47955",
+        "title": "(상주) 커스텀 Android 단말 및 기본 탑재 앱 QA엔지니어",
+        "budget": "4,000,000원 ~ 5,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "qa_testing",
+        "project_subcategory": "단말 앱 QA",
+        "engagement_type": "staffing",
+        "industry": "general",
+        "complexity_types": [
+          "hardware_iot"
+        ],
+        "reuse_level": "one_off",
+        "technology_assets": [
+          "mobile"
+        ],
+        "uncertain_fields": [],
+        "summary": "자체 제작 AOSP 단말의 기본 탑재 앱(런처·VoIP 등)에 대해 TC 작성과 테스트를 1개월 상주로 수행",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "android"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 20,
+        "estimated_hours_min": 150,
+        "estimated_hours_max": 180,
+        "learning_value": 20,
+        "reusability_value": 8,
+        "market_value": 40,
+        "technical_risk": 15,
+        "requirement_clarity": 70,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "자체 제작 단말과 자사 앱 전용 TC라 다른 외주에 재사용 거의 불가",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "1c58e8b6-f209-4c05-878d-48c9aa8815ff",
+        "platform": "freemoa",
+        "external_project_id": "48311",
+        "title": "[상주] PLM/BOM 고도화 개발 (Java/Vue3/Tibero)",
+        "budget": "5,000,000원 ~ 10,000,000원",
+        "project_duration": "120일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "business_management",
+        "project_subcategory": "PLM/BOM 고도화",
+        "engagement_type": "staffing",
+        "industry": "manufacturing",
+        "complexity_types": [
+          "legacy_heavy"
+        ],
+        "reuse_level": "one_off",
+        "technology_assets": [
+          "legacy_enterprise",
+          "backend_api",
+          "database"
+        ],
+        "uncertain_fields": [],
+        "summary": "대기업 계열 PLM/BOM 시스템의 분석·설계와 Java/Vue3/Tibero 기반 고도화 개발 인력 상주 투입",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 60,
+        "estimated_hours_min": 600,
+        "estimated_hours_max": 800,
+        "learning_value": 30,
+        "reusability_value": 10,
+        "market_value": 20,
+        "technical_risk": 50,
+        "requirement_clarity": 30,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "특정 고객사 내부 PLM/BOM 시스템과 Tibero 환경에 강하게 종속",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "deaa495d-8875-4f4d-8546-a5b4a05a53d8",
+        "platform": "freemoa",
+        "external_project_id": "47704",
+        "title": "크리에이터 주요 지표 분석 시각화 제공 플랫폼 웹 개발",
+        "budget": "10,000,000원 ~ 20,000,000원",
+        "project_duration": "60일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "data_dashboard",
+        "project_subcategory": "크리에이터 분석 플랫폼",
+        "engagement_type": "new_build",
+        "industry": "media_content",
+        "complexity_types": [
+          "standard_crud"
+        ],
+        "reuse_level": "high",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "analytics_dashboard",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [],
+        "summary": "내부 API 데이터를 시각화하는 사용자 웹, 관리자 백오피스(회원·콘텐츠·구독·통계), 백엔드를 구축",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 35,
+        "estimated_hours_min": 250,
+        "estimated_hours_max": 450,
+        "learning_value": 50,
+        "reusability_value": 70,
+        "market_value": 70,
+        "technical_risk": 30,
+        "requirement_clarity": 80,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "인증·관리자·구독 관리·대시보드 구조는 다른 SaaS형 외주에 거의 그대로 재사용 가능",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "a204db52-7228-4ac2-9bc2-e913a381365e",
+        "platform": "freemoa",
+        "external_project_id": "47969",
+        "title": "OpenClaw 설치 및 증권 HTS API 연동 설정 작업",
+        "budget": "300,000원 ~ 800,000원",
+        "project_duration": "2일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "crawler_data_collection",
+        "project_subcategory": "HTS API 환경 설정",
+        "engagement_type": "new_build",
+        "industry": "finance",
+        "complexity_types": [
+          "integration_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "external_api_integration"
+        ],
+        "uncertain_fields": [
+          "project_type"
+        ],
+        "summary": "OpenClaw 설치와 증권 HTS OpenAPI 기본 연동 설정, 데이터 수신 동작 확인",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "desktop"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 18,
+        "estimated_hours_min": 6,
+        "estimated_hours_max": 20,
+        "learning_value": 20,
+        "reusability_value": 15,
+        "market_value": 25,
+        "technical_risk": 25,
+        "requirement_clarity": 55,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "특정 프로그램·특정 증권사 API 환경 설정이라 코드 재사용 제한적",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "5a6a889f-0c1b-4f19-b056-7540f2676130",
+        "platform": "freemoa",
+        "external_project_id": "48169",
+        "title": "[도급/상주] 영어교육 플랫폼 차세대 아키텍처 전환 개발",
+        "budget": "100,000,000원 ~ 200,000,000원",
+        "project_duration": "180일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "saas",
+        "project_subcategory": "교육 플랫폼 재구축",
+        "engagement_type": "migration",
+        "industry": "education",
+        "complexity_types": [
+          "legacy_heavy",
+          "integration_heavy"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "saas_architecture",
+          "ai_llm",
+          "speech_audio_ai",
+          "external_api_integration",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [],
+        "summary": "PHP/그누보드 기반 영어교육 플랫폼을 Next.js/NestJS/PostgreSQL 멀티테넌트 구조로 재구축하고 데이터를 이전",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 65,
+        "estimated_hours_min": 1500,
+        "estimated_hours_max": 2800,
+        "learning_value": 65,
+        "reusability_value": 50,
+        "market_value": 55,
+        "technical_risk": 60,
+        "requirement_clarity": 60,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "멀티테넌트 SaaS 구조·RBAC·AI(STT/TTS/GPT) 연동 레이어는 재사용 가능하나 기존 시스템 이전 부분은 전용",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "d3cf6aca-4ae1-417f-98fd-e93cd0a0fa05",
+        "platform": "wishket",
+        "external_project_id": "158096",
+        "title": "글로벌 B2B 쇼핑몰 신규 구축 (WordPress + WooCommerce)",
+        "budget": "15,000,000원",
+        "project_duration": "90일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "ecommerce",
+        "project_subcategory": "B2B 쇼핑몰",
+        "engagement_type": "new_build",
+        "industry": "commerce",
+        "complexity_types": [
+          "standard_crud"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [],
+        "summary": "WordPress+WooCommerce 기반 글로벌 B2B 쇼핑몰: 구조화 Product DB, 필터 검색, 견적/주문, 관리자 운영",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 30,
+        "estimated_hours_min": 150,
+        "estimated_hours_max": 330,
+        "learning_value": 30,
+        "reusability_value": 50,
+        "market_value": 60,
+        "technical_risk": 30,
+        "requirement_clarity": 65,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "Product DB 구조·티어 가격/MOQ·패싯 필터는 다른 B2B 쇼핑몰에 재사용 가능한 구체적 구조",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "5b93ce61-fd50-400e-ab34-06c16b488739",
+        "platform": "wishket",
+        "external_project_id": "155100",
+        "title": "WordPress 기반 글로벌 B2B 홈페이지 신규 구축",
+        "budget": "12,000,000원",
+        "project_duration": "60일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "website",
+        "project_subcategory": "B2B 홈페이지",
+        "engagement_type": "new_build",
+        "industry": "general",
+        "complexity_types": [
+          "standard_crud"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "core_web"
+        ],
+        "uncertain_fields": [],
+        "summary": "WordPress+WPML 기반 다국어(영어/한국어/아랍어 RTL) 글로벌 B2B 홈페이지 구축",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 12,
+        "estimated_hours_min": 60,
+        "estimated_hours_max": 130,
+        "learning_value": 25,
+        "reusability_value": 28,
+        "market_value": 55,
+        "technical_risk": 15,
+        "requirement_clarity": 80,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "특정 기업 브랜드용 커스텀 테마와 콘텐츠라 코드 재사용은 제한적",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "21b89954-22cb-42ab-9957-feb8fde7879f",
+        "platform": "wishket",
+        "external_project_id": "156240",
+        "title": "Supabase 기반 사용자 게시판 및 관리자/광고주 대시보드 구축",
+        "budget": "15,000,000원",
+        "project_duration": "60일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "platform_marketplace",
+        "project_subcategory": "커뮤니티+광고 시스템",
+        "engagement_type": "new_build",
+        "industry": "general",
+        "complexity_types": [
+          "standard_crud",
+          "workflow_complex"
+        ],
+        "reuse_level": "high",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "analytics_dashboard",
+          "external_api_integration"
+        ],
+        "uncertain_fields": [],
+        "summary": "Supabase 기반 커뮤니티 게시판(웹뷰)과 광고 캠페인·트래킹, 관리자/광고주 대시보드, 4단계 권한 관리",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "mobile_web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 38,
+        "estimated_hours_min": 200,
+        "estimated_hours_max": 380,
+        "learning_value": 50,
+        "reusability_value": 75,
+        "market_value": 70,
+        "technical_risk": 35,
+        "requirement_clarity": 80,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "권한 관리·게시판/댓글/신고·관리자 템플릿·광고 트래킹은 범용 모듈이라 거의 그대로 재사용 가능",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "394b49e4-c8c1-45d3-ba7c-1e88d89561bf",
+        "platform": "wishket",
+        "external_project_id": "158628",
+        "title": "React/Spring Boot 기반 대기업 PG 백오피스 풀스택 개발",
+        "budget": "6,000,000원/월",
+        "project_duration": "225일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "fintech_payment",
+        "project_subcategory": "PG 백오피스",
+        "engagement_type": "staffing",
+        "industry": "finance",
+        "complexity_types": [
+          "high_risk_domain"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "payments",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "대기업 차세대 PG 시스템 재구축의 백오피스를 React/Spring Boot로 분석·설계·개발하는 상주 인력 투입",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 60,
+        "estimated_hours_min": 1200,
+        "estimated_hours_max": 1500,
+        "learning_value": 40,
+        "reusability_value": 20,
+        "market_value": 35,
+        "technical_risk": 55,
+        "requirement_clarity": 25,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "특정 대기업 PG 업무 흐름의 백오피스라 코드 재사용은 제한적이나 일부 일반성은 있음",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "98b639be-2e07-4efb-aa62-79bba52dfd0b",
+        "platform": "wishket",
+        "external_project_id": "154821",
+        "title": "RPA 기반 대기업 업무 프로세스 자동화 개발 및 운영 지원",
+        "budget": "5,500,000원/월",
+        "project_duration": "150일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "automation_rpa",
+        "project_subcategory": "대기업 RPA 운영",
+        "engagement_type": "staffing",
+        "industry": "manufacturing",
+        "complexity_types": [
+          "legacy_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "workflow_automation",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "대기업 RPA 프로세스 개발·운영 지원, 기존 RPA 시스템 개선(UiPath/Power Automate 등)",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "desktop"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 42,
+        "estimated_hours_min": 650,
+        "estimated_hours_max": 800,
+        "learning_value": 30,
+        "reusability_value": 18,
+        "market_value": 35,
+        "technical_risk": 30,
+        "requirement_clarity": 30,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "특정 기업 업무 흐름과 기존 RPA 수정이라 코드 재사용 제한적",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "f31756bd-8ef0-4727-aea9-9396fb0a7479",
+        "platform": "wishket",
+        "external_project_id": "153028",
+        "title": "클라우드 기반 전자차트 SaaS 플랫폼 MVP 개발",
+        "budget": "40,000,000원",
+        "project_duration": "170일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "saas",
+        "project_subcategory": "뷰티샵 전자차트",
+        "engagement_type": "new_build",
+        "industry": "other",
+        "complexity_types": [
+          "standard_crud",
+          "multi_platform"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "authentication_authorization",
+          "admin_system",
+          "saas_architecture",
+          "mobile",
+          "analytics_dashboard",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [],
+        "summary": "뷰티샵용 클라우드 전자차트 SaaS MVP: 고객/시술 기록, 사진, 예약, 동의서 서명, 통계 (웹+태블릿 앱)",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web",
+          "cross_platform_app"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 45,
+        "estimated_hours_min": 450,
+        "estimated_hours_max": 900,
+        "learning_value": 55,
+        "reusability_value": 55,
+        "market_value": 65,
+        "technical_risk": 45,
+        "requirement_clarity": 60,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "권한·고객관리·예약·통계 등 SaaS 공통 구조는 재사용 가능하나 시술 차트 도메인은 전용",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "007f36ae-0ce6-4135-9273-938bf5f6f6c7",
+        "platform": "wishket",
+        "external_project_id": "150086",
+        "title": "쿠팡 API 연동 제품 판매량 및 재고 추적 자동화 (Excel VBA)",
+        "budget": "1,000,000원",
+        "project_duration": "5일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "automation_rpa",
+        "project_subcategory": "쿠팡 재고 VBA",
+        "engagement_type": "new_build",
+        "industry": "commerce",
+        "complexity_types": [
+          "standard_crud"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "external_api_integration"
+        ],
+        "uncertain_fields": [],
+        "summary": "쿠팡 로켓그로스 API로 재고를 조회해 일별 판매량을 계산·누적하는 Excel VBA 자동화 툴",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "desktop"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 20,
+        "estimated_hours_min": 12,
+        "estimated_hours_max": 30,
+        "learning_value": 20,
+        "reusability_value": 22,
+        "market_value": 45,
+        "technical_risk": 15,
+        "requirement_clarity": 80,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "쿠팡 API 전용 Excel VBA라 코드 재사용은 제한적",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "1c665cb9-b05a-49c3-b1a5-0bc8acb98805",
+        "platform": "wishket",
+        "external_project_id": "157477",
+        "title": "EMS 연동 피크제어 및 Auto-DR 서버 백엔드 개발",
+        "budget": "5,000,000원",
+        "project_duration": "60일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "피크제어 Auto-DR",
+        "engagement_type": "new_build",
+        "industry": "other",
+        "complexity_types": [
+          "hardware_iot",
+          "integration_heavy",
+          "realtime"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "backend_api",
+          "database",
+          "realtime",
+          "hardware_iot",
+          "external_api_integration"
+        ],
+        "uncertain_fields": [],
+        "summary": "기존 EMS와 연동해 Modbus로 장비를 제어하는 피크제어/Auto-DR(OpenADR) Python 서버 백엔드",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "backend_api"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 68,
+        "estimated_hours_min": 350,
+        "estimated_hours_max": 650,
+        "learning_value": 55,
+        "reusability_value": 28,
+        "market_value": 25,
+        "technical_risk": 62,
+        "requirement_clarity": 60,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "OpenADR/Modbus 연동은 일부 일반성이 있으나 기존 EMS 스키마·장비 매핑에 묶여 재사용 제한적",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "ab5e3a06-37a0-45b3-a900-de46a29c40e7",
+        "platform": "wishket",
+        "external_project_id": "149922",
+        "title": "Sharetribe 기반 숙박 예약 플랫폼 결제/정산 기능 개발",
+        "budget": "5,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "reservation",
+        "project_subcategory": "숙박 정산·캘린더",
+        "engagement_type": "feature_extension",
+        "industry": "travel_hospitality",
+        "complexity_types": [
+          "integration_heavy",
+          "high_risk_domain"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "payments",
+          "external_api_integration",
+          "admin_system"
+        ],
+        "uncertain_fields": [],
+        "summary": "Sharetribe Pro 기반 숙박 예약 플랫폼에 신규 PG 연동 자동 정산, iCal 동기화, 고객 문의 기능 추가",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web",
+          "admin_web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 50,
+        "estimated_hours_min": 80,
+        "estimated_hours_max": 180,
+        "learning_value": 55,
+        "reusability_value": 30,
+        "market_value": 50,
+        "technical_risk": 55,
+        "requirement_clarity": 62,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "Sharetribe 플러그인/커스터마이징 대응이라 해당 플랫폼 밖에서 재사용 제한적",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "1c02cc02-eeb1-4723-9877-c256dd0716a1",
+        "platform": "wishket",
+        "external_project_id": "152942",
+        "title": "Nest.js/AWS 기반 AI튜터 앱 백엔드 개발 (주 20시간 재택)",
+        "budget": "3,000,000원/월",
+        "project_duration": "360일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "mobile_app",
+        "project_subcategory": "AI튜터 앱 백엔드",
+        "engagement_type": "staffing",
+        "industry": "education",
+        "complexity_types": [
+          "legacy_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "backend_api",
+          "database",
+          "cloud_infra"
+        ],
+        "uncertain_fields": [],
+        "summary": "출시된 AI튜터 앱의 Nest.js/AWS 백엔드 유지관리와 신규 기능 개발 (주 20시간 재택)",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "backend_api"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 40,
+        "estimated_hours_min": 900,
+        "estimated_hours_max": 1100,
+        "learning_value": 35,
+        "reusability_value": 18,
+        "market_value": 40,
+        "technical_risk": 30,
+        "requirement_clarity": 35,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "특정 회사 앱의 기존 백엔드 수정이라 코드 재사용 제한적",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "03de6cda-040c-472b-8f36-d68adcedc253",
+        "platform": "wishket",
+        "external_project_id": "157967",
+        "title": "C#.Net WPF 기반 키오스크 배리어프리 기능 추가 개발",
+        "budget": "3,000,000원/월",
+        "project_duration": "90일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "iot_device",
+        "project_subcategory": "키오스크 배리어프리",
+        "engagement_type": "staffing",
+        "industry": "general",
+        "complexity_types": [
+          "legacy_heavy"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [
+          "project_type"
+        ],
+        "summary": "기존 C#/WPF 키오스크 시스템 소스를 분석해 배리어프리 기능을 추가 개발하는 상주 인력 투입",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "desktop"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 42,
+        "estimated_hours_min": 450,
+        "estimated_hours_max": 560,
+        "learning_value": 30,
+        "reusability_value": 22,
+        "market_value": 30,
+        "technical_risk": 35,
+        "requirement_clarity": 55,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "특정 키오스크 레거시 소스 수정이지만 배리어프리 UI 패턴에는 일부 일반성",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "ed5af3bf-7f17-43c4-b762-8d98d09c7e13",
+        "platform": "wishket",
+        "external_project_id": "150884",
+        "title": "Nest.js/React 기반 회계/인사 ERP 시스템 기능 개선",
+        "budget": "6,000,000원",
+        "project_duration": "30일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "business_management",
+        "project_subcategory": "급여대장 기능 개선",
+        "engagement_type": "feature_extension",
+        "industry": "hr",
+        "complexity_types": [
+          "legacy_heavy",
+          "high_risk_domain"
+        ],
+        "reuse_level": "low",
+        "technology_assets": [
+          "core_web",
+          "backend_api",
+          "database",
+          "legacy_enterprise"
+        ],
+        "uncertain_fields": [],
+        "summary": "운영 중인 회계/인사 ERP의 급여대장 로직 개선과 연봉 테이블 기능 신설 (Nest.js/React)",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 45,
+        "estimated_hours_min": 80,
+        "estimated_hours_max": 180,
+        "learning_value": 40,
+        "reusability_value": 25,
+        "market_value": 40,
+        "technical_risk": 50,
+        "requirement_clarity": 70,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "특정 ERP 코드베이스의 급여 로직 수정이라 코드 재사용 제한적",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    },
+    {
+      "project": {
+        "id": "96237d21-5682-4954-a481-5b3b05eed0df",
+        "platform": "wishket",
+        "external_project_id": "153015",
+        "title": "AI 기반 사용자 맞춤형 디지털 복지 앱 구축",
+        "budget": "20,000,000원",
+        "project_duration": "180일"
+      },
+      "input_meta": {},
+      "ok": true,
+      "analysis": {
+        "project_type": "mobile_app",
+        "project_subcategory": "복지 정보 앱",
+        "engagement_type": "new_build",
+        "industry": "public_sector",
+        "complexity_types": [
+          "multi_platform"
+        ],
+        "reuse_level": "medium",
+        "technology_assets": [
+          "mobile",
+          "backend_api",
+          "database",
+          "admin_system",
+          "ai_llm",
+          "external_api_integration"
+        ],
+        "uncertain_fields": [],
+        "summary": "복지 정보 제공, 위치 기반 시설 안내, AI 맞춤 로드맵, 예약/상담 신청과 관리자 기능을 갖춘 Android/iOS 앱",
+        "required_features": [],
+        "required_integrations": [],
+        "required_platforms": [
+          "ios",
+          "android",
+          "admin_web"
+        ],
+        "required_skills": [],
+        "suggested_stack": [],
+        "vibe_coding_difficulty": 45,
+        "estimated_hours_min": 400,
+        "estimated_hours_max": 900,
+        "learning_value": 45,
+        "reusability_value": 50,
+        "market_value": 55,
+        "technical_risk": 40,
+        "requirement_clarity": 40,
+        "rationale": {
+          "vibe_coding_difficulty": "수동 기준(분류 중심)",
+          "estimated_hours": "공고 작업 범위 기준, 예산과 무관",
+          "learning_value": "수동 기준(분류 중심)",
+          "reusability_value": "예약/상담 신청·콘텐츠 관리자·위치 안내 구조는 재사용 가능하나 AI 로드맵은 전용",
+          "market_value": "수동 기준(분류 중심)",
+          "technical_risk": "수동 기준(분류 중심)"
+        }
+      },
+      "usage": null,
+      "cost_usd": null
+    }
+  ]
+}
