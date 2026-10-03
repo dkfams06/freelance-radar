@@ -87,6 +87,15 @@ export class AnalyzerStore {
     return out.sort((a, b) => order.get(a.id)! - order.get(b.id)!);
   }
 
+  /** 시장 표본 추출용 전체 원본 프로젝트. 분석 결과가 있어도 포함한다. */
+  async allProjects(platform?: string): Promise<AnalysisSourceProject[]> {
+    return this.pageAll<AnalysisSourceProject>((f, t) => {
+      let q = this.db.from("projects").select(ANALYSIS_SOURCE_COLUMNS).order("registered_at", { ascending: true, nullsFirst: true }).order("id");
+      if (platform) q = q.eq("platform", platform);
+      return q.range(f, t) as unknown as PromiseLike<{ data: AnalysisSourceProject[] | null; error: unknown }>;
+    });
+  }
+
   /** 최신 등록순 프로젝트 (설명이 있는 것만, 테스트 샘플용) */
   async latestProjects(platform: string, limit: number): Promise<AnalysisSourceProject[]> {
     const { data, error } = await this.db
@@ -222,7 +231,7 @@ export class AnalyzerStore {
     const projects = await this.pageAll<MarketProject>((f, t) =>
       this.db
         .from("projects")
-        .select("id,platform,registered_at,raw_type:project_type,budget_type,budget_min,budget_max")
+        .select("id,platform,registered_at,duration_days,raw_type:project_type,budget_type,budget_min,budget_max")
         .order("id")
         .range(f, t) as unknown as PromiseLike<{ data: MarketProject[] | null; error: unknown }>,
     );
@@ -231,7 +240,7 @@ export class AnalyzerStore {
         .from("project_analyses")
         .select(
           "project_id,project_type,engagement_type,industry,technology_assets,reuse_level," +
-            "vibe_coding_difficulty,estimated_hours_min,estimated_hours_max,learning_value,reusability_value,market_value",
+            "vibe_coding_difficulty,estimated_hours_min,estimated_hours_max,learning_value,reusability_value,market_value,raw_analysis",
         )
         .eq("analysis_version", version)
         .order("project_id")
@@ -243,6 +252,25 @@ export class AnalyzerStore {
       return p ? [{ ...p, ...a } as AnalyzedProject] : [];
     });
     return { projects, analyzed };
+  }
+
+  async analysisErrors(version: string, projectIds?: string[]): Promise<Array<{ project_id: string; error_type: string; attempt: number; resolved_at: string | null }>> {
+    const out: Array<{ project_id: string; error_type: string; attempt: number; resolved_at: string | null }> = [];
+    if (!projectIds) {
+      return this.pageAll((f, t) =>
+        this.db.from("analysis_errors").select("project_id,error_type,attempt,resolved_at").eq("analysis_version", version).range(f, t),
+      );
+    }
+    for (let i = 0; i < projectIds.length; i += 200) {
+      const { data, error } = await this.db
+        .from("analysis_errors")
+        .select("project_id,error_type,attempt,resolved_at")
+        .eq("analysis_version", version)
+        .in("project_id", projectIds.slice(i, i + 200));
+      if (error) throw new Error(`analysis errors: ${JSON.stringify(error)}`);
+      out.push(...((data ?? []) as typeof out));
+    }
+    return out;
   }
 
   async statsRows(version: string): Promise<StatsSourceRow[]> {

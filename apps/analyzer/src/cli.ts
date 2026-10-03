@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { createServiceClient } from "@fr/db";
@@ -13,6 +13,10 @@ import {
   computeDistribution,
   computeMarketReport,
   renderMarketReport,
+  sampleValidationMarkdown,
+  selectStratifiedSample,
+  validateStratifiedSample,
+  type StratifiedSampleFile,
   estimateCostUsd,
   estimateRun,
   renderDistribution,
@@ -49,6 +53,8 @@ freelance-radar analyzer (${ANALYSIS_VERSION})
 
 commands:
   sample          플랫폼별 최신 프로젝트 n 건을 동기 분석 → DB 저장 + 리포트 (기본 wishket 10, freemoa 10)
+  sample-select    v3.3 미분석 전체에서 고정 seed 층화 시장 표본을 선정·검증
+  sample-verify    저장된 시장 표본 JSON을 전체 projects와 다시 비교 검증
   run             미분석 프로젝트를 동기(Messages API) 분석
   batch-submit    미분석 프로젝트를 Message Batches API 로 제출 (50% 할인, 보통 1시간 이내 완료)
   batch-collect   제출한 batch 결과 회수 → 검증 → 저장 (--wait: 끝날 때까지 대기)
@@ -72,6 +78,7 @@ options:
   --dry-run                     DB 에 쓰지 않음 (결과 파일만)
   --wait                        batch-collect: 완료까지 1분 간격 대기
   --ids-from <file>             sample: 결과 파일과 같은 프로젝트들을 다시 분석 (샘플 고정)
+  --sample-file <file>          batch-submit / market-stats: 고정 시장 표본 JSON 사용
   --all                         classify: 이미 분석된 프로젝트도 포함 (--force 와 같음)
   --execute                     classify: 추정만 하지 않고 실제로 실행
   --batch                       classify --execute: Message Batches API 로 제출
@@ -89,6 +96,23 @@ env: ANTHROPIC_API_KEY, ANALYZER_MODEL (기본 claude-opus-5-5), ANALYZER_EFFORT
 const log = (m: string) => console.log(m);
 const stamp = () => new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 
+function readProjectIdsFile(file: string): string[] {
+  const parsed = JSON.parse(readFileSync(file, "utf8")) as { selected_project_ids?: unknown; items?: Array<{ project?: { id?: unknown } }> };
+  if (Array.isArray(parsed.selected_project_ids) && parsed.selected_project_ids.every((x) => typeof x === "string")) {
+    return parsed.selected_project_ids;
+  }
+  if (Array.isArray(parsed.items)) {
+    const ids = parsed.items.map((x) => x.project?.id).filter((x): x is string => typeof x === "string");
+    if (ids.length === parsed.items.length) return ids;
+  }
+  throw new Error(`${file}: selected_project_ids 또는 결과 items.project.id 가 없습니다`);
+}
+
+function sampleOutputPaths(raw: string): { json: string; md: string } {
+  const json = raw.toLowerCase().endsWith(".json") ? raw : `${raw}.json`;
+  return { json, md: json.slice(0, -5) + ".md" };
+}
+
 async function main() {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
@@ -103,6 +127,7 @@ async function main() {
       "dry-run": { type: "boolean" },
       wait: { type: "boolean" },
       "ids-from": { type: "string" },
+      "sample-file": { type: "string" },
       all: { type: "boolean" },
       execute: { type: "boolean" },
       batch: { type: "boolean" },
@@ -169,8 +194,8 @@ async function main() {
 
   const sampleProjects = async () => {
     if (values["ids-from"]) {
-      const file = readResults(path.resolve(process.env.INIT_CWD ?? process.cwd(), values["ids-from"]));
-      return store.projectsByIds(file.items.map((i) => i.project.id));
+      const ids = readProjectIdsFile(path.resolve(process.env.INIT_CWD ?? process.cwd(), values["ids-from"]));
+      return store.projectsByIds(ids);
     }
     const w = await store.latestProjects("wishket", num(values.wishket, 10));
     const f = await store.latestProjects("freemoa", num(values.freemoa, 10));
@@ -178,6 +203,80 @@ async function main() {
   };
 
   switch (command) {
+    case "sample-select": {
+      const size = values.limit ? positive(values.limit, "--limit") : 500;
+      const seed = "analyzer-v3.3-market-sample-500-v2";
+      const output = sampleOutputPaths(path.resolve(process.env.INIT_CWD ?? process.cwd(), values.out ?? "docs/analyzer-v3.3-market-sample-500.json"));
+      mkdirSync(path.dirname(output.json), { recursive: true });
+      const population = await store.allProjects();
+      const existing = existsSync(output.json) ? (JSON.parse(readFileSync(output.json, "utf8")) as StratifiedSampleFile) : null;
+      let selected: AnalysisSourceProject[];
+      let strata: StratifiedSampleFile["strata"];
+      let eligiblePopulation = population;
+      if (existing?.schema === "analyzer-v3.3-market-sample/v1" && existing.analysis_version === ANALYSIS_VERSION && existing.seed === seed && existing.requested_size === size) {
+        selected = await store.projectsByIds(existing.selected_project_ids);
+        strata = existing.strata;
+        log(`기존 고정 표본 재사용: ${output.json}`);
+      } else {
+        const analyzed = await store.analyzedHashes(ANALYSIS_VERSION);
+        const unresolved = await store.unresolvedErrorProjectIds(ANALYSIS_VERSION);
+        const inFlight = new Set(
+          (await store.openBatches())
+            .filter((b) => b.analysis_version === ANALYSIS_VERSION)
+            .flatMap((b) => b.project_ids),
+        );
+        eligiblePopulation = population.filter((p) => !analyzed.has(p.id) && !unresolved.has(p.id) && !inFlight.has(p.id));
+        const picked = selectStratifiedSample(eligiblePopulation, size, seed);
+        selected = await store.projectsByIds(picked.selected.map((p) => p.id));
+        strata = picked.strata;
+      }
+      const validation = validateStratifiedSample(population, selected, size);
+      const file: StratifiedSampleFile = {
+        schema: "analyzer-v3.3-market-sample/v1",
+        analysis_version: ANALYSIS_VERSION,
+        seed,
+        requested_size: size,
+        population_total: population.length,
+        eligible_population: existing ? existing.eligible_population : eligiblePopulation.length,
+        selected_project_ids: selected.map((p) => p.id).sort(),
+        selected: [],
+        strata,
+        validation,
+        created_at: existing?.created_at ?? new Date().toISOString(),
+      };
+      // 위의 snapshot 조합은 DB 원본을 기준으로 다시 생성해 선택 파일이 self-contained 하도록 한다.
+      file.selected = selected.map((p) => {
+        const picked = selectStratifiedSample([p], 1, seed).selected[0]!;
+        return picked;
+      });
+      writeFileSync(output.json, `${JSON.stringify(file, null, 2)}\n`);
+      writeFileSync(output.md, `${sampleValidationMarkdown(validation)}\n`);
+      log(`표본 ${selected.length}건 / 전체 ${population.length}건 / v3.3 기존 분석 제외 후 후보 ${file.eligible_population}건`);
+      log(`검증: ${validation.passed ? "PASS" : "FAIL"}`);
+      for (const e of validation.errors) log(`❌ ${e}`);
+      log(`→ ${output.json}\n→ ${output.md}`);
+      if (!validation.passed) process.exitCode = 1;
+      return;
+    }
+
+    case "sample-verify": {
+      const samplePath = resolveArg(values["sample-file"] ?? rawArg);
+      if (!samplePath) throw new Error("sample-verify --sample-file <sample.json>");
+      const file = JSON.parse(readFileSync(samplePath, "utf8")) as StratifiedSampleFile;
+      const population = await store.allProjects();
+      const selected = await store.projectsByIds(file.selected_project_ids);
+      const validation = validateStratifiedSample(population, selected, file.requested_size);
+      file.population_total = population.length;
+      file.validation = validation;
+      writeFileSync(samplePath, `${JSON.stringify(file, null, 2)}\n`);
+      const output = sampleOutputPaths(samplePath);
+      writeFileSync(output.md, `${sampleValidationMarkdown(validation)}\n`);
+      log(`표본 검증: ${validation.passed ? "PASS" : "FAIL"} (${selected.length}/${file.requested_size})`);
+      for (const e of validation.errors) log(`❌ ${e}`);
+      if (!validation.passed) process.exitCode = 1;
+      return;
+    }
+
     case "export-inputs": {
       const projects = await sampleProjects();
       mkdirSync(OUT_DIR, { recursive: true });
@@ -219,13 +318,16 @@ async function main() {
     }
 
     case "batch-submit": {
+      if (!process.env.ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY가 없어 Batch 실행을 중지합니다. claude -p 동기 실행으로 대체하지 않습니다.");
       const llm = createBatchLlm();
       const ids = await candidateIds(store, {
         platform: values.platform,
         retryFailed: Boolean(values["retry-failed"]),
         force: Boolean(values.force),
       });
-      const target = ids.slice(0, num(values.limit, ids.length));
+      const sampleIds = values["sample-file"] ? new Set(readProjectIdsFile(resolveArg(values["sample-file"])!)) : null;
+      const scoped = sampleIds ? ids.filter((id) => sampleIds.has(id)) : ids;
+      const target = scoped.slice(0, num(values.limit, scoped.length));
       if (!target.length) return log("분석할 프로젝트가 없습니다");
       if (target.length > 100 && !values.yes) return log(`${target.length}건입니다. 실행하려면 --yes 를 붙이세요 (추정은 pnpm analyzer classify)`);
       await submitBatches(llm, store, target);
@@ -259,11 +361,16 @@ async function main() {
 
     case "market-stats": {
       const version = values.version ?? ANALYSIS_VERSION;
-      const { projects, analyzed } = await store.marketRows(version);
+      const { projects, analyzed: allAnalyzed } = await store.marketRows(version);
+      const sampleIds = values["sample-file"] ? readProjectIdsFile(resolveArg(values["sample-file"])!) : null;
+      const sampleSet = sampleIds ? new Set(sampleIds) : null;
+      const analyzed = sampleSet ? allAnalyzed.filter((a) => sampleSet.has(a.project_id)) : allAnalyzed;
+      const errors = await store.analysisErrors(version, sampleIds ?? allAnalyzed.map((a) => a.project_id));
       const report = computeMarketReport(projects, analyzed, {
         version,
         minN: values["min-n"] ? positive(values["min-n"], "--min-n") : undefined,
         minCombo: values["min-combo"] ? positive(values["min-combo"], "--min-combo") : undefined,
+        errors,
       });
       const repoRoot = path.resolve(import.meta.dirname, "../../..");
       const outBase = values.out ? path.resolve(process.env.INIT_CWD ?? process.cwd(), values.out) : path.join(repoRoot, "docs", "market-stats-v1");
@@ -366,8 +473,13 @@ async function candidateIds(
   const all = await store.allProjectIds(opts.platform);
   const inFlight = new Set((await store.openBatches()).flatMap((b) => b.project_ids));
   const analyzed = opts.force ? new Map() : await store.analyzedHashes(ANALYSIS_VERSION);
-  const failed = opts.retryFailed ? await store.unresolvedErrorProjectIds(ANALYSIS_VERSION) : null;
-  return all.filter((id) => !inFlight.has(id) && !analyzed.has(id) && (!failed || failed.has(id)));
+  const unresolved = await store.unresolvedErrorProjectIds(ANALYSIS_VERSION);
+  return all.filter(
+    (id) =>
+      !inFlight.has(id) &&
+      !analyzed.has(id) &&
+      (opts.force || (opts.retryFailed ? unresolved.has(id) : !unresolved.has(id))),
+  );
 }
 
 /** Batch API 제출. 한 batch 당 최대 100,000건/256MB 이지만 실패 영향 범위를 줄이려고 BATCH_CHUNK 단위로 나눈다 */

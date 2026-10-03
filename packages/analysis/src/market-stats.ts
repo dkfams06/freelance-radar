@@ -1,4 +1,4 @@
-import { budgetAmount, budgetStats, type BudgetStats } from "./stats";
+import { budgetAmount, budgetStats, quantile, type BudgetStats } from "./stats";
 import { reuseGroup, type ReuseGroup } from "./taxonomy";
 
 /**
@@ -20,6 +20,7 @@ export interface MarketProject {
   id: string;
   platform: string;
   registered_at: string | null;
+  duration_days?: number | null;
   /** projects.project_type (수집 구분: 외주/기간제/도급/기간제 상주 ...) */
   raw_type: string | null;
   budget_type: string | null;
@@ -40,6 +41,7 @@ export interface MarketAnalysis {
   learning_value: number;
   reusability_value: number;
   market_value: number;
+  raw_analysis?: unknown;
 }
 
 export type AnalyzedProject = MarketProject & MarketAnalysis;
@@ -70,6 +72,19 @@ export function amountsOf(rows: MarketProject[], segment: Segment): number[] {
     .filter((r) => r.budget_type === type)
     .map(budgetAmount)
     .filter((v): v is number => v !== null);
+}
+
+/** 단순 비교용 budget / midpoint(estimated_hours_min, estimated_hours_max). */
+export function budgetPerEstimatedHourAmounts(rows: AnalyzedProject[], segment: Segment): number[] {
+  const type = segment === "staffing" ? "monthly" : "fixed";
+  return rows
+    .filter((r) => r.budget_type === type && r.estimated_hours_min > 0 && r.estimated_hours_max >= r.estimated_hours_min)
+    .map((r) => {
+      const budget = budgetAmount(r);
+      const midpoint = (r.estimated_hours_min + r.estimated_hours_max) / 2;
+      return budget === null || midpoint <= 0 ? null : budget / midpoint;
+    })
+    .filter((v): v is number => v !== null && Number.isFinite(v));
 }
 
 // ---------------------------------------------------------------------------
@@ -232,8 +247,12 @@ export interface TypeStat {
   monthly_avg_estimated: number | null;
   budget: BudgetStats;
   avg_vibe_coding_difficulty: number | null;
+  avg_ai_ease: number | null;
+  median_hours_min: number | null;
+  median_hours_max: number | null;
   avg_hours_min: number | null;
   avg_hours_max: number | null;
+  budget_per_estimated_hour: BudgetStats;
   avg_learning_value: number | null;
   avg_reusability_value: number | null;
   avg_market_value: number | null;
@@ -249,13 +268,21 @@ export interface Averages {
   avg_learning_value: number | null;
   avg_reusability_value: number | null;
   avg_market_value: number | null;
+  avg_ai_ease: number | null;
+  median_budget_per_estimated_hour: number | null;
 }
 
-function groupMetrics(rows: AnalyzedProject[]) {
+function groupMetrics(rows: AnalyzedProject[], segment: Segment) {
+  const hoursMin = rows.map((r) => r.estimated_hours_min).sort((a, b) => a - b);
+  const hoursMax = rows.map((r) => r.estimated_hours_max).sort((a, b) => a - b);
   return {
     avg_vibe_coding_difficulty: mean(rows.map((r) => r.vibe_coding_difficulty)),
+    avg_ai_ease: mean(rows.map((r) => 100 - r.vibe_coding_difficulty)),
+    median_hours_min: quantile(hoursMin, 0.5),
+    median_hours_max: quantile(hoursMax, 0.5),
     avg_hours_min: mean(rows.map((r) => r.estimated_hours_min)),
     avg_hours_max: mean(rows.map((r) => r.estimated_hours_max)),
+    budget_per_estimated_hour: budgetStats(budgetPerEstimatedHourAmounts(rows, segment)),
     avg_learning_value: mean(rows.map((r) => r.learning_value)),
     avg_reusability_value: mean(rows.map((r) => r.reusability_value)),
     avg_market_value: mean(rows.map((r) => r.market_value)),
@@ -296,7 +323,7 @@ export function computeTypeStats(rows: AnalyzedProject[], ctx: ScopeContext): Ty
         monthly_avg_in_sample: ctx.complete_months.length ? inWindow / ctx.complete_months.length : null,
         monthly_avg_estimated: ctx.monthly_avg_total === null ? null : share * ctx.monthly_avg_total,
         budget: budgetStats(amountsOf(rs, ctx.segment)),
-        ...groupMetrics(rs),
+        ...groupMetrics(rs, ctx.segment),
         ...reuseCounts(rs),
         low_sample: rs.length < ctx.minN,
       };
@@ -305,12 +332,15 @@ export function computeTypeStats(rows: AnalyzedProject[], ctx: ScopeContext): Ty
 }
 
 export function averagesOf(rows: AnalyzedProject[]): Averages {
+  const hourly = budgetPerEstimatedHourAmounts(rows, rows.some((r) => r.engagement_type === "staffing") ? "staffing" : "non_staffing");
   return {
     n: rows.length,
     avg_vibe_coding_difficulty: mean(rows.map((r) => r.vibe_coding_difficulty)),
     avg_learning_value: mean(rows.map((r) => r.learning_value)),
     avg_reusability_value: mean(rows.map((r) => r.reusability_value)),
     avg_market_value: mean(rows.map((r) => r.market_value)),
+    avg_ai_ease: mean(rows.map((r) => 100 - r.vibe_coding_difficulty)),
+    median_budget_per_estimated_hour: quantile([...hourly].sort((a, b) => a - b), 0.5),
   };
 }
 
@@ -328,8 +358,11 @@ export interface AssetStat {
   share: number;
   budget: BudgetStats;
   avg_vibe_coding_difficulty: number | null;
+  avg_ai_ease: number | null;
   avg_learning_value: number | null;
   avg_reusability_value: number | null;
+  avg_market_value: number | null;
+  budget_per_estimated_hour: BudgetStats;
   low_sample: boolean;
 }
 
@@ -345,8 +378,11 @@ export function computeAssetStats(rows: AnalyzedProject[], segment: Segment, min
       share: rows.length ? rs.length / rows.length : 0,
       budget: budgetStats(amountsOf(rs, segment)),
       avg_vibe_coding_difficulty: mean(rs.map((r) => r.vibe_coding_difficulty)),
+       avg_ai_ease: mean(rs.map((r) => 100 - r.vibe_coding_difficulty)),
       avg_learning_value: mean(rs.map((r) => r.learning_value)),
       avg_reusability_value: mean(rs.map((r) => r.reusability_value)),
+       avg_market_value: mean(rs.map((r) => r.market_value)),
+       budget_per_estimated_hour: budgetStats(budgetPerEstimatedHourAmounts(rs, segment)),
       low_sample: rs.length < minN,
     }))
     .sort((a, b) => b.n - a.n || a.key.localeCompare(b.key));
@@ -444,6 +480,19 @@ export interface RankedItem {
   low_sample: boolean;
 }
 
+export interface PairCandidate {
+  key: string;
+  n: number;
+  low_sample: boolean;
+  primary: number;
+  secondary: number;
+}
+
+export interface PairList {
+  thresholds: Record<string, number | null>;
+  candidates: PairCandidate[];
+}
+
 export interface MarketLists {
   min_n: number;
   /** n ≥ minN 인 유형 수 */
@@ -453,17 +502,32 @@ export interface MarketLists {
   top_count: RankedItem[];
   top_median_budget: RankedItem[];
   top_low_difficulty: RankedItem[];
+  top_ai_ease: RankedItem[];
+  top_budget_per_estimated_hour: RankedItem[];
   top_reusability: RankedItem[];
   top_learning: RankedItem[];
+  top_market_value: RankedItem[];
   high_budget_low_difficulty: {
     thresholds: { median_budget: number | null; avg_difficulty: number | null; budget_source: string };
     candidates: Array<{ key: string; n: number; median_budget: number; avg_difficulty: number; low_sample: boolean }>;
   };
+  frequency_high_reuse: PairList;
+  hourly_budget_high_reuse: PairList;
+  ai_easy_high_learning: PairList;
 }
 
 export function computeLists(
   types: TypeStat[],
-  opts: { minN: number; marketMedianBudget: number | null; sampleAvgDifficulty: number | null; limit?: number },
+  opts: {
+    minN: number;
+    marketMedianBudget: number | null;
+    sampleAvgDifficulty: number | null;
+    sampleAvgReusability?: number | null;
+    sampleAvgLearning?: number | null;
+    sampleAvgAiEase?: number | null;
+    sampleMedianBudgetPerEstimatedHour?: number | null;
+    limit?: number;
+  },
 ): MarketLists {
   const limit = opts.limit ?? 10;
   const eligible = types.filter((t) => !t.low_sample && t.key !== "(none)");
@@ -490,6 +554,30 @@ export function computeLists(
     .map((t) => ({ key: t.key, n: t.n, median_budget: t.budget.median!, avg_difficulty: t.avg_vibe_coding_difficulty!, low_sample: t.low_sample }))
     .sort((a, b) => b.median_budget - a.median_budget || a.avg_difficulty - b.avg_difficulty);
 
+  const sampleAvgAiEase = opts.sampleAvgAiEase ?? (opts.sampleAvgDifficulty === null ? null : 100 - opts.sampleAvgDifficulty);
+  const sampleAvgReusability = opts.sampleAvgReusability ?? mean(pool.map((t) => t.avg_reusability_value).filter((v): v is number => v !== null));
+  const sampleAvgLearning = opts.sampleAvgLearning ?? mean(pool.map((t) => t.avg_learning_value).filter((v): v is number => v !== null));
+  const sampleMedianHourly = opts.sampleMedianBudgetPerEstimatedHour ?? quantile(
+    pool.map((t) => t.budget_per_estimated_hour.median).filter((v): v is number => v !== null).sort((a, b) => a - b),
+    0.5,
+  );
+  const sampleMedianN = quantile(pool.map((t) => t.n).sort((a, b) => a - b), 0.5);
+  const pair = (
+    predicate: (t: TypeStat) => boolean,
+    primary: (t: TypeStat) => number | null,
+    secondary: (t: TypeStat) => number | null,
+    thresholds: Record<string, number | null>,
+  ): PairList => ({
+    thresholds,
+    candidates: pool
+      .filter(predicate)
+      .map((t) => ({ t, p: primary(t), s: secondary(t) }))
+      .filter((x): x is { t: TypeStat; p: number; s: number } => x.p !== null && x.s !== null)
+      .sort((a, b) => b.p - a.p || b.s - a.s || b.t.n - a.t.n || a.t.key.localeCompare(b.t.key))
+      .slice(0, limit)
+      .map(({ t, p, s }) => ({ key: t.key, n: t.n, low_sample: t.low_sample, primary: p, secondary: s })),
+  });
+
   return {
     min_n: opts.minN,
     eligible_types: eligible.length,
@@ -497,8 +585,11 @@ export function computeLists(
     top_count: rank((t) => t.n, "desc"),
     top_median_budget: rank((t) => t.budget.median, "desc"),
     top_low_difficulty: rank((t) => t.avg_vibe_coding_difficulty, "asc"),
+    top_ai_ease: rank((t) => t.avg_ai_ease, "desc"),
+    top_budget_per_estimated_hour: rank((t) => t.budget_per_estimated_hour.median, "desc"),
     top_reusability: rank((t) => t.avg_reusability_value, "desc"),
     top_learning: rank((t) => t.avg_learning_value, "desc"),
+    top_market_value: rank((t) => t.avg_market_value, "desc"),
     high_budget_low_difficulty: {
       thresholds: {
         median_budget: opts.marketMedianBudget,
@@ -507,6 +598,158 @@ export function computeLists(
       },
       candidates,
     },
+    frequency_high_reuse: pair(
+      (t) => sampleMedianN !== null && sampleAvgReusability !== null && t.n >= sampleMedianN && t.avg_reusability_value !== null && t.avg_reusability_value >= sampleAvgReusability,
+      (t) => t.n,
+      (t) => t.avg_reusability_value,
+      { n: sampleMedianN, reusability: sampleAvgReusability },
+    ),
+    hourly_budget_high_reuse: pair(
+      (t) => sampleMedianHourly !== null && sampleAvgReusability !== null && t.budget_per_estimated_hour.median !== null && t.budget_per_estimated_hour.median >= sampleMedianHourly && t.avg_reusability_value !== null && t.avg_reusability_value >= sampleAvgReusability,
+      (t) => t.budget_per_estimated_hour.median,
+      (t) => t.avg_reusability_value,
+      { budget_per_estimated_hour: sampleMedianHourly, reusability: sampleAvgReusability },
+    ),
+    ai_easy_high_learning: pair(
+      (t) => sampleAvgAiEase !== null && sampleAvgLearning !== null && t.avg_ai_ease !== null && t.avg_ai_ease >= sampleAvgAiEase && t.avg_learning_value !== null && t.avg_learning_value >= sampleAvgLearning,
+      (t) => t.avg_ai_ease,
+      (t) => t.avg_learning_value,
+      { ai_ease: sampleAvgAiEase, learning: sampleAvgLearning },
+    ),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 6. 표본 데이터 품질
+// ---------------------------------------------------------------------------
+
+export interface AnalysisErrorSummary {
+  project_id: string;
+  error_type: string;
+  attempt: number;
+  resolved_at: string | null;
+}
+
+export interface ScoreQuality {
+  n: number;
+  at_0: number;
+  at_100: number;
+  near_boundary_n: number;
+  near_boundary_rate: number;
+}
+
+export interface DataQuality {
+  analyzed_n: number;
+  schema_failure_count: number;
+  schema_failure_projects: number;
+  retry_count: number;
+  retry_projects: number;
+  other_ratio: { project_type: number; technology_assets: number };
+  uncertain_fields: { projects_with_any: number; rate: number; by_field: Record<string, number> };
+  project_type_counts: Record<string, number>;
+  estimated_hours: {
+    n: number;
+    min: number | null;
+    max: number | null;
+    midpoint_q1: number | null;
+    midpoint_median: number | null;
+    midpoint_q3: number | null;
+    lower_fence: number | null;
+    upper_fence: number | null;
+    outlier_n: number;
+    invalid_range_n: number;
+  };
+  score_distribution: Record<string, ScoreQuality>;
+}
+
+const SCORE_FIELDS = [
+  "vibe_coding_difficulty",
+  "learning_value",
+  "reusability_value",
+  "market_value",
+  "technical_risk",
+  "requirement_clarity",
+] as const;
+
+function rawUncertainFields(row: AnalyzedProject): string[] {
+  const raw = row.raw_analysis;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
+  const value = (raw as Record<string, unknown>).uncertain_fields;
+  return Array.isArray(value) ? value.filter((x): x is string => typeof x === "string") : [];
+}
+
+export function computeDataQuality(rows: AnalyzedProject[], errors: AnalysisErrorSummary[] = []): DataQuality {
+  const project_type_counts: Record<string, number> = {};
+  let projectTypeOther = 0;
+  let assetOther = 0;
+  const uncertainByField: Record<string, number> = {};
+  let uncertainProjects = 0;
+  for (const row of rows) {
+    const type = row.project_type ?? "(none)";
+    project_type_counts[type] = (project_type_counts[type] ?? 0) + 1;
+    if (type === "other") projectTypeOther++;
+    if ((row.technology_assets ?? []).includes("other")) assetOther++;
+    const uncertain = rawUncertainFields(row);
+    if (uncertain.length) uncertainProjects++;
+    for (const field of uncertain) uncertainByField[field] = (uncertainByField[field] ?? 0) + 1;
+  }
+  const midpoints = rows
+    .filter((r) => Number.isFinite(r.estimated_hours_min) && Number.isFinite(r.estimated_hours_max) && r.estimated_hours_min <= r.estimated_hours_max)
+    .map((r) => (r.estimated_hours_min + r.estimated_hours_max) / 2)
+    .sort((a, b) => a - b);
+  const q1 = quantile(midpoints, 0.25);
+  const median = quantile(midpoints, 0.5);
+  const q3 = quantile(midpoints, 0.75);
+  const iqr = q1 !== null && q3 !== null ? q3 - q1 : null;
+  const lower = q1 !== null && iqr !== null ? q1 - 1.5 * iqr : null;
+  const upper = q3 !== null && iqr !== null ? q3 + 1.5 * iqr : null;
+  const outlier_n = lower === null || upper === null ? 0 : midpoints.filter((x) => x < lower || x > upper).length;
+  const invalid_range_n = rows.filter((r) => r.estimated_hours_min <= 0 || r.estimated_hours_max < r.estimated_hours_min).length;
+  const score_distribution: Record<string, ScoreQuality> = {};
+  for (const field of SCORE_FIELDS) {
+    const values = rows
+      .map((r) => {
+        if (field === "vibe_coding_difficulty") return r.vibe_coding_difficulty;
+        if (field === "learning_value") return r.learning_value;
+        if (field === "reusability_value") return r.reusability_value;
+        if (field === "market_value") return r.market_value;
+        const raw = r.raw_analysis;
+        const value = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>)[field] : null;
+        return typeof value === "number" ? value : null;
+      })
+      .filter((v): v is number => v !== null && Number.isFinite(v));
+    const near_boundary_n = values.filter((v) => v <= 5 || v >= 95).length;
+    score_distribution[field] = {
+      n: values.length,
+      at_0: values.filter((v) => v === 0).length,
+      at_100: values.filter((v) => v === 100).length,
+      near_boundary_n,
+      near_boundary_rate: values.length ? near_boundary_n / values.length : 0,
+    };
+  }
+  const schemaErrors = errors.filter((e) => e.error_type === "VALIDATION");
+  return {
+    analyzed_n: rows.length,
+    schema_failure_count: schemaErrors.length,
+    schema_failure_projects: new Set(schemaErrors.map((e) => e.project_id)).size,
+    retry_count: errors.length,
+    retry_projects: new Set(errors.map((e) => e.project_id)).size,
+    other_ratio: { project_type: rows.length ? projectTypeOther / rows.length : 0, technology_assets: rows.length ? assetOther / rows.length : 0 },
+    uncertain_fields: { projects_with_any: uncertainProjects, rate: rows.length ? uncertainProjects / rows.length : 0, by_field: uncertainByField },
+    project_type_counts,
+    estimated_hours: {
+      n: midpoints.length,
+      min: midpoints.length ? midpoints[0]! : null,
+      max: midpoints.length ? midpoints.at(-1)! : null,
+      midpoint_q1: q1,
+      midpoint_median: median,
+      midpoint_q3: q3,
+      lower_fence: lower,
+      upper_fence: upper,
+      outlier_n,
+      invalid_range_n,
+    },
+    score_distribution,
   };
 }
 
@@ -534,6 +777,7 @@ export interface MarketReport {
   notes: string[];
   base: BaseStats;
   coverage: Coverage;
+  quality: DataQuality;
   /** 기본 화면: staffing 제외 */
   non_staffing: ScopeReport;
   staffing: ScopeReport;
@@ -543,6 +787,7 @@ export interface ComputeOptions {
   version: string;
   minN?: number;
   minCombo?: number;
+  errors?: AnalysisErrorSummary[];
   now?: Date;
 }
 
@@ -576,6 +821,10 @@ export function computeMarketReport(projects: MarketProject[], analyzed: Analyze
             minN,
             marketMedianBudget: base[segment].budget.stats.median,
             sampleAvgDifficulty: averages.avg_vibe_coding_difficulty,
+            sampleAvgAiEase: averages.avg_ai_ease,
+            sampleAvgReusability: averages.avg_reusability_value,
+            sampleAvgLearning: averages.avg_learning_value,
+            sampleMedianBudgetPerEstimatedHour: averages.median_budget_per_estimated_hour,
           })
         : null,
     };
@@ -592,10 +841,13 @@ export function computeMarketReport(projects: MarketProject[], analyzed: Analyze
       "월별 평균은 수집 시점이 속한 마지막 달을 제외한 완전한 달만 사용 (첫 달 2025-10 은 cutoff 2025-10-02 라 약 1일 적음).",
       "자산 조합은 2~3개 조합 중 최소 등장 건수 이상만, 같은 프로젝트 집합에서 나오는 조합은 항상 함께 등장하는 자산 묶음(closed itemset)으로 병합.",
       "reuse_level 은 원본 4단계 유지 + 보조 3단계(high / medium / low_reuse = low + one_off) 집계.",
+      "ai_ease = 100 - vibe_coding_difficulty 는 표시용 파생값이며 가중치/합산 점수에 사용하지 않는다.",
+      "budget_per_estimated_hour = budget / midpoint(estimated_hours_min, estimated_hours_max) 는 순수익이 아닌 단순 비교용이다.",
       "최종 점수(외주 매력도/수익성/공략)는 계산하지 않는다.",
     ],
     base,
     coverage,
+    quality: computeDataQuality(analyzed, opts.errors),
     non_staffing: scope("non_staffing", true),
     staffing: scope("staffing", false),
   };

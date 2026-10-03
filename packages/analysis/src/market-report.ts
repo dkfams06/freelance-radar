@@ -1,5 +1,5 @@
 import type { BudgetStats } from "./stats";
-import type { AssetStat, ComboStat, MarketReport, RankedItem, ScopeReport, Segment, TypeStat } from "./market-stats";
+import type { AssetStat, ComboStat, MarketReport, PairList, RankedItem, ScopeReport, Segment, TypeStat } from "./market-stats";
 
 const pct = (x: number | null | undefined, d = 1) => (x == null ? "-" : `${(x * 100).toFixed(d)}%`);
 const f1 = (x: number | null | undefined) => (x == null ? "-" : x.toFixed(1));
@@ -17,12 +17,12 @@ function budgetCells(b: BudgetStats): string {
 function typeTable(types: TypeStat[], unit: string): string[] {
   if (!types.length) return ["_분석된 프로젝트가 없습니다._", ""];
   return [
-    `| project_type | n | 비율 | 월평균(표본) | 월평균(추정) | **중앙 예산** | p25 | p75 | 평균 | 예산 n | 난이도 | 시간 min | 시간 max | 학습 | 재사용 | 시장성 | reuse 4단계 (h/m/l/o) | reuse 3단계 (h/m/low_reuse) |`,
-    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+    `| project_type | n | 비율 | 월평균(표본) | 월평균(추정) | **중앙 예산** | p25 | p75 | 평균 | 예산 n | 난이도 | AI 용이성 | 시간 min 중앙 | 시간 max 중앙 | 시간당 예산 중앙 | 학습 | 재사용 | 시장성 | reuse 4단계 (h/m/l/o) | reuse 3단계 (h/m/low_reuse) |`,
+    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ...types.map((t) => {
       const r4 = ["high", "medium", "low", "one_off"].map((k) => t.reuse_4[k] ?? 0).join("/");
       const r3 = `${t.reuse_3.high}/${t.reuse_3.medium}/${t.reuse_3.low_reuse}`;
-      return `| ${t.key}${warn(t.low_sample)} | ${t.n} | ${pct(t.share)} | ${f1(t.monthly_avg_in_sample)} | ${f1(t.monthly_avg_estimated)} | ${budgetCells(t.budget)} | ${f1(t.avg_vibe_coding_difficulty)} | ${f0(t.avg_hours_min)} | ${f0(t.avg_hours_max)} | ${f1(t.avg_learning_value)} | ${f1(t.avg_reusability_value)} | ${f1(t.avg_market_value)} | ${r4} | ${r3} |`;
+      return `| ${t.key}${warn(t.low_sample)} | ${t.n} | ${pct(t.share)} | ${f1(t.monthly_avg_in_sample)} | ${f1(t.monthly_avg_estimated)} | ${budgetCells(t.budget)} | ${f1(t.avg_vibe_coding_difficulty)} | ${f1(t.avg_ai_ease)} | ${f0(t.median_hours_min)} | ${f0(t.median_hours_max)} | ${man(t.budget_per_estimated_hour.median)} | ${f1(t.avg_learning_value)} | ${f1(t.avg_reusability_value)} | ${f1(t.avg_market_value)} | ${r4} | ${r3} |`;
     }),
     "",
     `_예산 단위: ${unit}. ⚠ = 표본 부족(n < 기준). 월평균(추정)은 표본 비율 × 원본 월평균이라 표본이 무작위일 때만 의미가 있습니다._`,
@@ -33,10 +33,10 @@ function typeTable(types: TypeStat[], unit: string): string[] {
 function assetTable(assets: AssetStat[]): string[] {
   if (!assets.length) return ["_분석된 프로젝트가 없습니다._", ""];
   return [
-    "| asset | 등장 n | 등장 비율 | **중앙 예산** | p25 | p75 | 평균 | 예산 n | 난이도 | 학습 | 재사용 |",
-    "|---|---|---|---|---|---|---|---|---|---|---|",
+    "| asset | 등장 n | 등장 비율 | **중앙 예산** | p25 | p75 | 평균 | 예산 n | 난이도 | AI 용이성 | 학습 | 재사용 | 시장성 | 시간당 예산 중앙 |",
+    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ...assets.map(
-      (a) => `| ${a.key}${warn(a.low_sample)} | ${a.n} | ${pct(a.share)} | ${budgetCells(a.budget)} | ${f1(a.avg_vibe_coding_difficulty)} | ${f1(a.avg_learning_value)} | ${f1(a.avg_reusability_value)} |`,
+      (a) => `| ${a.key}${warn(a.low_sample)} | ${a.n} | ${pct(a.share)} | ${budgetCells(a.budget)} | ${f1(a.avg_vibe_coding_difficulty)} | ${f1(a.avg_ai_ease)} | ${f1(a.avg_learning_value)} | ${f1(a.avg_reusability_value)} | ${f1(a.avg_market_value)} | ${man(a.budget_per_estimated_hour.median)} |`,
     ),
     "",
   ];
@@ -66,11 +66,35 @@ function rankList(title: string, items: RankedItem[], fmt: (v: number) => string
   ];
 }
 
+function pairList(
+  title: string,
+  list: PairList,
+  primaryLabel: string,
+  secondaryLabel: string,
+  primaryFmt: (x: number | null) => string = f1,
+  secondaryFmt: (x: number | null) => string = f1,
+): string[] {
+  if (!list.candidates.length) return [`### ${title}`, "", "_해당 없음_", ""];
+  const thresholds = Object.entries(list.thresholds)
+    .map(([k, v]) => `${k} ≥ ${k === "n" ? String(Math.round(v ?? 0)) : k.includes("budget") ? primaryFmt(v) : secondaryFmt(v)}`)
+    .join(", ");
+  return [
+    `### ${title}`,
+    "",
+    `- 조건: ${thresholds}`,
+    "",
+    `| 순위 | project_type | ${primaryLabel} | ${secondaryLabel} | n |`,
+    "|---|---|---:|---:|---:|",
+    ...list.candidates.map((c, i) => `| ${i + 1} | ${c.key}${warn(c.low_sample)} | ${primaryFmt(c.primary)} | ${secondaryFmt(c.secondary)} | ${c.n} |`),
+    "",
+  ];
+}
+
 function scopeSection(title: string, s: ScopeReport, unit: string, minN: number, minCombo: number): string[] {
   const L: string[] = [`## ${title}`, "", `- 분석 표본: **${s.n}건** (${SEG_LABEL[s.segment]})`];
   if (s.n) {
     L.push(
-      `- 표본 평균: 난이도 ${f1(s.averages.avg_vibe_coding_difficulty)} · 학습 ${f1(s.averages.avg_learning_value)} · 재사용 ${f1(s.averages.avg_reusability_value)} · 시장성 ${f1(s.averages.avg_market_value)}`,
+      `- 표본 평균: 난이도 ${f1(s.averages.avg_vibe_coding_difficulty)} · AI 용이성 ${f1(s.averages.avg_ai_ease)} · 학습 ${f1(s.averages.avg_learning_value)} · 재사용 ${f1(s.averages.avg_reusability_value)} · 시장성 ${f1(s.averages.avg_market_value)}`,
       `- reuse: 4단계 high ${s.reuse.reuse_4.high ?? 0} / medium ${s.reuse.reuse_4.medium ?? 0} / low ${s.reuse.reuse_4.low ?? 0} / one_off ${s.reuse.reuse_4.one_off ?? 0}` +
         ` → 3단계 high ${s.reuse.reuse_3.high} / medium ${s.reuse.reuse_3.medium} / low_reuse ${s.reuse.reuse_3.low_reuse}`,
     );
@@ -148,20 +172,30 @@ export function renderMarketReport(r: MarketReport): string {
     L.push("");
   }
 
-  // 5. 목록
+  // 5. 데이터 품질
+  L.push("## 5. 데이터 품질 검사", "", `- schema failure: ${r.quality.schema_failure_count}건 (${r.quality.schema_failure_projects}개 프로젝트) · retry 기록: ${r.quality.retry_count}건 (${r.quality.retry_projects}개 프로젝트)`);
+  L.push(`- other 비율: project_type ${pct(r.quality.other_ratio.project_type)} · technology_assets 포함 프로젝트 ${pct(r.quality.other_ratio.technology_assets)}`);
+  L.push(`- uncertain_fields: ${r.quality.uncertain_fields.projects_with_any}건 (${pct(r.quality.uncertain_fields.rate)}) · 필드별 ${Object.entries(r.quality.uncertain_fields.by_field).map(([k, v]) => `${k} ${v}`).join(", ") || "-"}`);
+  L.push(`- estimated_hours midpoint: n ${r.quality.estimated_hours.n} · 중앙값 ${f0(r.quality.estimated_hours.midpoint_median)} · IQR fence 밖 이상치 ${r.quality.estimated_hours.outlier_n}건 · 잘못된 범위 ${r.quality.estimated_hours.invalid_range_n}건`, "");
+  L.push("### project_type별 표본 수", "", "| project_type | n |", "|---|---:|", ...Object.entries(r.quality.project_type_counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([k, v]) => `| ${k} | ${v} |`), "");
+  L.push("### 점수 경계 몰림", "", "| 필드 | n | 0 | 100 | 0/100 근처(≤5 또는 ≥95) | 비율 |", "|---|---:|---:|---:|---:|---:|", ...Object.entries(r.quality.score_distribution).map(([k, v]) => `| ${k} | ${v.n} | ${v.at_0} | ${v.at_100} | ${v.near_boundary_n} | ${pct(v.near_boundary_rate)} |`), "");
+
+  // 6. 목록
   const lists = r.non_staffing.lists!;
-  L.push("## 5. 다음 단계 판단용 지표별 목록 (일반 외주 기준, 합산 순위 아님)", "");
+  L.push("## 6. 다음 단계 판단용 지표별 목록 (일반 외주 기준, 합산 순위 아님)", "");
   if (lists.reference_mode) {
     L.push(
       `> ⚠ n ≥ ${lists.min_n} 인 유형이 ${lists.eligible_types}개뿐이라 **모든 유형을 참고용으로** 보여줍니다. 아래 순위는 의사결정에 쓰지 마세요 (n 이 1~3 인 평균/중앙값은 의미가 약합니다).`,
       "",
     );
   }
-  L.push(...rankList("공고가 많은 유형 TOP 10 (분석 표본 내 건수)", lists.top_count, (v) => String(v), "건수", false));
+  L.push(...rankList("공고가 많은 유형 TOP 10 (분석 표본 내 건수)", lists.top_count, (v) => String(v), "건수"));
   L.push(...rankList("중앙 견적이 높은 유형 TOP 10 (일반 외주 총액)", lists.top_median_budget, (v) => man(v), "중앙 예산"));
-  L.push(...rankList("AI 난이도가 낮은 유형 TOP 10 (평균 vibe_coding_difficulty)", lists.top_low_difficulty, f1, "평균 난이도"));
+  L.push(...rankList("AI 난이도가 낮은 유형 TOP 10 (평균 vibe_coding_difficulty / AI 구현이 쉬운 유형)", lists.top_ai_ease, f1, "평균 AI 용이성"));
+  L.push(...rankList("예상 시간당 예산이 높은 유형 TOP 10", lists.top_budget_per_estimated_hour, man, "중앙 시간당 예산"));
   L.push(...rankList("재사용 가치가 높은 유형 TOP 10 (평균 reusability_value)", lists.top_reusability, f1, "평균 재사용"));
   L.push(...rankList("학습 가치가 높은 유형 TOP 10 (평균 learning_value)", lists.top_learning, f1, "평균 학습"));
+  L.push(...rankList("market_value가 높은 유형 TOP 10", lists.top_market_value, f1, "평균 market_value"));
   const h = lists.high_budget_low_difficulty;
   L.push("### \"견적 높음 + AI 난이도 낮음\" 후보 유형", "");
   L.push(`- 기준: 유형 중앙 예산 ≥ 원본 일반 외주 전체 중앙값(**${man(h.thresholds.median_budget)}**) 이고 평균 난이도 ≤ 분석 표본 평균(**${f1(h.thresholds.avg_difficulty)}**)`);
@@ -171,9 +205,12 @@ export function renderMarketReport(r: MarketReport): string {
     for (const x of h.candidates) L.push(`| ${x.key}${warn(x.low_sample)} | **${man(x.median_budget)}** | ${f1(x.avg_difficulty)} | ${x.n} |`);
     L.push("");
   }
+  L.push(...pairList("빈도 높음 + reuse 높음", lists.frequency_high_reuse, "표본 n", "평균 reuse", (v) => String(Math.round(v ?? 0)), f1));
+  L.push(...pairList("시간당 예산 높음 + reuse 높음", lists.hourly_budget_high_reuse, "중앙 시간당 예산", "평균 reuse", man, f1));
+  L.push(...pairList("AI 쉬움 + learning 높음", lists.ai_easy_high_learning, "평균 AI 용이성", "평균 learning"));
 
-  // 6. 한계
-  L.push("## 6. 해석 주의", "");
+  // 7. 한계
+  L.push("## 7. 해석 주의", "");
   for (const n of r.notes) L.push(`- ${n}`);
   L.push("- 위 목록은 지표별로 따로 본 것이며 합산 점수/최종 순위는 만들지 않았습니다.");
   L.push("- 분석 기반 표(2~5번 섹션)는 분석 커버리지가 올라가기 전까지 참고용입니다. 전체 분석 후 같은 명령으로 다시 생성합니다.", "");
