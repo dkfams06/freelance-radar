@@ -13,7 +13,7 @@ templateability_score = core_coverage*0.30 + core_fit*0.25 + jaccard*0.20 + bund
 | project_type | n(v0.1) | n(f1) | confidence | v0.1 | v0.2 | v0.1 순위 | v0.2 순위 | 순위 변화 | templateability | 추천 label |
 |---|---:|---:|---|---:|---:|---:|---:|---:|---:|---|
 | admin_backoffice | 8 | 8 | low | 54.27 | 57.70 | 7 | 6 | ▲1 | 62.90 | template_product |
-| ai_service | 15 | 16 | medium | 46.42 | 46.05 | 10 | 8 | ▲2 | 37.06 | learning_bet |
+| ai_service | 15 | 16 | medium | 46.42 | 46.05 | 8 | 8 | - | 37.06 | learning_bet |
 | business_management | 37 | 37 | high | 80.66 | 76.03 | 1 | 1 | - | 43.87 | core_business |
 | ecommerce | 18 | 18 | medium | 59.77 | 58.56 | 4 | 5 | ▼1 | 56.41 | template_product |
 | platform_marketplace | 38 | 39 | high | 74.20 | 67.62 | 2 | 3 | ▼1 | 40.73 | selective_high_value |
@@ -48,6 +48,7 @@ templateability_score = core_coverage*0.30 + core_fit*0.25 + jaccard*0.20 + bund
 
 - v0.2는 v0.1과 feature repetition f1을 결합한 후보 공식이며 최종 확정 점수가 아니다.
 - v0.1은 이상치 제외 일반 외주 모드의 정규화 지표를 재사용했다.
+- v0.1/v0.2 순위 변화는 두 점수 모두 결합 대상 8개 유형 집합 안에서 다시 매긴 순위다.
 - feature repetition은 지정된 8개 project_type 결과를 사용한다. 유형별 opportunity n과 feature n은 이상치 처리 차이로 다를 수 있다.
 - templateability의 feature_repetition은 feature 개수 자체가 아니라 고빈도 core 비율과 core 밀도의 조합이다.
 - reservation, saas, admin_backoffice는 n<10이므로 추천 label도 낮은 confidence로 해석해야 한다.

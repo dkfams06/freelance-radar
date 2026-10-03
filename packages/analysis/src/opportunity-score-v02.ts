@@ -185,7 +185,9 @@ export function buildOpportunityV02Report(
       n_features: f.n,
       confidence,
       v01_score: v01Score,
-      v01_rank: type.rank.balanced,
+      // v0.1 원본 순위는 결합 대상 밖의 유형까지 포함할 수 있으므로
+      // 아래에서 v0.2와 동일한 8개 유형 집합 기준으로 다시 부여한다.
+      v01_rank: null,
       v02_score: round2(v02Score),
       v02_rank: null,
       rank_change: null,
@@ -207,6 +209,10 @@ export function buildOpportunityV02Report(
       role_reason: "",
     });
   }
+  const v01Ranked = [...rows].sort((a, b) => (b.v01_score ?? -1) - (a.v01_score ?? -1) || b.n_opportunity - a.n_opportunity || a.project_type.localeCompare(b.project_type));
+  v01Ranked.forEach((row, index) => {
+    row.v01_rank = row.v01_score === null ? null : index + 1;
+  });
   rows.sort((a, b) => (b.v02_score ?? -1) - (a.v02_score ?? -1) || b.n_opportunity - a.n_opportunity || a.project_type.localeCompare(b.project_type));
   rows.forEach((row, index) => {
     row.v02_rank = row.v02_score === null ? null : index + 1;
@@ -242,6 +248,7 @@ export function buildOpportunityV02Report(
     notes: [
       "v0.2는 v0.1과 feature repetition f1을 결합한 후보 공식이며 최종 확정 점수가 아니다.",
       "v0.1은 이상치 제외 일반 외주 모드의 정규화 지표를 재사용했다.",
+      "v0.1/v0.2 순위 변화는 두 점수 모두 결합 대상 8개 유형 집합 안에서 다시 매긴 순위다.",
       "feature repetition은 지정된 8개 project_type 결과를 사용한다. 유형별 opportunity n과 feature n은 이상치 처리 차이로 다를 수 있다.",
       "templateability의 feature_repetition은 feature 개수 자체가 아니라 고빈도 core 비율과 core 밀도의 조합이다.",
       "reservation, saas, admin_backoffice는 n<10이므로 추천 label도 낮은 confidence로 해석해야 한다.",
