@@ -17,7 +17,7 @@ import {
  * project_analyses 는 (project_id, analysis_version) 단위로 저장되므로
  * 버전을 올리면 원본 수집 없이 같은 projects 를 새 기준으로 다시 분석할 수 있다.
  */
-export const ANALYSIS_VERSION = "v3.2";
+export const ANALYSIS_VERSION = "v3.3";
 // v1: 최초 기준 (project_category 15종, engagement_type 7종)
 // v2: 통계용 6개 분류 추가 (project_type, engagement_type 재정의, complexity_types, reuse_level, technology_assets, industry)
 // v3: project_type 4종(fintech_payment, iot_device, media_processing, enterprise_infra), technology_assets 3종
@@ -26,6 +26,7 @@ export const ANALYSIS_VERSION = "v3.2";
 //       작업시간을 클라이언트 예산과 분리, uncertain_fields 사용 조건 강화, 기능추가/QA 상주 예시 추가
 // v3.2: project_type 에서 maintenance 제거(유지보수는 engagement_type 에만), technology_assets 에 test_automation 추가,
 //       complexity_types 선택 규칙 강화(근거 필수, 4개 이상은 독립적 복잡성일 때만), reuse_level low/medium 경계 명시
+// v3.3: reuse_level 규칙만 수정 (medium 은 공고에 구체적 재사용 모듈이 있어야 함, one_off 는 아주 특수한 고객 종속일 때만, staffing 만으로 one_off 금지)
 
 const list = (o: Record<string, string>) =>
   Object.entries(o)
@@ -111,11 +112,13 @@ ${list(COMPLEXITY_TYPES)}
 ${list(REUSE_LEVELS)}
 - 기준은 "이 프로젝트에서 만든 코드/구조/패턴을 다른 외주나 자체 서비스에서 실제로 다시 쓸 수 있는가" 하나뿐입니다.
 - "배운다"는 learning_value 의 몫이고, "다른 데 그대로 써먹는다"가 reuse_level 의 몫입니다. 어렵거나 새로운 기술을 익힌다고 reuse_level 을 올리지 않습니다.
-- medium 과 low 의 경계: 프로젝트 도메인이 달라도 실제 코드/컴포넌트/아키텍처의 의미 있는 부분을 다른 외주에서 쓸 수 있으면 medium.
-  일반적인 경험이나 아이디어만 남고 코드/구조 재사용이 제한적이면 low.
-- 특정 기업 환경, 특정 SDK, 특정 승인 대응, 특정 레거시 수정은 기본적으로 low 쪽으로 봅니다. 상주/인력 투입이라도 투입 대상이 특정 기업의 시스템이면 같습니다.
-  결제·금융 도메인이 들어 있어도 고객 전용 시스템이라 코드 재사용이 제한적이면 low 입니다.
-- 특정 장비·폐쇄망·레거시 환경에 강하게 묶여 다른 외주에 거의 쓸 수 없으면 one_off.
+- high: 코드/구조/아키텍처의 상당 부분을 다른 외주에서 그대로 또는 약간 수정해 쓸 수 있을 때.
+- medium: 공고 내용상 재사용 가능한 구체적인 모듈/구조가 실제로 존재해야 합니다 (예: 범용 인증/권한, 일반 결제 모듈, 예약 엔진, 공통 관리자 구조, 범용 API integration layer, SaaS 공통 구조).
+  단순히 "비슷한 기술을 또 쓸 수 있다"는 이유만으로 medium 을 주지 않습니다.
+- low: 개발 경험과 개념은 남지만 실제 코드/구조 재사용은 제한적일 때. 일부 일반성은 있지만 실제 재사용성이 낮은 경우입니다
+  (예: 특정 SDK 대응, 특정 승인 대응, 특정 기업 업무 흐름, 특정 레거시 수정, 특정 환경 설정).
+- one_off: 폐쇄망, 특정 고객 전용 시스템, 특정 기업 내부 인프라, 특정 장비/설비 종속, 특정 레거시 코드베이스 종속, 특정 조직 환경에 강하게 결합 중 하나 이상이 지배적이어서 다른 외주에 거의 재사용할 수 없을 때만.
+  "아주 특수한 고객 종속"일 때만 쓰고, 일부 일반성이 있으면 low 입니다. staffing(상주/인력 투입)이라는 이유만으로 one_off 로 분류하지 않습니다.
 
 ## technology_assets (수행 시 축적되는 기술자산, 복수)
 ${TECHNOLOGY_ASSETS.join(", ")}

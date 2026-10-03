@@ -67,10 +67,10 @@ export const COMPLEXITY_TYPE_CODES = Object.keys(COMPLEXITY_TYPES) as [Complexit
 
 /** 결과물 재사용 수준 (이후 프로젝트 간 feature overlap 통계로 보정 예정) */
 export const REUSE_LEVELS = {
-  high: "만든 구조/코드의 상당 부분을 다른 외주에서 그대로 또는 약간 수정해 재사용 가능 (인증/권한·관리자·CRUD·예약·결제·SaaS 공통 구조·일반적인 API 연동·범용 자동화)",
-  medium: "프로젝트 도메인은 달라도 실제 코드/컴포넌트/아키텍처의 의미 있는 부분을 다른 외주에 재사용할 수 있음",
-  low: "일반적인 경험이나 아이디어는 남지만 실제 코드/구조 재사용은 제한적 (특정 기업 환경·특정 SDK·특정 승인 대응·특정 레거시 수정)",
-  one_off: "특정 기업/장비/폐쇄망/레거시 환경에 강하게 종속되어 다른 외주에 거의 재사용 불가능",
+  high: "다른 외주에서 코드, 구조, 아키텍처의 상당 부분을 그대로 또는 약간 수정해서 재사용 가능 (인증/권한·관리자·CRUD·예약·결제·SaaS 공통 구조·일반적인 API 연동·범용 자동화)",
+  medium: "공고 내용상 재사용 가능한 구체적인 모듈/구조가 존재 (범용 인증/권한·일반 결제 모듈·예약 엔진·공통 관리자 구조·범용 API integration layer·SaaS 공통 구조)",
+  low: "개발 경험과 개념은 남지만 실제 코드/구조 재사용은 제한적 (특정 SDK 대응·특정 승인 대응·특정 기업 업무 흐름·특정 레거시 수정·특정 환경 설정)",
+  one_off: "폐쇄망·특정 고객 전용 시스템·특정 기업 내부 인프라·특정 장비/설비 종속·특정 레거시 코드베이스 종속·특정 조직 환경 결합 중 하나 이상이 강하게 지배해 다른 외주에 거의 재사용 불가",
 } as const;
 export type ReuseLevel = keyof typeof REUSE_LEVELS;
 export const REUSE_LEVEL_CODES = Object.keys(REUSE_LEVELS) as [ReuseLevel, ...ReuseLevel[]];
