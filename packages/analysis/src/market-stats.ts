@@ -30,6 +30,7 @@ export interface MarketProject {
 
 export interface MarketAnalysis {
   project_id: string;
+  model?: string;
   project_type: string | null;
   engagement_type: string | null;
   industry: string | null;

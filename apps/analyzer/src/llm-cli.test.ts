@@ -72,4 +72,10 @@ describe("ClaudeCliClient.buildArgs", () => {
     expect(args).toEqual(expect.arrayContaining(["-p", "--output-format", "json", "--model", "claude-sonnet-5-5", "--json-schema", "--no-session-persistence"]));
     expect(args[args.indexOf("--tools") + 1]).toBe("");
   });
+
+  it("Haiku 검증 실행에서는 지원되지 않는 effort 인자를 생략", () => {
+    const args = new ClaudeCliClient({ model: "claude-haiku-4-5", effort: "low", maxTokens: 8000 }).buildArgs();
+    expect(args).toEqual(expect.arrayContaining(["-p", "--model", "claude-haiku-4-5", "--json-schema"]));
+    expect(args).not.toContain("--effort");
+  });
 });

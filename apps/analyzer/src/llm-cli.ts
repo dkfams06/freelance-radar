@@ -37,14 +37,14 @@ export class ClaudeCliClient implements SyncLlm {
   }
 
   buildArgs(): string[] {
+    const effortArgs = this.cfg.model.startsWith("claude-haiku") ? [] : ["--effort", this.cfg.effort];
     return [
       "-p",
       "--output-format",
       "json",
       "--model",
       this.cfg.model,
-      "--effort",
-      this.cfg.effort,
+      ...effortArgs,
       "--system-prompt",
       SYSTEM_PROMPT,
       "--json-schema",

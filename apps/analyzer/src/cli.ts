@@ -38,10 +38,20 @@ import {
   renderStarterKitReport,
   type FeatureV01Json,
   type OpportunityV01Json,
+  HAIKU_VALIDATION_ANALYSIS_VERSION,
+  HAIKU_VALIDATION_SAMPLE_SCHEMA,
+  selectHaikuValidationSample,
+  validateHaikuValidationSample,
+  renderHaikuValidationSelection,
+  buildHaikuValidationReport,
+  renderHaikuValidationReport,
+  type HaikuValidationSampleFile,
+  type HaikuValidationSource,
+  type HaikuValidationRunStats,
 } from "@fr/analysis";
 import { LlmClient, llmBackend, loadLlmConfig, type SyncLlm } from "./llm";
 import { ClaudeCliClient } from "./llm-cli";
-import { runSample } from "./sample-runner";
+import { runSample, type SampleRunProgress } from "./sample-runner";
 
 const CLI_BACKEND_NOTE =
   "backend=claude-cli (claude -p, Claude 구독제). 비용은 API 단가 환산 추정치이며 실제 청구되지 않음 (구독 사용량 한도에 반영)";
@@ -69,8 +79,11 @@ freelance-radar analyzer (${ANALYSIS_VERSION})
 commands:
   sample          플랫폼별 최신 프로젝트 n 건을 동기 분석 → DB 저장 + 리포트 (기본 wishket 10, freemoa 10)
   sample-select    v3.3 미분석 전체에서 고정 seed 층화 시장 표본을 선정·검증
+  haiku-validate-select  기존 Sonnet v3.3 성공 분석에서 Haiku 검증용 100건 표본을 고정 seed로 선정
   sample-verify    저장된 시장 표본 JSON을 전체 projects와 다시 비교 검증
   run-sample       고정 시장 표본을 claude -p로 순차 분석 (체크포인트 재개)
+                  Sonnet/Haiku 모두 허용. Haiku 검증은 별도 --version을 사용해 기존 v3.3을 덮어쓰지 않음
+  haiku-validate-report  Sonnet v3.3 vs Haiku 검증 결과·opportunity 순위 비교 리포트 생성
   run             미분석 프로젝트를 동기(Messages API) 분석
   batch-submit    미분석 프로젝트를 Message Batches API 로 제출 (50% 할인, 보통 1시간 이내 완료)
   batch-collect   제출한 batch 결과 회수 → 검증 → 저장 (--wait: 끝날 때까지 대기)
@@ -115,6 +128,8 @@ options:
                                 opportunity-score-v0.2: 출력 경로(기본 docs/opportunity-score-v0.2-500)
   --opportunity-file <file>     opportunity-score-v0.2 입력 v0.1 JSON
   --feature-file <file>         opportunity-score-v0.2 입력 feature repetition JSON
+  --sonnet-version <v>          haiku-validate-report 기준 버전 (기본 v3.3)
+  --haiku-version <v>           haiku-validate-report 비교 버전 (기본 v3.3-haiku-validation)
 
 env: ANTHROPIC_API_KEY, ANALYZER_MODEL (일반 실행 기본 claude-opus-5-5), ANALYZER_EFFORT (기본 low), ANALYZER_MAX_TOKENS (기본 8000)
      ANALYZER_BACKEND=claude-cli  → API 키 대신 Claude 구독제(claude -p) 로 sample/run 실행 (Batch 불가)
@@ -183,6 +198,8 @@ async function main() {
       out: { type: "string" },
       "opportunity-file": { type: "string" },
       "feature-file": { type: "string" },
+      "sonnet-version": { type: "string" },
+      "haiku-version": { type: "string" },
       save: { type: "boolean" },
       "min-support": { type: "string" },
       types: { type: "string" },
@@ -313,6 +330,41 @@ async function main() {
       return;
     }
 
+    case "haiku-validate-select": {
+      const size = values.limit ? positive(values.limit, "--limit") : 100;
+      const seed = "analyzer-v3.3-haiku-validation-100-v1";
+      const output = sampleOutputPaths(path.resolve(process.env.INIT_CWD ?? process.cwd(), values.out ?? "docs/analyzer-v3.3-haiku-validation-sample-100.json"));
+      const { analyzed } = await store.marketRows(ANALYSIS_VERSION);
+      const eligible = analyzed.filter((row) => row.model?.startsWith("claude-sonnet")) as HaikuValidationSource[];
+      if (eligible.length < size) throw new Error(`Sonnet ${ANALYSIS_VERSION} 성공 분석이 ${size}건보다 적습니다 (${eligible.length}건)`);
+      const picked = selectHaikuValidationSample(eligible, size, seed);
+      const populationSnapshots = selectHaikuValidationSample(eligible, eligible.length, seed).selected;
+      const validation = validateHaikuValidationSample(populationSnapshots, picked.selected, size);
+      const file: HaikuValidationSampleFile = {
+        schema: HAIKU_VALIDATION_SAMPLE_SCHEMA,
+        base_analysis_version: ANALYSIS_VERSION,
+        target_analysis_version: HAIKU_VALIDATION_ANALYSIS_VERSION,
+        seed,
+        requested_size: size,
+        population_total: eligible.length,
+        eligible_population: eligible.length,
+        selected_project_ids: picked.selected.map((row) => row.id).sort(),
+        selected: picked.selected,
+        strata: picked.strata,
+        validation,
+        created_at: new Date().toISOString(),
+      };
+      mkdirSync(path.dirname(output.json), { recursive: true });
+      writeFileSync(output.json, `${JSON.stringify(file, null, 2)}\n`);
+      writeFileSync(output.md, `${renderHaikuValidationSelection(file)}\n`);
+      log(`Haiku 검증 표본 ${picked.selected.length}건 / Sonnet ${ANALYSIS_VERSION} 모집단 ${eligible.length}건`);
+      log(`seed=${seed} 검증=${validation.passed ? "PASS" : "FAIL"}`);
+      for (const warning of validation.warnings) log(`⚠ ${warning}`);
+      log(`→ ${output.json}\n→ ${output.md}`);
+      if (!validation.passed) process.exitCode = 1;
+      return;
+    }
+
     case "sample-verify": {
       const samplePath = resolveArg(values["sample-file"] ?? rawArg);
       if (!samplePath) throw new Error("sample-verify --sample-file <sample.json>");
@@ -332,28 +384,26 @@ async function main() {
     }
 
     case "run-sample": {
-      const version = values.version ?? ANALYSIS_VERSION;
-      if (version !== ANALYSIS_VERSION) throw new Error(`run-sample은 고정된 ${ANALYSIS_VERSION}만 지원합니다`);
       const backend = values.backend ?? process.env.ANALYZER_BACKEND ?? "claude-cli";
       if (backend !== "claude-cli") throw new Error("run-sample은 ANALYZER_BACKEND=claude-cli만 지원합니다. API/Batch 경로는 사용하지 않습니다.");
       const samplePath = resolveArg(values["sample-file"] ?? rawArg);
       if (!samplePath) throw new Error("run-sample --sample-file <sample.json>");
-      const sample = JSON.parse(readFileSync(samplePath, "utf8")) as Partial<StratifiedSampleFile>;
-      if (
-        sample.schema !== "analyzer-v3.3-market-sample/v1" ||
-        sample.analysis_version !== version ||
-        !Array.isArray(sample.selected_project_ids) ||
-        sample.selected_project_ids.length === 0 ||
-        sample.selected_project_ids.some((id) => typeof id !== "string")
-      ) {
-        throw new Error(`${samplePath}: v3.3 시장 표본 JSON 형식이 아닙니다`);
+      const sample = JSON.parse(readFileSync(samplePath, "utf8")) as Partial<StratifiedSampleFile> & Partial<HaikuValidationSampleFile>;
+      const isHaikuValidationSample = sample.schema === HAIKU_VALIDATION_SAMPLE_SCHEMA;
+      const version = values.version ?? (isHaikuValidationSample ? sample.target_analysis_version ?? HAIKU_VALIDATION_ANALYSIS_VERSION : ANALYSIS_VERSION);
+      if (!isHaikuValidationSample && version !== ANALYSIS_VERSION) throw new Error(`일반 run-sample은 고정된 ${ANALYSIS_VERSION}만 지원합니다`);
+      const validSample = isHaikuValidationSample
+        ? sample.target_analysis_version === version && sample.base_analysis_version === ANALYSIS_VERSION
+        : sample.schema === "analyzer-v3.3-market-sample/v1" && sample.analysis_version === version;
+      if (!validSample || !Array.isArray(sample.selected_project_ids) || sample.selected_project_ids.length === 0 || sample.selected_project_ids.some((id) => typeof id !== "string")) {
+        throw new Error(`${samplePath}: 지원하지 않는 v3.3 표본 JSON 형식입니다`);
       }
       const sampleIds = sample.selected_project_ids as string[];
       if (new Set(sampleIds).size !== sampleIds.length) throw new Error(`${samplePath}: project_id 중복이 있습니다`);
       const projects = await store.projectsByIds(sampleIds);
       if (projects.length !== sampleIds.length) throw new Error(`${samplePath}: DB에서 표본 프로젝트를 모두 찾지 못했습니다 (${projects.length}/${sampleIds.length})`);
-      const model = values.model ?? "claude-sonnet-5-5";
-      if (!model.startsWith("claude-sonnet")) throw new Error("run-sample은 검증된 Claude Sonnet 계열 모델만 허용합니다");
+      const model = values.model ?? (isHaikuValidationSample ? "claude-haiku-4-5" : "claude-sonnet-5-5");
+      if (!model.startsWith("claude-sonnet") && !model.startsWith("claude-haiku")) throw new Error("run-sample은 Claude Sonnet/Haiku 계열 모델만 허용합니다");
       const cfg = { ...loadLlmConfig(), model };
       const llm = new ClaudeCliClient(cfg, { useApiKey: false });
       const delayMs = values["delay-ms"] === undefined
@@ -538,6 +588,60 @@ async function main() {
       log(`→ ${outBase}.md`);
       log(`→ ${outBase}.json`);
       log(`→ ${path.join(repoRoot, "docs", "starter-kit-v0.1.md")}`);
+      return;
+    }
+
+    case "haiku-validate-report": {
+      const samplePath = resolveArg(values["sample-file"] ?? "docs/analyzer-v3.3-haiku-validation-sample-100.json")!;
+      const sample = JSON.parse(readFileSync(samplePath, "utf8")) as HaikuValidationSampleFile;
+      if (sample.schema !== HAIKU_VALIDATION_SAMPLE_SCHEMA) throw new Error(`${samplePath}: Haiku 검증 표본 파일이 아닙니다`);
+      const sonnetVersion = values["sonnet-version"] ?? sample.base_analysis_version;
+      const haikuVersion = values["haiku-version"] ?? sample.target_analysis_version;
+      const sampleIds = sample.selected_project_ids;
+      const sampleSet = new Set(sampleIds);
+      const sonnetMarket = await store.marketRows(sonnetVersion);
+      const haikuMarket = await store.marketRows(haikuVersion);
+      const projects = sonnetMarket.projects.filter((project) => sampleSet.has(project.id));
+      const sonnetRows = sonnetMarket.analyzed.filter((row) => sampleSet.has(row.project_id) && row.model?.startsWith("claude-sonnet"));
+      const haikuRows = haikuMarket.analyzed.filter((row) => sampleSet.has(row.project_id) && row.model?.startsWith("claude-haiku"));
+      const sonnetErrors = await store.analysisErrors(sonnetVersion, sampleIds);
+      const haikuErrors = await store.analysisErrors(haikuVersion, sampleIds);
+      const progressPath = values["progress-file"]
+        ? resolveArg(values["progress-file"])!
+        : path.join(OUT_DIR, `run-sample-${haikuVersion}-progress.json`);
+      const defaultRun: HaikuValidationRunStats = { total: sampleIds.length, success: haikuRows.length, failed: Math.max(0, sampleIds.length - haikuRows.length), skipped: 0 };
+      const haikuRun = existsSync(progressPath)
+        ? { total: sampleIds.length, ...(JSON.parse(readFileSync(progressPath, "utf8")) as SampleRunProgress).counts }
+        : defaultRun;
+      const sonnetRun: HaikuValidationRunStats = { total: sampleIds.length, success: sonnetRows.length, failed: Math.max(0, sampleIds.length - sonnetRows.length), skipped: 0 };
+      const sonnetOpportunity = computeOpportunityScoreReport(projects, sonnetRows, sonnetErrors, { version: sonnetVersion, sampleProjectIds: sampleIds });
+      const haikuOpportunity = computeOpportunityScoreReport(projects, haikuRows, haikuErrors, { version: haikuVersion, sampleProjectIds: sampleIds });
+      const report = buildHaikuValidationReport({
+        sampleFile: samplePath,
+        seed: sample.seed,
+        populationTotal: sample.population_total,
+        selectionValidation: sample.validation,
+        sonnetRows,
+        haikuRows,
+        sonnetErrors,
+        haikuErrors,
+        sonnetRun,
+        haikuRun,
+        sonnetOpportunity,
+        haikuOpportunity,
+        baseAnalysisVersion: sonnetVersion,
+        haikuAnalysisVersion: haikuVersion,
+      });
+      const repoRoot = path.resolve(import.meta.dirname, "../../..");
+      const outBase = values.out
+        ? path.resolve(process.env.INIT_CWD ?? process.cwd(), values.out)
+        : path.join(repoRoot, "docs", "haiku-validation-v3.3-100");
+      mkdirSync(path.dirname(outBase), { recursive: true });
+      writeFileSync(`${outBase}.json`, `${JSON.stringify(report, null, 2)}\n`);
+      writeFileSync(`${outBase}.md`, `${renderHaikuValidationReport(report)}\n`);
+      log(`${report.recommendation.label} / matched=${report.agreement.matched_n}/${sampleIds.length}`);
+      log(`→ ${outBase}.md`);
+      log(`→ ${outBase}.json`);
       return;
     }
 

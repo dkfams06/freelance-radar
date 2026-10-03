@@ -239,7 +239,7 @@ export class AnalyzerStore {
       this.db
         .from("project_analyses")
         .select(
-          "project_id,project_type,engagement_type,industry,technology_assets,reuse_level," +
+          "project_id,model,project_type,engagement_type,industry,technology_assets,reuse_level," +
             "vibe_coding_difficulty,estimated_hours_min,estimated_hours_max,learning_value,reusability_value,market_value,raw_analysis",
         )
         .eq("analysis_version", version)

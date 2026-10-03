@@ -11,5 +11,6 @@ export * from "./market-report";
 export * from "./market-sample";
 export * from "./opportunity-score";
 export * from "./opportunity-score-v02";
+export * from "./haiku-validation";
 export * from "./features";
 export * from "./feature-repetition";
