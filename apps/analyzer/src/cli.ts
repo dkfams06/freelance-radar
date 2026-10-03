@@ -19,7 +19,23 @@ import {
   type AnalysisSourceProject,
   type TokenUsage,
 } from "@fr/analysis";
-import { LlmClient, loadLlmConfig } from "./llm";
+import { LlmClient, llmBackend, loadLlmConfig, type SyncLlm } from "./llm";
+import { ClaudeCliClient } from "./llm-cli";
+
+const CLI_BACKEND_NOTE =
+  "backend=claude-cli (claude -p, Claude 구독제). 비용은 API 단가 환산 추정치이며 실제 청구되지 않음 (구독 사용량 한도에 반영)";
+
+/** 동기 분석용 클라이언트: ANALYZER_BACKEND=claude-cli 면 구독제 claude -p, 아니면 Messages API */
+function createSyncLlm(): SyncLlm {
+  const cfg = loadLlmConfig();
+  return llmBackend() === "claude-cli" ? new ClaudeCliClient(cfg) : new LlmClient(cfg);
+}
+
+/** Batch API 는 API 키 경로에서만 가능 */
+function createBatchLlm(): LlmClient {
+  if (llmBackend() === "claude-cli") throw new Error("Batch 는 ANALYZER_BACKEND=claude-cli 에서 지원하지 않습니다 (API 키 필요)");
+  return new LlmClient(loadLlmConfig());
+}
 import { OUT_DIR, readResults, renderComparison, summarizeUsage, writeResults, type ResultItem, type ResultsFile } from "./results";
 import { analyzeProjectsSync, toItemProject } from "./runner";
 import { AnalyzerStore } from "./store";
@@ -59,6 +75,8 @@ options:
   --version <v>                 stats: 분석 버전 (기본 현재 버전)
 
 env: ANTHROPIC_API_KEY, ANALYZER_MODEL (기본 claude-opus-5-5), ANALYZER_EFFORT (기본 low), ANALYZER_MAX_TOKENS (기본 8000)
+     ANALYZER_BACKEND=claude-cli  → API 키 대신 Claude 구독제(claude -p) 로 sample/run 실행 (Batch 불가)
+                                    CLAUDE_CLI_PATH, ANALYZER_CLI_TIMEOUT_MS (기본 300000)
 `;
 
 const log = (m: string) => console.log(m);
@@ -136,7 +154,7 @@ async function main() {
 
     case "sample":
     case "run": {
-      const llm = new LlmClient(loadLlmConfig());
+      const llm = createSyncLlm();
       let projects: AnalysisSourceProject[];
       if (command === "sample") {
         projects = await sampleProjects();
@@ -163,7 +181,7 @@ async function main() {
     }
 
     case "batch-submit": {
-      const llm = new LlmClient(loadLlmConfig());
+      const llm = createBatchLlm();
       const ids = await candidateIds(store, {
         platform: values.platform,
         retryFailed: Boolean(values["retry-failed"]),
@@ -189,12 +207,12 @@ async function main() {
         return;
       }
       if (!target.length) return log("분석할 프로젝트가 없습니다");
-      const llm = new LlmClient(loadLlmConfig());
       if (values.batch) {
-        await submitBatches(llm, store, target);
+        await submitBatches(createBatchLlm(), store, target);
         log("결과 회수: pnpm analyzer batch-collect --wait");
         return;
       }
+      const llm = createSyncLlm();
       const projects = await store.projectsByIds(target);
       const items = await analyzeProjectsSync(llm, projects, { concurrency: num(values.concurrency, 4), maxAttempts: 3, store, log });
       finish({ model: llm.cfg.model, mode: "sync", items, name: `classify-${stamp()}`, batch: false });
@@ -215,7 +233,7 @@ async function main() {
     }
 
     case "batch-collect": {
-      const llm = new LlmClient(loadLlmConfig());
+      const llm = createBatchLlm();
       for (;;) {
         const open = await store.openBatches();
         if (!open.length) return log("회수할 batch 가 없습니다");
@@ -415,6 +433,7 @@ function finish(args: { model: string; mode: ResultsFile["mode"]; items: ResultI
     model: args.model,
     mode: args.mode,
     created_at: new Date().toISOString(),
+    ...(args.mode === "sync" && llmBackend() === "claude-cli" ? { note: CLI_BACKEND_NOTE } : {}),
     usage_total: usage,
     cost_usd_total: estimateCostUsd(args.model, usage, { batch: args.batch }),
     projection_total: args.projectionTotal,

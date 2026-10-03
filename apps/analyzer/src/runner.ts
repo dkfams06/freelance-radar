@@ -1,5 +1,5 @@
 import { ANALYSIS_VERSION, buildProjectInput, estimateCostUsd, type AnalysisSourceProject } from "@fr/analysis";
-import type { LlmClient } from "./llm";
+import type { SyncLlm } from "./llm";
 import type { ResultItem } from "./results";
 import type { AnalyzerStore } from "./store";
 
@@ -27,7 +27,7 @@ export function toItemProject(p: AnalysisSourceProject): ResultItem["project"] {
 }
 
 /** 프로젝트를 동기(Messages API)로 하나씩 분석. 결과는 검증 후 저장하고 실패는 analysis_errors 에 남긴다 */
-export async function analyzeProjectsSync(llm: LlmClient, projects: AnalysisSourceProject[], opts: RunOptions): Promise<ResultItem[]> {
+export async function analyzeProjectsSync(llm: SyncLlm, projects: AnalysisSourceProject[], opts: RunOptions): Promise<ResultItem[]> {
   const log = opts.log ?? (() => {});
   const results: ResultItem[] = new Array(projects.length);
   let next = 0;

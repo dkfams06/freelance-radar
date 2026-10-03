@@ -150,6 +150,16 @@ pnpm analyzer classify --execute --batch          # 실제 전체 분류 (승인
 pnpm analyzer stats                               # 분류 분포 통계 (project_type/engagement/industry/reuse/technology_assets)
 ```
 
+API 키 대신 **Claude 구독제**로 동기 분석(`sample` / `run` / `classify --execute`)을 돌릴 수 있다. Claude Code 헤드리스 모드(`claude -p`)를 같은 시스템 프롬프트·JSON 스키마로 호출한다.
+
+```bash
+claude            # 처음 한 번: 터미널에서 /login 으로 구독 계정 로그인
+ANALYZER_BACKEND=claude-cli ANALYZER_MODEL=claude-sonnet-5-5 pnpm analyzer sample --ids-from docs/analyzer-v3-sample-20.json --concurrency 2
+```
+
+- `ANTHROPIC_API_KEY` 는 자식 프로세스에서 제거해 구독 인증을 쓴다. 리포트의 비용은 API 단가 환산 추정치이며 실제 청구는 없다 (구독 사용량 한도에 반영).
+- Batch API(`batch-submit`, `classify --batch`)는 API 키가 필요하다.
+
 - 현재 기준은 `v3` (v2 에 project_type 4종·technology_assets 3종·engagement 경계 규칙 추가): 통계용 6개 분류 `project_type`, `engagement_type`, `industry`, `complexity_types[]`, `reuse_level`, `technology_assets[]`
   (enum 은 `packages/analysis/src/taxonomy.ts`). 판단이 애매한 분류는 `uncertain_fields` 로 표시되고 리포트 "분류가 애매한 케이스"에 모인다.
 - 점수(종합점수·빈도/견적/구현 용이성/반복률 점수)는 아직 만들지 않는다. 수집 → 분류 → 분포 확인 → 배점 결정 → 전체 점수화 순서.

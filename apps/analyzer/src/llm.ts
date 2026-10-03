@@ -73,7 +73,19 @@ export function interpretMessage(msg: Anthropic.Message): AnalyzeOutcome {
   return { ok: true, analysis: v.value, usage, model: msg.model };
 }
 
-export class LlmClient {
+/** 동기 분석에 필요한 최소 인터페이스 (Messages API / claude -p 공용) */
+export interface SyncLlm {
+  readonly cfg: LlmConfig;
+  analyze(inputText: string): Promise<AnalyzeOutcome>;
+}
+
+export type LlmBackend = "api" | "claude-cli";
+
+export function llmBackend(env = process.env): LlmBackend {
+  return env.ANALYZER_BACKEND === "claude-cli" ? "claude-cli" : "api";
+}
+
+export class LlmClient implements SyncLlm {
   readonly client: Anthropic;
   constructor(readonly cfg: LlmConfig) {
     // 자격증명: ANTHROPIC_API_KEY (또는 SDK 가 지원하는 다른 방식)
