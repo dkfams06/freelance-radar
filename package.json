@@ -14,12 +14,14 @@
     "crawl:all": "pnpm --filter @fr/collector run cli all backfill",
     "dashboard:dev": "pnpm --filter @fr/dashboard dev",
     "dashboard:build": "pnpm --filter @fr/dashboard build",
+    "analyzer": "pnpm --filter @fr/analyzer run cli",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "pnpm -r --parallel run typecheck",
     "db:migrate": "tsx --env-file-if-exists=.env scripts/db-migrate.ts",
     "db:check": "pnpm --filter @fr/collector exec tsx --env-file-if-exists=../../.env e2e/db-check.ts",
-    "db:report": "tsx --env-file-if-exists=.env scripts/db-report.ts"
+    "db:report": "tsx --env-file-if-exists=.env scripts/db-report.ts",
+    "db:verify": "tsx --env-file-if-exists=.env scripts/collector-verify.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

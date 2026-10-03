@@ -1,0 +1,16 @@
+{
+  "name": "@fr/analyzer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cli": "tsx --env-file-if-exists=../../.env src/cli.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "@fr/analysis": "workspace:*",
+    "@fr/db": "workspace:*",
+    "zod": "^4.1.0"
+  }
+}

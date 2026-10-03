@@ -1,0 +1,188 @@
+/**
+ * Analyzer V1 분류 체계.
+ *
+ * - 카테고리는 고정 enum (AI 가 반드시 이 중 하나를 고름). DB 컬럼은 text 라서
+ *   데이터를 본 뒤 코드를 늘리고 analysis_version 을 올려 재분석하면 된다.
+ * - 기능/연동/기술 목록은 "권장 어휘"다. AI 는 가능한 한 이 코드를 재사용하고,
+ *   맞는 것이 없을 때만 새 snake_case 코드를 만든다. 새 코드는 report 의 "어휘 밖" 집계로 드러나
+ *   다음 버전에서 어휘에 편입할지 결정한다.
+ */
+
+export const PROJECT_CATEGORIES = {
+  ecommerce: "쇼핑몰/커머스",
+  reservation: "예약시스템",
+  admin_system: "관리자시스템/백오피스",
+  work_automation: "업무자동화/RPA",
+  ai_service: "AI서비스",
+  crawling: "크롤링/데이터수집",
+  erp: "ERP/그룹웨어/사내시스템",
+  mobile_app: "모바일앱",
+  website: "홈페이지/랜딩",
+  platform: "플랫폼/중개/커뮤니티 서비스",
+  data_analytics: "데이터분석/대시보드",
+  iot_embedded: "IoT/임베디드/하드웨어",
+  game: "게임",
+  maintenance: "기존 시스템 유지보수/고도화",
+  other: "기타",
+} as const;
+
+export type ProjectCategory = keyof typeof PROJECT_CATEGORIES;
+export const PROJECT_CATEGORY_CODES = Object.keys(PROJECT_CATEGORIES) as [ProjectCategory, ...ProjectCategory[]];
+
+export const ENGAGEMENT_TYPES = {
+  build: "산출물 기준 신규 개발 (도급)",
+  enhancement: "기존 시스템 기능 추가/개선",
+  maintenance: "유지보수/운영",
+  staffing: "기간제/상주 인력 구인 (산출물보다 투입 기간 중심)",
+  consulting: "기획/컨설팅/PM",
+  design_only: "디자인 위주",
+  other: "기타",
+} as const;
+export type EngagementType = keyof typeof ENGAGEMENT_TYPES;
+export const ENGAGEMENT_TYPE_CODES = Object.keys(ENGAGEMENT_TYPES) as [EngagementType, ...EngagementType[]];
+
+export const PLATFORMS = {
+  web: "반응형 웹/웹앱",
+  admin_web: "관리자 웹",
+  mobile_web: "모바일 웹/PWA",
+  ios: "iOS 네이티브",
+  android: "Android 네이티브",
+  cross_platform_app: "크로스플랫폼 앱 (Flutter/React Native)",
+  desktop: "데스크톱 앱",
+  backend_api: "서버/API 단독",
+  browser_extension: "브라우저 확장",
+  chatbot: "메신저/챗봇",
+  embedded: "임베디드/펌웨어",
+  other: "기타",
+} as const;
+export type PlatformCode = keyof typeof PLATFORMS;
+export const PLATFORM_CODES = Object.keys(PLATFORMS) as [PlatformCode, ...PlatformCode[]];
+
+export const FEATURE_VOCAB = [
+  "authentication",
+  "social_login",
+  "identity_verification",
+  "user_management",
+  "role_permission",
+  "admin_dashboard",
+  "cms",
+  "board_community",
+  "comments_reviews",
+  "search_filter",
+  "product_catalog",
+  "cart_checkout",
+  "order_management",
+  "payment",
+  "subscription_billing",
+  "settlement",
+  "point_coupon",
+  "reservation",
+  "scheduling_calendar",
+  "notification_push",
+  "notification_sms_kakao",
+  "notification_email",
+  "chat_messaging",
+  "realtime_sync",
+  "map_location",
+  "file_upload",
+  "media_processing",
+  "video_streaming",
+  "statistics_reporting",
+  "data_export",
+  "crawling_scraping",
+  "data_pipeline",
+  "llm_generation",
+  "llm_chatbot",
+  "rag_search",
+  "computer_vision",
+  "speech_processing",
+  "recommendation",
+  "multilingual",
+  "landing_page",
+  "seo",
+  "inventory_management",
+  "crm",
+  "hr_attendance",
+  "accounting",
+  "approval_workflow",
+  "document_generation",
+  "e_signature",
+  "matching",
+  "iot_device_control",
+  "hardware_integration",
+  "blockchain",
+  "game_logic",
+  "app_store_release",
+  "public_api",
+  "legacy_migration",
+  "bug_fix_maintenance",
+  "infra_devops",
+  "security_hardening",
+] as const;
+
+export const INTEGRATION_VOCAB = [
+  "kakao_login",
+  "kakao_alimtalk",
+  "kakao_map",
+  "naver_login",
+  "naver_map",
+  "google_login",
+  "apple_login",
+  "google_maps",
+  "payment_gateway",
+  "easy_pay",
+  "identity_verification_service",
+  "sms_gateway",
+  "email_service",
+  "push_service",
+  "openai",
+  "anthropic",
+  "google_ai",
+  "cloud_ai_vision_ocr",
+  "aws",
+  "gcp",
+  "firebase",
+  "supabase",
+  "shopping_platform",
+  "marketplace_api",
+  "sns_api",
+  "youtube_api",
+  "public_data_api",
+  "tax_invoice",
+  "erp_external",
+  "accounting_software",
+  "google_workspace",
+  "slack",
+  "notion",
+  "logistics_api",
+  "hardware_device",
+] as const;
+
+export const SKILL_VOCAB = [
+  "frontend",
+  "backend",
+  "database",
+  "authentication",
+  "payment",
+  "ui_design",
+  "mobile_native",
+  "cross_platform_mobile",
+  "desktop_app",
+  "devops_infra",
+  "data_engineering",
+  "crawling",
+  "llm_integration",
+  "ai_ml",
+  "computer_vision",
+  "realtime",
+  "security",
+  "embedded",
+  "game_dev",
+  "blockchain",
+  "legacy_tech",
+  "qa_testing",
+  "project_management",
+] as const;
+
+/** snake_case 코드 형식 (어휘 밖 코드도 이 형식은 지켜야 한다) */
+export const CODE_PATTERN = /^[a-z][a-z0-9_]{1,40}$/;
