@@ -21,7 +21,7 @@
 | 8 | APM/DR 기반 금융권 차세대 인프라 관제 및 금융보안 분석 | 7,000,000원/월 | enterprise_infra | staffing | finance | high_risk_domain, legacy_heavy | one_off | cloud_infra, security, legacy_enterprise | 95 | 3000~4300h | 30 | 10 | 15 |
 | 9 | EDW/CDC·ETL 기반 금융권 차세대 정보계 분석·설계 | 7,000,000원/월 | data_dashboard | staffing | finance | high_risk_domain, legacy_heavy | low | data_pipeline, database, analytics_dashboard, legacy_enterprise | 90 | 3000~4300h | 45 | 20 | 30 |
 | 10 | 중등 온라인 교육 서비스 모바일 앱·반응형 웹 QA | 4,000,000원/월 | mobile_app | staffing | education | multi_platform | low | mobile | 50 | 280~320h | 30 | 30 | 50 |
-| 11 | 유소년 스포츠 등번호 AI 하이라이트 웹 MVP 개발 | 5,000,000원 | media_processing | new_build | sports | algorithmic_specialized | medium | core_web, backend_api, database, admin_system, data_pipeline, cloud_infra, computer_vision | 68 | 120~260h | 80 | 55 | 50 |
+| 11 | 유소년 스포츠 등번호 AI 하이라이트 웹 MVP 개발 | 5,000,000원 | ai_service | new_build | sports | algorithmic_specialized | medium | core_web, backend_api, database, admin_system, data_pipeline, cloud_infra, computer_vision | 68 | 120~260h | 80 | 55 | 50 |
 | 12 | 언론 웹사이트 추가 개발 및 유지보수 | 10,000원 ~ 1,000,000원 | maintenance | feature_extension | media_content | legacy_heavy | medium | core_web, backend_api, cloud_infra | 50 | 30~70h | 35 | 45 | 60 |
 | 13 | 기존 웹/앱 서비스 고도화 및 추가 개발 | 2,500,000원 ~ 5,000,000원 | iot_device | feature_extension | general | legacy_heavy, hardware_iot, multi_platform, realtime | low | core_web, backend_api, database, mobile, hardware_iot, realtime | 65 | 80~180h | 50 | 35 | 45 |
 | 14 | 자사 iOS 앱 승인 대응 | 18,000,000원 ~ 18,000,000원 | mobile_app | feature_extension | education | integration_heavy | high | mobile, payments, backend_api | 45 | 60~140h | 55 | 60 | 55 |
@@ -37,13 +37,12 @@
 - [wishket:158896] Java 기반 녹취 솔루션 구축 PL — AI 판단 애매: industry
 - [wishket:158850] 예약 플랫폼 프론트/백엔드 연동 및 해외 결제 시스템 구축 — AI 판단 애매: industry
 - [wishket:158878] 중등 온라인 교육 서비스 모바일 앱·반응형 웹 QA — AI 판단 애매: technology_assets
-- [freemoa:48504] 유소년 스포츠 등번호 AI 하이라이트 웹 MVP 개발 — AI 판단 애매: project_type
 - [freemoa:48501] 기존 웹/앱 서비스 고도화 및 추가 개발 — complexity_types 4개; AI 판단 애매: industry, engagement_type
 - [freemoa:48472] 해외(태국) 무인 생수 락커 SW 및 제어보드 통합 개발 — complexity_types 4개
 
 ## 분류별 샘플 건수
 
-- project_type: mobile_app 3, business_management 2, iot_device 2, maintenance 2, media_processing 2, ai_service 1, automation_rpa 1, crawler_data_collection 1, data_dashboard 1, enterprise_infra 1, fintech_payment 1, platform_marketplace 1, reservation 1, website 1
+- project_type: mobile_app 3, ai_service 2, business_management 2, iot_device 2, maintenance 2, automation_rpa 1, crawler_data_collection 1, data_dashboard 1, enterprise_infra 1, fintech_payment 1, media_processing 1, platform_marketplace 1, reservation 1, website 1
 - engagement_type: staffing 8, new_build 7, feature_extension 4, design_publishing 1
 - industry: finance 5, general 3, education 2, professional_services 2, sports 2, commerce 1, construction 1, logistics 1, manufacturing 1, media_content 1, travel_hospitality 1
 - reuse_level: low 7, medium 7, high 3, one_off 3
@@ -248,9 +247,8 @@
 ### 11. [freemoa:48504] 유소년 스포츠 등번호 AI 하이라이트 웹 MVP 개발
 
 - 예산: 5,000,000원 · 기간: 45일
-- 분류: **media_processing** (녹취/영상·음성 처리/미디어 분석 파이프라인) / 스포츠 영상 AI · new_build · sports · reuse medium
+- 분류: **ai_service** (LLM/RAG/영상·음성 AI 기능이 중심) / 스포츠 영상 AI · new_build · sports · reuse medium
 - complexity_types: algorithmic_specialized · technology_assets: core_web, backend_api, database, admin_system, data_pipeline, cloud_infra, computer_vision
-- 판단 애매: project_type
 - 요약: 유소년 축구 경기 영상에서 선수 등번호를 인식해 선수별 구간을 추출·하이라이트로 만들고, 학부모가 앱형 모바일 웹에서 시청하는 MVP를 만든다.
 - 기능: admin_dashboard, file_upload, media_processing, computer_vision, video_streaming, job_queue
 - 연동: aws, cloud_ai_vision_ocr

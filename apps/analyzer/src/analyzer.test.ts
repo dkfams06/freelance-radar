@@ -160,5 +160,11 @@ describe("renderComparison", () => {
     expect(md).toContain("+ computer_vision");
     expect(md).toContain("## engagement_type 변경 (0건)");
     expect(md).toContain("## 애매 표시가 해소된 사례 (1건)");
+    expect(md).toContain("| project_type | 0/1 | 0% |");
+    expect(md).toContain("| engagement_type | 1/1 | 100% |");
+    expect(md).toContain("| technology_assets (완전 일치 / 평균 Jaccard) | 0/1 | 50% |");
+    expect(md).toContain("| vibe_coding_difficulty | 35.0 | 35.0 | +0.0 | 0.0 |");
+    expect(md).toContain("- schema 성공: 1/1 (100%)");
+    expect(md).toContain("## 차이가 큰 프로젝트 TOP 5");
   });
 });

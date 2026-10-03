@@ -837,7 +837,7 @@
           "market_value": "스포츠 영상 AI는 틈새지만 영상 AI 수요는 증가 추세",
           "technical_risk": "인식 정확도 미달 위험, 예산 대비 범위 큼"
         },
-        "project_type": "media_processing",
+        "project_type": "ai_service",
         "industry": "sports",
         "complexity_types": [
           "algorithmic_specialized"
@@ -852,9 +852,7 @@
           "cloud_infra",
           "computer_vision"
         ],
-        "uncertain_fields": [
-          "project_type"
-        ]
+        "uncertain_fields": []
       },
       "usage": null,
       "cost_usd": null

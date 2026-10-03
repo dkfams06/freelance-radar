@@ -239,6 +239,16 @@ export function renderReport(r: ResultsFile): string {
 }
 
 const CLASS_FIELDS = ["project_type", "engagement_type", "industry", "reuse_level"] as const;
+const SCORE_FIELDS = ["vibe_coding_difficulty", "learning_value", "reusability_value", "market_value", "technical_risk", "requirement_clarity"] as const;
+const avgOf = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+const signed = (x: number) => `${x >= 0 ? "+" : ""}${x.toFixed(1)}`;
+function jaccard(a: string[], b: string[]): number {
+  const A = new Set(a);
+  const B = new Set(b);
+  const union = new Set([...A, ...B]);
+  if (!union.size) return 1;
+  return [...A].filter((x) => B.has(x)).length / union.size;
+}
 const ARRAY_FIELDS = ["complexity_types", "technology_assets"] as const;
 
 /**
@@ -253,6 +263,67 @@ export function renderComparison(base: ResultsFile, next: ResultsFile): string {
   const label = (r: ResultsFile) => `${r.analysis_version} (${r.model})`;
   const title = (i: ResultItem) => `[${i.project.platform}:${i.project.external_project_id}] ${esc(i.project.title)}`;
   const L: string[] = [`# 분류 비교: ${label(base)} → ${label(next)}`, "", `- 비교 대상: ${pairs.length}건`, ""];
+
+  // 실행 품질 (next 기준)
+  const total = next.items.length;
+  const okCount = next.items.filter((i) => i.ok).length;
+  const schemaFailures = next.items.filter((i) => !i.ok && (i.error_type === "VALIDATION" || i.error_type === "MAX_TOKENS")).length;
+  const retries = next.items.reduce((n, i) => n + Math.max(0, (i.attempts ?? 1) - 1), 0);
+  const u = next.usage_total;
+  L.push("## 실행 결과 (이후 파일 기준)", "");
+  L.push(`- schema 성공: ${okCount}/${total} (${total ? ((okCount / total) * 100).toFixed(0) : 0}%) · 최종 schema failure ${schemaFailures}건 · 기타 실패 ${total - okCount - schemaFailures}건`);
+  L.push(`- retry: ${retries}회 (재시도한 프로젝트 ${next.items.filter((i) => (i.attempts ?? 1) > 1).length}건)`);
+  L.push(`- 토큰: input ${u.input_tokens.toLocaleString()} · output ${u.output_tokens.toLocaleString()} · cache write ${(u.cache_creation_input_tokens ?? 0).toLocaleString()} · cache read ${(u.cache_read_input_tokens ?? 0).toLocaleString()}`);
+  L.push(`- 비용: ${fmtUsd(next.cost_usd_total)}${okCount && next.cost_usd_total != null ? ` (건당 ${fmtUsd(next.cost_usd_total / okCount)})` : ""}`);
+  L.push("");
+
+  // 분류 일치율
+  L.push("## taxonomy 일치율", "", "| 필드 | 일치 | 일치율 |", "|---|---|---|");
+  for (const f of CLASS_FIELDS) {
+    const same = pairs.filter((p) => p.b.analysis![f] === p.n.analysis![f]).length;
+    L.push(`| ${f} | ${same}/${pairs.length} | ${pairs.length ? ((same / pairs.length) * 100).toFixed(0) : 0}% |`);
+  }
+  for (const f of ARRAY_FIELDS) {
+    const jac = pairs.map((p) => jaccard(p.b.analysis![f] as string[], p.n.analysis![f] as string[]));
+    const exact = jac.filter((j) => j === 1).length;
+    L.push(`| ${f} (완전 일치 / 평균 Jaccard) | ${exact}/${pairs.length} | ${(avgOf(jac) * 100).toFixed(0)}% |`);
+  }
+  L.push("");
+
+  // 점수 차이
+  L.push("## 점수 차이 (이후 − 이전)", "", "| 항목 | 이전 평균 | 이후 평균 | 평균 차이 | 평균 절대 차이 |", "|---|---|---|---|---|");
+  const scoreRow = (name: string, f: (a: ProjectAnalysis) => number) => {
+    const b = pairs.map((p) => f(p.b.analysis!));
+    const n = pairs.map((p) => f(p.n.analysis!));
+    const d = n.map((x, i) => x - b[i]!);
+    L.push(`| ${name} | ${avgOf(b).toFixed(1)} | ${avgOf(n).toFixed(1)} | ${signed(avgOf(d))} | ${avgOf(d.map(Math.abs)).toFixed(1)} |`);
+  };
+  for (const f of SCORE_FIELDS) scoreRow(f, (a) => a[f]);
+  scoreRow("estimated_hours_min", (a) => a.estimated_hours_min);
+  scoreRow("estimated_hours_max", (a) => a.estimated_hours_max);
+  L.push("");
+
+  // 차이가 큰 프로젝트 TOP 5: 점수 5종 평균 절대 차이 + 분류 불일치 1개당 15
+  const scored = pairs
+    .map((p) => {
+      const sd = avgOf(SCORE_FIELDS.slice(0, 4).concat(["technical_risk"]).map((f) => Math.abs(p.n.analysis![f] - p.b.analysis![f])));
+      const mism = CLASS_FIELDS.filter((f) => p.b.analysis![f] !== p.n.analysis![f]);
+      const hb = (p.b.analysis!.estimated_hours_min + p.b.analysis!.estimated_hours_max) / 2;
+      const hn = (p.n.analysis!.estimated_hours_min + p.n.analysis!.estimated_hours_max) / 2;
+      return { p, distance: sd + mism.length * 15, sd, mism, hb, hn };
+    })
+    .sort((a, b) => b.distance - a.distance)
+    .slice(0, 5);
+  L.push("## 차이가 큰 프로젝트 TOP 5", "", "(거리 = 점수 5종 평균 절대 차이 + 분류 불일치 1개당 15)", "");
+  for (const x of scored) {
+    const a = x.p.b.analysis!;
+    const b = x.p.n.analysis!;
+    L.push(
+      `- ${title(x.p.n)} — 거리 ${x.distance.toFixed(1)}: 점수 차 평균 ${x.sd.toFixed(1)}, 시간 ${Math.round(x.hb)}h → ${Math.round(x.hn)}h` +
+        (x.mism.length ? `, 분류 ${x.mism.map((f) => `${f} ${a[f]}→${b[f]}`).join(", ")}` : ""),
+    );
+  }
+  L.push("");
 
   // other 건수
   L.push("## other 건수", "", "| 필드 | 이전 | 이후 |", "|---|---|---|");

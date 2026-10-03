@@ -53,7 +53,9 @@ ${list(PROJECT_TYPES)}
 - 상주/인력 구인이라도 "투입되어 만드는 대상"의 성격으로 고릅니다 (예: 금융 정보계 EDW → data_dashboard, PG 결제 시스템 → fintech_payment).
 - PG/선불결제/결제 인프라 → fintech_payment. 단, 일반 쇼핑몰·예약 서비스에 결제를 붙이는 것은 그 서비스 유형(ecommerce, reservation)입니다.
 - 무인 락커·키오스크·센서 등 장치가 시스템의 중심 → iot_device. 장치와 연동하는 기존 앱의 유지보수도 장치가 중심이면 iot_device.
-- 녹취/영상·음성 처리/미디어 분석 파이프라인이 결과물의 중심 → media_processing. LLM/RAG/에이전트가 중심이면 ai_service.
+- ai_service 와 media_processing 의 경계: 납품 대상의 본질이 AI 기능/AI 서비스(예: AI 하이라이트 생성 서비스, AI 상담봇)면 ai_service,
+  영상·음성 처리 시스템 자체가 핵심 납품물(예: 녹취 솔루션, 영상 인코딩/편집 파이프라인)이면 media_processing.
+  사용한 AI 기술(영상 인식, 음성 인식, OCR, LLM)은 project_type 이 아니라 technology_assets 로 표현합니다.
 - DR/관제/APM/인프라 아키텍처 설계 → enterprise_infra.
 - other 는 위 어떤 범주에도 맞지 않을 때만 씁니다. other 를 고르기 전에 가장 가까운 유형이 있는지 다시 확인합니다.
 
