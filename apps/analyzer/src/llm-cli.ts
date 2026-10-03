@@ -23,13 +23,15 @@ export class ClaudeCliClient implements SyncLlm {
   private readonly bin: string;
   private readonly cwd: string;
   private readonly timeoutMs: number;
+  private readonly useApiKey: boolean;
 
   constructor(
     readonly cfg: LlmConfig,
-    opts: { bin?: string; timeoutMs?: number } = {},
+    opts: { bin?: string; timeoutMs?: number; useApiKey?: boolean } = {},
   ) {
     this.bin = opts.bin ?? process.env.CLAUDE_CLI_PATH ?? resolveClaudeBin();
     this.timeoutMs = opts.timeoutMs ?? Number(process.env.ANALYZER_CLI_TIMEOUT_MS || 300_000);
+    this.useApiKey = opts.useApiKey ?? process.env.ANALYZER_CLI_USE_API_KEY === "1";
     this.cwd = path.join(os.tmpdir(), "freelance-radar-analyzer");
     mkdirSync(this.cwd, { recursive: true });
   }
@@ -60,14 +62,16 @@ export class ClaudeCliClient implements SyncLlm {
     try {
       stdout = await this.exec(buildUserMessage(inputText));
     } catch (e) {
-      return { ok: false, errorType: "API_ERROR", error: e instanceof Error ? e.message : String(e), retryable: true };
+      const error = e instanceof Error ? e.message : String(e);
+      const usageLimit = isUsageLimitMessage(error);
+      return { ok: false, errorType: usageLimit ? "USAGE_LIMIT" : "API_ERROR", error, retryable: !usageLimit };
     }
     return interpretCliOutput(stdout, this.cfg.model);
   }
 
   private exec(stdin: string): Promise<string> {
     const env = { ...process.env };
-    if (process.env.ANALYZER_CLI_USE_API_KEY !== "1") delete env.ANTHROPIC_API_KEY;
+    if (!this.useApiKey) delete env.ANTHROPIC_API_KEY;
     return new Promise((resolve, reject) => {
       const child = spawn(this.bin, this.buildArgs(), { cwd: this.cwd, env, windowsHide: true });
       let out = "";
@@ -123,6 +127,12 @@ interface CliResult {
   modelUsage?: Record<string, unknown>;
 }
 
+/** Claude Code 구독 사용량/요청 제한으로 더 진행할 수 없는 응답인지 판정한다. */
+export function isUsageLimitMessage(value: unknown): boolean {
+  const text = String(value ?? "");
+  return /(?:rate\s*limit|usage\s*limit|quota|too\s+many\s+requests|limit\s+reached|hit\s+(?:your\s+)?limit|\b429\b|resets?\s+(?:in|at))/i.test(text);
+}
+
 /** `claude -p --output-format json` 출력 → 검증된 분석 결과 */
 export function interpretCliOutput(stdout: string, fallbackModel: string): AnalyzeOutcome {
   let j: CliResult;
@@ -141,14 +151,15 @@ export function interpretCliOutput(stdout: string, fallbackModel: string): Analy
   if (j.is_error) {
     const status = j.api_error_status ?? null;
     const auth = status === 401 || /authenticate|login|OAuth/i.test(j.result ?? "");
+    const usageLimit = !auth && (status === 429 || isUsageLimitMessage(j.result));
     return {
       ok: false,
-      errorType: "API_ERROR",
+      errorType: usageLimit ? "USAGE_LIMIT" : "API_ERROR",
       error: auth ? `claude 로그인 필요 (claude 실행 후 /login): ${j.result ?? ""}` : `claude -p error ${status ?? ""}: ${j.result ?? j.subtype}`,
       raw: j.result,
       usage,
-      // 인증 오류는 재시도해도 소용없음. 그 외(과부하/429/5xx)는 재시도
-      retryable: !auth,
+      // 인증 오류와 사용량 제한은 재시도해도 소용없음. 그 외 일시 오류는 재시도
+      retryable: !auth && !usageLimit,
     };
   }
   if (j.stop_reason === "refusal") {

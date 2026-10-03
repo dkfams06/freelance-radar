@@ -27,6 +27,7 @@ import {
 } from "@fr/analysis";
 import { LlmClient, llmBackend, loadLlmConfig, type SyncLlm } from "./llm";
 import { ClaudeCliClient } from "./llm-cli";
+import { runSample } from "./sample-runner";
 
 const CLI_BACKEND_NOTE =
   "backend=claude-cli (claude -p, Claude 구독제). 비용은 API 단가 환산 추정치이며 실제 청구되지 않음 (구독 사용량 한도에 반영)";
@@ -55,6 +56,7 @@ commands:
   sample          플랫폼별 최신 프로젝트 n 건을 동기 분석 → DB 저장 + 리포트 (기본 wishket 10, freemoa 10)
   sample-select    v3.3 미분석 전체에서 고정 seed 층화 시장 표본을 선정·검증
   sample-verify    저장된 시장 표본 JSON을 전체 projects와 다시 비교 검증
+  run-sample       고정 시장 표본을 claude -p로 순차 분석 (체크포인트 재개)
   run             미분석 프로젝트를 동기(Messages API) 분석
   batch-submit    미분석 프로젝트를 Message Batches API 로 제출 (50% 할인, 보통 1시간 이내 완료)
   batch-collect   제출한 batch 결과 회수 → 검증 → 저장 (--wait: 끝날 때까지 대기)
@@ -72,13 +74,17 @@ options:
   --wishket <n> --freemoa <n>   sample / export-inputs 건수
   --platform <p>                run / batch-submit 대상 플랫폼
   --limit <n>                   run / batch-submit 최대 건수
-  --retry-failed                run / batch-submit: 미해결 실패 건만
+  --retry-failed                run / run-sample / batch-submit: 미해결 실패 건만
   --force                       이미 분석된 프로젝트도 다시 분석 (같은 버전 덮어쓰기)
   --concurrency <n>             동기 분석 동시 요청 수 (기본 4)
   --dry-run                     DB 에 쓰지 않음 (결과 파일만)
   --wait                        batch-collect: 완료까지 1분 간격 대기
   --ids-from <file>             sample: 결과 파일과 같은 프로젝트들을 다시 분석 (샘플 고정)
-  --sample-file <file>          batch-submit / market-stats: 고정 시장 표본 JSON 사용
+  --sample-file <file>          run-sample / batch-submit / market-stats: 고정 시장 표본 JSON 사용
+  --backend <name>              run-sample: claude-cli만 허용 (기본 claude-cli)
+  --model <name>                run-sample: 모델 (기본 claude-sonnet-5-5)
+  --delay-ms <n>                run-sample: 호출 사이 대기(ms, 기본 250)
+  --progress-file <file>        run-sample: 체크포인트 파일 경로
   --all                         classify: 이미 분석된 프로젝트도 포함 (--force 와 같음)
   --execute                     classify: 추정만 하지 않고 실제로 실행
   --batch                       classify --execute: Message Batches API 로 제출
@@ -88,7 +94,7 @@ options:
   --min-combo <n>               market-stats: 자산 조합 최소 등장 건수 (기본 5)
   --out <path>                  market-stats: 출력 경로(확장자 제외, 기본 docs/market-stats-v1)
 
-env: ANTHROPIC_API_KEY, ANALYZER_MODEL (기본 claude-opus-5-5), ANALYZER_EFFORT (기본 low), ANALYZER_MAX_TOKENS (기본 8000)
+env: ANTHROPIC_API_KEY, ANALYZER_MODEL (일반 실행 기본 claude-opus-5-5), ANALYZER_EFFORT (기본 low), ANALYZER_MAX_TOKENS (기본 8000)
      ANALYZER_BACKEND=claude-cli  → API 키 대신 Claude 구독제(claude -p) 로 sample/run 실행 (Batch 불가)
                                     CLAUDE_CLI_PATH, ANALYZER_CLI_TIMEOUT_MS (기본 300000)
 `;
@@ -128,6 +134,10 @@ async function main() {
       wait: { type: "boolean" },
       "ids-from": { type: "string" },
       "sample-file": { type: "string" },
+      backend: { type: "string" },
+      model: { type: "string" },
+      "delay-ms": { type: "string" },
+      "progress-file": { type: "string" },
       all: { type: "boolean" },
       execute: { type: "boolean" },
       batch: { type: "boolean" },
@@ -186,6 +196,11 @@ async function main() {
   const positive = (v: string, flag: string) => {
     const n = Number.parseInt(v, 10);
     if (!Number.isFinite(n) || n < 1) throw new Error(`${flag} 는 1 이상의 정수여야 합니다`);
+    return n;
+  };
+  const nonNegative = (v: string, flag: string) => {
+    const n = Number.parseInt(v, 10);
+    if (!Number.isFinite(n) || n < 0) throw new Error(`${flag} 는 0 이상의 정수여야 합니다`);
     return n;
   };
   const db = createServiceClient();
@@ -274,6 +289,59 @@ async function main() {
       log(`표본 검증: ${validation.passed ? "PASS" : "FAIL"} (${selected.length}/${file.requested_size})`);
       for (const e of validation.errors) log(`❌ ${e}`);
       if (!validation.passed) process.exitCode = 1;
+      return;
+    }
+
+    case "run-sample": {
+      const version = values.version ?? ANALYSIS_VERSION;
+      if (version !== ANALYSIS_VERSION) throw new Error(`run-sample은 고정된 ${ANALYSIS_VERSION}만 지원합니다`);
+      const backend = values.backend ?? process.env.ANALYZER_BACKEND ?? "claude-cli";
+      if (backend !== "claude-cli") throw new Error("run-sample은 ANALYZER_BACKEND=claude-cli만 지원합니다. API/Batch 경로는 사용하지 않습니다.");
+      const samplePath = resolveArg(values["sample-file"] ?? rawArg);
+      if (!samplePath) throw new Error("run-sample --sample-file <sample.json>");
+      const sample = JSON.parse(readFileSync(samplePath, "utf8")) as Partial<StratifiedSampleFile>;
+      if (
+        sample.schema !== "analyzer-v3.3-market-sample/v1" ||
+        sample.analysis_version !== version ||
+        !Array.isArray(sample.selected_project_ids) ||
+        sample.selected_project_ids.length === 0 ||
+        sample.selected_project_ids.some((id) => typeof id !== "string")
+      ) {
+        throw new Error(`${samplePath}: v3.3 시장 표본 JSON 형식이 아닙니다`);
+      }
+      const sampleIds = sample.selected_project_ids as string[];
+      if (new Set(sampleIds).size !== sampleIds.length) throw new Error(`${samplePath}: project_id 중복이 있습니다`);
+      const projects = await store.projectsByIds(sampleIds);
+      if (projects.length !== sampleIds.length) throw new Error(`${samplePath}: DB에서 표본 프로젝트를 모두 찾지 못했습니다 (${projects.length}/${sampleIds.length})`);
+      const model = values.model ?? "claude-sonnet-5-5";
+      if (!model.startsWith("claude-sonnet")) throw new Error("run-sample은 검증된 Claude Sonnet 계열 모델만 허용합니다");
+      const cfg = { ...loadLlmConfig(), model };
+      const llm = new ClaudeCliClient(cfg, { useApiKey: false });
+      const delayMs = values["delay-ms"] === undefined
+        ? Number.parseInt(process.env.ANALYZER_CLI_DELAY_MS || "250", 10)
+        : nonNegative(values["delay-ms"], "--delay-ms");
+      if (!Number.isFinite(delayMs) || delayMs < 0) throw new Error("ANALYZER_CLI_DELAY_MS 는 0 이상의 정수여야 합니다");
+      const progressFile = values["progress-file"]
+        ? resolveArg(values["progress-file"])!
+        : path.join(OUT_DIR, `run-sample-${version}-progress.json`);
+      log(`run-sample total=${sampleIds.length} backend=claude-cli model=${model} concurrency=1 delay_ms=${delayMs}`);
+      log(`sample=${samplePath}`);
+      log(`progress=${progressFile}`);
+      const result = await runSample({
+        version,
+        sampleFile: samplePath,
+        sampleIds,
+        projects,
+        progressFile,
+        model,
+        llm,
+        store,
+        maxAttempts: 3,
+        delayMs,
+        retryFailed: Boolean(values["retry-failed"]),
+        log,
+      });
+      if (result.stopped) log(`분석 일시중지: ${result.progress.stopped_reason}. 다음 실행에서 project=${result.progress.current_project_id}부터 재개합니다.`);
       return;
     }
 

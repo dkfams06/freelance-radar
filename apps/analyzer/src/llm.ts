@@ -44,7 +44,7 @@ export type AnalyzeOutcome =
   | { ok: true; analysis: ProjectAnalysis; usage: TokenUsage; model: string }
   | { ok: false; errorType: AnalysisErrorType; error: string; raw?: string; usage?: TokenUsage; retryable: boolean };
 
-export type AnalysisErrorType = "API_ERROR" | "VALIDATION" | "REFUSAL" | "MAX_TOKENS" | "EXPIRED";
+export type AnalysisErrorType = "API_ERROR" | "VALIDATION" | "REFUSAL" | "MAX_TOKENS" | "EXPIRED" | "USAGE_LIMIT";
 
 export function usageOf(u: Anthropic.Usage): TokenUsage {
   return {

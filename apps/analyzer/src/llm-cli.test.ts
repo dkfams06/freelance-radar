@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { ClaudeCliClient, interpretCliOutput } from "./llm-cli";
+import { ClaudeCliClient, interpretCliOutput, isUsageLimitMessage } from "./llm-cli";
 
 const sample = JSON.parse(
   readFileSync(path.resolve(import.meta.dirname, "../../../docs/analyzer-v3-sample-20.json"), "utf8"),
@@ -40,6 +40,15 @@ describe("interpretCliOutput", () => {
       "m",
     );
     expect(out).toMatchObject({ ok: false, errorType: "API_ERROR", retryable: false });
+  });
+
+  it("사용량 제한은 프로젝트 실패로 확정하지 않는 별도 오류로 분류한다", () => {
+    const out = interpretCliOutput(
+      cliJson({ is_error: true, api_error_status: 429, result: "Usage limit reached. Resets in 2 hours." }),
+      "m",
+    );
+    expect(out).toMatchObject({ ok: false, errorType: "USAGE_LIMIT", retryable: false });
+    expect(isUsageLimitMessage("Claude Code usage limit reached")).toBe(true);
   });
 
   it("과부하 등 다른 오류는 재시도 대상", () => {
