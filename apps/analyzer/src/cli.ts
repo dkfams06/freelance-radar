@@ -24,6 +24,8 @@ import {
   validateAnalysis,
   type AnalysisSourceProject,
   type TokenUsage,
+  computeOpportunityScoreReport,
+  renderOpportunityScoreReport,
 } from "@fr/analysis";
 import { LlmClient, llmBackend, loadLlmConfig, type SyncLlm } from "./llm";
 import { ClaudeCliClient } from "./llm-cli";
@@ -65,6 +67,7 @@ commands:
   report <file>   결과 파일로 Markdown 리포트 재생성
   compare <a> <b> 두 결과 파일의 분류 비교 (예: v2 → v3, 수동 샘플 → 실제 API)
   market-stats    시장 통계 (원본 전체 + 분석 표본). docs/market-stats-v1.md|json 생성. 최종 점수는 만들지 않음
+  opportunity-score 495건 분석으로 공략 점수 v0.1 후보 + 이상치 포함/제외 + 민감도 리포트 생성
   validate <file> 결과 파일의 모든 분석을 현재 schema 로 검증 (DB 불필요). --report 를 붙이면 .out 에 md 리포트 생성
   classify        전체 수집 데이터 분류 준비: 기본은 대상 건수/토큰/비용/API 호출 수 추정만 출력
                   --execute 를 붙여야 실제 실행 (--batch: Batch API 로 제출)
@@ -93,6 +96,7 @@ options:
   --min-n <n>                   market-stats: 유형/자산 표본 기준 (기본 5, 미만은 ⚠)
   --min-combo <n>               market-stats: 자산 조합 최소 등장 건수 (기본 5)
   --out <path>                  market-stats: 출력 경로(확장자 제외, 기본 docs/market-stats-v1)
+                                opportunity-score: 출력 경로(기본 docs/opportunity-score-v0.1-500)
 
 env: ANTHROPIC_API_KEY, ANALYZER_MODEL (일반 실행 기본 claude-opus-5-5), ANALYZER_EFFORT (기본 low), ANALYZER_MAX_TOKENS (기본 8000)
      ANALYZER_BACKEND=claude-cli  → API 키 대신 Claude 구독제(claude -p) 로 sample/run 실행 (Batch 불가)
@@ -447,6 +451,31 @@ async function main() {
       writeFileSync(`${outBase}.md`, `${renderMarketReport(report)}\n`);
       log(`원본 ${report.base.total}건 / 분석(${version}) ${report.coverage.analyzed}건 / 커버리지 ${(report.coverage.coverage_rate * 100).toFixed(2)}%`);
       for (const w of report.coverage.warnings) log(`⚠ ${w}`);
+      log(`→ ${outBase}.md`);
+      log(`→ ${outBase}.json`);
+      return;
+    }
+
+    case "opportunity-score": {
+      const version = values.version ?? ANALYSIS_VERSION;
+      const { projects, analyzed: allAnalyzed } = await store.marketRows(version);
+      const sampleIds = values["sample-file"] ? readProjectIdsFile(resolveArg(values["sample-file"])!) : null;
+      const sampleSet = sampleIds ? new Set(sampleIds) : null;
+      const analyzed = sampleSet ? allAnalyzed.filter((a) => sampleSet.has(a.project_id)) : allAnalyzed;
+      const errors = await store.analysisErrors(version, sampleIds ?? analyzed.map((a) => a.project_id));
+      const report = computeOpportunityScoreReport(projects, analyzed, errors, {
+        version,
+        sampleProjectIds: sampleIds ?? undefined,
+      });
+      const repoRoot = path.resolve(import.meta.dirname, "../../..");
+      const outBase = values.out
+        ? path.resolve(process.env.INIT_CWD ?? process.cwd(), values.out)
+        : path.join(repoRoot, "docs", "opportunity-score-v0.1-500");
+      mkdirSync(path.dirname(outBase), { recursive: true });
+      writeFileSync(`${outBase}.json`, `${JSON.stringify(report, null, 2)}\n`);
+      writeFileSync(`${outBase}.md`, `${renderOpportunityScoreReport(report)}\n`);
+      log(`분석 성공 ${report.quality.analyzed_success}건 / 시간 이상치 ${report.quality.hours_outlier}건 / 최종 실패 ${report.quality.final_failed}건`);
+      log(`기본 후보: 이상치 제외 + 균형형(v0.1), 일반 외주 ${report.modes.exclude_outliers.non_staffing.n}건`);
       log(`→ ${outBase}.md`);
       log(`→ ${outBase}.json`);
       return;

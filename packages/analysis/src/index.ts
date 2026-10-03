@@ -9,3 +9,4 @@ export * from "./estimate";
 export * from "./market-stats";
 export * from "./market-report";
 export * from "./market-sample";
+export * from "./opportunity-score";
