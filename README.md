@@ -1,4 +1,4 @@
-# freelance-radar — Collector V1
+# freelance-radar — Collector V1 / Analyzer V1
 
 위시캣(Wishket)과 프리모아(Freemoa)의 외주 프로젝트를 수집해 Supabase(PostgreSQL)에 저장하는 수집기입니다.
 분석 기능(유형별 빈도/견적/난이도/반복률)은 이후 Phase 에서 이 데이터를 기반으로 진행합니다.
@@ -13,7 +13,9 @@ apps/
     src/adapters.ts     플랫폼 → Adapter 레지스트리 (플랫폼 이름을 아는 유일한 곳)
     e2e/                실제 브라우저를 쓰는 스크립트 (기본 테스트에서 제외)
   dashboard/            Next.js 내부 관리화면 (/admin/crawler)
+  analyzer/             projects → AI 구조화 분석 CLI (동기 / Message Batches)
 packages/
+  analysis/             분석 스키마(zod + JSON schema), 분류 체계, 프롬프트, 입력 변환, 비용 계산
   shared/               공통 타입, Adapter 인터페이스, 오류 분류, 파싱 유틸
   db/                   Supabase 클라이언트, 저장소(CollectorStore), 대시보드 쿼리
   platform-wishket/     위시캣 Adapter (목록 XHR + 상세 DOM 추출 → 정규화)
@@ -120,6 +122,7 @@ pnpm dashboard:dev     # http://localhost:3100/admin/crawler
 ## 테스트
 
 ```bash
+pnpm db:verify     # Collector 종료 검증: 건수/중복/crawl_errors/cutoff/checkpoint/멈춘 job (읽기 전용)
 pnpm test          # 단위 테스트 (normalize, upsert, checkpoint/resume, retry, rate limiter, cutoff, login 처리)
 pnpm typecheck
 
@@ -128,6 +131,43 @@ pnpm --filter @fr/collector exec tsx e2e/aside-smoke.ts
 pnpm --filter @fr/collector exec tsx e2e/adapter-probe.ts wishket 3 [page]
 pnpm --filter @fr/collector exec tsx e2e/list-dates.ts freemoa 30 40 50
 ```
+
+## Analyzer V1
+
+수집한 `projects` 를 읽어 프로젝트마다 비교 가능한 구조화 데이터(`project_analyses`)를 만든다. `projects` 는 수정하지 않는다.
+
+```bash
+pnpm db:migrate                                   # analyzer_v1 + analyzer_v2_classification migration 적용
+pnpm analyzer sample                              # wishket 10 + freemoa 10 동기 분석 → DB 저장 + 리포트
+pnpm analyzer sample --dry-run                    # DB 에 쓰지 않고 리포트만
+pnpm analyzer batch-submit                        # 미분석 전체를 Message Batches API 로 제출 (50% 할인)
+pnpm analyzer batch-collect --wait                # 결과 회수 → 검증 → 저장
+pnpm analyzer run --retry-failed                  # 실패 건만 동기 재시도
+pnpm analyzer sample --ids-from docs/analyzer-v3-sample-20.json   # 같은 20건을 실제 API 로 재분석
+pnpm analyzer compare docs/analyzer-v3-sample-20.json apps/analyzer/.out/sample-*.json   # 두 결과의 분류 비교
+pnpm analyzer classify                            # 전체 분류 추정만 (대상 건수/토큰/비용/API 호출 수)
+pnpm analyzer classify --execute --batch          # 실제 전체 분류 (승인 후에만)
+pnpm analyzer stats                               # 분류 분포 통계 (project_type/engagement/industry/reuse/technology_assets)
+```
+
+- 현재 기준은 `v3` (v2 에 project_type 4종·technology_assets 3종·engagement 경계 규칙 추가): 통계용 6개 분류 `project_type`, `engagement_type`, `industry`, `complexity_types[]`, `reuse_level`, `technology_assets[]`
+  (enum 은 `packages/analysis/src/taxonomy.ts`). 판단이 애매한 분류는 `uncertain_fields` 로 표시되고 리포트 "분류가 애매한 케이스"에 모인다.
+- 점수(종합점수·빈도/견적/구현 용이성/반복률 점수)는 아직 만들지 않는다. 수집 → 분류 → 분포 확인 → 배점 결정 → 전체 점수화 순서.
+- `run` / `batch-submit` 은 100건을 넘으면 `--yes` 가 있어야 실행된다.
+- `docs/analyzer-v1-sample-20.*`, `docs/analyzer-v2-sample-20.*` 는 이전 기준 참고 자료. v1/v2/v3 결과는 `(project_id, analysis_version)` 로 따로 저장되어 서로 덮어쓰지 않는다.
+
+- 리포트/결과 파일: `apps/analyzer/.out/*.md|json` (gitignore)
+- 분류 체계·점수 기준: `packages/analysis/src/taxonomy.ts`, `prompt.ts`. 바꾸면 `ANALYSIS_VERSION` 을 올린다.
+  `(project_id, analysis_version)` 단위로 저장되므로 원본 재수집 없이 새 기준으로 재분석할 수 있다.
+- 모든 응답은 structured output(JSON schema, enum 강제) + zod 재검증(점수 0~100 정수, 시간 min ≤ max, 코드 형식)을 거친다.
+  실패는 `analysis_errors` 에 남고 `--retry-failed` 로 재시도한다. 같은 버전으로 성공하면 `resolved_at` 기록.
+- 기능/연동/기술 코드는 권장 어휘를 우선 쓰고, 어휘 밖 코드는 리포트에 집계되어 다음 버전 어휘 후보가 된다.
+
+| 테이블 | 용도 |
+|---|---|
+| `project_analyses` | 분류, 요약, 기능/연동/플랫폼/기술, 추천 스택, 점수 7종, 예상 시간, `raw_analysis`(근거 포함), 토큰/비용 |
+| `analysis_batches` | Batch API 제출 기록 (프로세스가 죽어도 `batch-collect` 로 회수) |
+| `analysis_errors` | 실패한 분석 (재시도 대상) |
 
 ## 범위 밖 (Collector V1 에서 구현하지 않음)
 
