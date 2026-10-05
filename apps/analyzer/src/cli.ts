@@ -53,7 +53,19 @@ import {
 } from "@fr/analysis";
 import { LlmClient, llmBackend, loadLlmConfig, type SyncLlm } from "./llm";
 import { ClaudeCliClient } from "./llm-cli";
+import { CodexCliClient } from "./llm-codex";
 import { runSample, type SampleRunProgress } from "./sample-runner";
+import {
+  LUNA_MODEL,
+  LUNA_VALIDATION_SAMPLE_SCHEMA,
+  LUNA_VALIDATION_SEED,
+  buildLunaValidationReport,
+  renderLunaValidationMarkdown,
+  selectLunaValidationSample,
+  validateLunaSample,
+  type LunaValidationEntry,
+  type LunaValidationSampleFile,
+} from "./luna-validation";
 
 const CLI_BACKEND_NOTE =
   "backend=claude-cli (claude -p, Claude 구독제). 비용은 API 단가 환산 추정치이며 실제 청구되지 않음 (구독 사용량 한도에 반영)";
@@ -83,8 +95,9 @@ commands:
   sample-select    v3.3 미분석 전체에서 고정 seed 층화 시장 표본을 선정·검증
   haiku-validate-select  기존 Sonnet v3.3 성공 분석에서 Haiku 검증용 100건 표본을 고정 seed로 선정
   sample-verify    저장된 시장 표본 JSON을 전체 projects와 다시 비교 검증
-  run-sample       고정 시장 표본을 claude -p로 순차 분석 (체크포인트 재개)
-                  Sonnet/Haiku 모두 허용. Haiku 검증은 별도 --version을 사용해 기존 v3.3을 덮어쓰지 않음
+  run-sample       고정 시장 표본을 CLI 구독 모델로 분석 (체크포인트 재개)
+                  --backend=claude-cli 또는 --backend=codex-cli
+  luna-validate    기존 Haiku v3.3 결과와 Codex Luna 10건 비교 (API/Batch 없음)
   run-haiku-all    전체 projects 중 Haiku v3.3 결과가 없는 건만 claude -p 순차 분석 (모델별 skip/resume)
   haiku-validate-report  Sonnet v3.3 vs Haiku 검증 결과·opportunity 순위 비교 리포트 생성
   run             미분석 프로젝트를 동기(Messages API) 분석
@@ -115,10 +128,11 @@ options:
   --wait                        batch-collect: 완료까지 1분 간격 대기
   --ids-from <file>             sample: 결과 파일과 같은 프로젝트들을 다시 분석 (샘플 고정)
   --sample-file <file>          run-sample / batch-submit / market-stats: 고정 시장 표본 JSON 사용
-  --backend <name>              run-sample: claude-cli만 허용 (기본 claude-cli)
-  --model <name>                run-sample: 모델 (기본 claude-sonnet-5-5)
+  --backend <name>              run-sample: claude-cli 또는 codex-cli (기본 claude-cli)
+  --model <name>                run-sample: 모델 (Codex Luna: gpt-5.6-luna)
   --delay-ms <n>                run-sample: 호출 사이 대기(ms, 기본 250)
   --progress-file <file>        run-sample: 체크포인트 파일 경로
+  --select-only                 luna-validate: 10건 표본만 만들고 Luna 호출은 하지 않음
   --target-file <file>          run-haiku-all: 전체 대상 project_id 목록 파일
   --all                         classify: 이미 분석된 프로젝트도 포함 (--force 와 같음)
   --execute                     classify: 추정만 하지 않고 실제로 실행
@@ -138,6 +152,7 @@ options:
 env: ANTHROPIC_API_KEY, ANALYZER_MODEL (일반 실행 기본 claude-opus-5-5), ANALYZER_EFFORT (기본 low), ANALYZER_MAX_TOKENS (기본 8000)
      ANALYZER_BACKEND=claude-cli  → API 키 대신 Claude 구독제(claude -p) 로 sample/run 실행 (Batch 불가)
                                     CLAUDE_CLI_PATH, ANALYZER_CLI_TIMEOUT_MS (기본 300000)
+     Codex Luna 검증은 Codex CLI 로그인 구독을 사용하며 API/Batch 경로를 사용하지 않음
 `;
 
 const log = (m: string) => console.log(m);
@@ -191,6 +206,7 @@ async function main() {
       model: { type: "string" },
       "delay-ms": { type: "string" },
       "progress-file": { type: "string" },
+      "select-only": { type: "boolean" },
       "target-file": { type: "string" },
       all: { type: "boolean" },
       execute: { type: "boolean" },
@@ -390,7 +406,7 @@ async function main() {
 
     case "run-sample": {
       const backend = values.backend ?? process.env.ANALYZER_BACKEND ?? "claude-cli";
-      if (backend !== "claude-cli") throw new Error("run-sample은 ANALYZER_BACKEND=claude-cli만 지원합니다. API/Batch 경로는 사용하지 않습니다.");
+      if (backend !== "claude-cli" && backend !== "codex-cli") throw new Error("run-sample은 claude-cli 또는 codex-cli만 지원합니다. API/Batch 경로는 사용하지 않습니다.");
       const samplePath = resolveArg(values["sample-file"] ?? rawArg);
       if (!samplePath) throw new Error("run-sample --sample-file <sample.json>");
       const sample = JSON.parse(readFileSync(samplePath, "utf8")) as Partial<StratifiedSampleFile> & Partial<HaikuValidationSampleFile>;
@@ -407,10 +423,11 @@ async function main() {
       if (new Set(sampleIds).size !== sampleIds.length) throw new Error(`${samplePath}: project_id 중복이 있습니다`);
       const projects = await store.projectsByIds(sampleIds);
       if (projects.length !== sampleIds.length) throw new Error(`${samplePath}: DB에서 표본 프로젝트를 모두 찾지 못했습니다 (${projects.length}/${sampleIds.length})`);
-      const model = values.model ?? (isHaikuValidationSample ? HAIKU_MODEL : SONNET_MODEL);
-      if (!model.startsWith("claude-sonnet") && !model.startsWith("claude-haiku")) throw new Error("run-sample은 Claude Sonnet/Haiku 계열 모델만 허용합니다");
+      const model = values.model ?? (backend === "codex-cli" ? "gpt-5.6-luna" : isHaikuValidationSample ? HAIKU_MODEL : SONNET_MODEL);
+      if (backend === "codex-cli" && model !== "gpt-5.6-luna") throw new Error("codex-cli 검증은 현재 gpt-5.6-luna만 허용합니다");
+      if (backend === "claude-cli" && !model.startsWith("claude-sonnet") && !model.startsWith("claude-haiku")) throw new Error("claude-cli는 Claude Sonnet/Haiku 계열 모델만 허용합니다");
       const cfg = { ...loadLlmConfig(), model };
-      const llm = new ClaudeCliClient(cfg, { useApiKey: false });
+      const llm = backend === "codex-cli" ? new CodexCliClient(cfg) : new ClaudeCliClient(cfg, { useApiKey: false });
       const delayMs = values["delay-ms"] === undefined
         ? Number.parseInt(process.env.ANALYZER_CLI_DELAY_MS || "250", 10)
         : nonNegative(values["delay-ms"], "--delay-ms");
@@ -419,7 +436,7 @@ async function main() {
         ? resolveArg(values["progress-file"])!
         : path.join(OUT_DIR, `run-sample-${version}-progress.json`);
       const concurrency = values.concurrency === undefined ? 1 : positive(values.concurrency, "--concurrency");
-      log(`run-sample total=${sampleIds.length} backend=claude-cli model=${model} concurrency=${concurrency} delay_ms=${delayMs}`);
+      log(`run-sample total=${sampleIds.length} backend=${backend} model=${model} concurrency=${concurrency} delay_ms=${delayMs}`);
       log(`sample=${samplePath}`);
       log(`progress=${progressFile}`);
       const result = await runSample({
@@ -429,6 +446,7 @@ async function main() {
         projects,
         progressFile,
         model,
+        backend: backend as "claude-cli" | "codex-cli",
         llm,
         store,
         maxAttempts: 3,
@@ -438,6 +456,108 @@ async function main() {
         log,
       });
       if (result.stopped) log(`분석 일시중지: ${result.progress.stopped_reason}. 다음 실행에서 project=${result.progress.current_project_id}부터 재개합니다.`);
+      return;
+    }
+
+    case "luna-validate": {
+      const samplePath = resolveArg(values["sample-file"] ?? "docs/luna-validation-10.json")!;
+      const reportBase = resolveArg(values.out ?? "docs/luna-validation-10-report")!;
+      const progressFile = values["progress-file"]
+        ? resolveArg(values["progress-file"])!
+        : path.join(OUT_DIR, `luna-validation-v3.3-${LUNA_MODEL}-progress.json`);
+      const haikuRows = await store.analysesFor(ANALYSIS_VERSION, undefined, HAIKU_MODEL);
+      if (!haikuRows.length) throw new Error(`기존 Haiku ${ANALYSIS_VERSION} 성공 분석이 없습니다`);
+      const haikuIds = haikuRows.map((row) => row.project_id);
+      const [haikuProjects, marketRows] = await Promise.all([
+        store.projectsByIds(haikuIds),
+        store.marketRows(ANALYSIS_VERSION, HAIKU_MODEL),
+      ]);
+      const projectById = new Map(haikuProjects.map((project) => [project.id, project]));
+      const analyzedById = new Map(marketRows.analyzed.map((row) => [row.project_id, row]));
+      const entries: LunaValidationEntry[] = haikuRows.flatMap((saved) => {
+        const project = projectById.get(saved.project_id);
+        const analyzed = analyzedById.get(saved.project_id);
+        if (!project || !analyzed) return [];
+        return [{
+          project,
+          analyzed,
+          saved,
+          analysis: saved.raw_analysis,
+        }];
+      });
+      if (entries.length !== haikuRows.length) throw new Error(`Haiku 결과와 원본 프로젝트를 모두 매칭하지 못했습니다 (${entries.length}/${haikuRows.length})`);
+
+      let sample: LunaValidationSampleFile;
+      if (existsSync(samplePath)) {
+        sample = JSON.parse(readFileSync(samplePath, "utf8")) as LunaValidationSampleFile;
+        if (sample.schema !== LUNA_VALIDATION_SAMPLE_SCHEMA || sample.seed !== LUNA_VALIDATION_SEED || sample.requested_size !== 10) {
+          throw new Error(`${samplePath}: 기존 Luna 표본의 schema/seed/size가 현재 실행과 다릅니다`);
+        }
+        log(`기존 고정 Luna 표본 재사용: ${samplePath}`);
+      } else {
+        sample = selectLunaValidationSample(entries, {
+          seed: LUNA_VALIDATION_SEED,
+          size: 10,
+          haikuModel: HAIKU_MODEL,
+          lunaModel: LUNA_MODEL,
+        });
+        mkdirSync(path.dirname(samplePath), { recursive: true });
+        writeFileSync(samplePath, `${JSON.stringify(sample, null, 2)}\n`);
+        log(`Luna 검증 표본 생성: ${samplePath}`);
+      }
+      const sampleErrors = validateLunaSample(sample, entries);
+      if (sampleErrors.length) throw new Error(`Luna 표본 검증 실패:\n${sampleErrors.map((error) => `- ${error}`).join("\n")}`);
+      log(`Luna 표본 ${sample.selected_project_ids.length}건 / Haiku 모집단 ${entries.length}건 / seed=${sample.seed}`);
+      for (const row of sample.selected) log(`  ${row.project_id} · ${row.project_type ?? "unknown"} · ${row.engagement_type ?? "unknown"} · ${row.selection_reasons.join(", ")}`);
+      if (values["select-only"]) return;
+
+      const sampleIds = sample.selected_project_ids;
+      const projects = await store.projectsByIds(sampleIds);
+      if (projects.length !== sampleIds.length) throw new Error(`Luna 표본 프로젝트를 모두 찾지 못했습니다 (${projects.length}/${sampleIds.length})`);
+      const cfg = { ...loadLlmConfig(), model: LUNA_MODEL };
+      const llm = new CodexCliClient(cfg);
+      const delayMs = values["delay-ms"] === undefined
+        ? Number.parseInt(process.env.ANALYZER_CLI_DELAY_MS || "250", 10)
+        : nonNegative(values["delay-ms"], "--delay-ms");
+      if (!Number.isFinite(delayMs) || delayMs < 0) throw new Error("ANALYZER_CLI_DELAY_MS 는 0 이상의 정수여야 합니다");
+      const concurrency = values.concurrency === undefined ? 1 : positive(values.concurrency, "--concurrency");
+      if (concurrency !== 1) throw new Error("luna-validate는 구독 사용량 보호를 위해 concurrency=1만 허용합니다");
+      log(`luna-validate total=${sampleIds.length} backend=codex-cli model=${LUNA_MODEL} concurrency=1 delay_ms=${delayMs}`);
+      log(`sample=${samplePath}`);
+      log(`progress=${progressFile}`);
+      const result = await runSample({
+        version: ANALYSIS_VERSION,
+        sampleFile: samplePath,
+        sampleIds,
+        projects,
+        progressFile,
+        model: LUNA_MODEL,
+        backend: "codex-cli",
+        llm,
+        store,
+        maxAttempts: 3,
+        delayMs,
+        concurrency: 1,
+        retryFailed: Boolean(values["retry-failed"]),
+        log,
+      });
+      if (result.stopped) {
+        log(`Luna 분석 일시중지: ${result.progress.stopped_reason}. Haiku 결과는 변경하지 않았습니다.`);
+        return;
+      }
+      const lunaRows = await store.analysesFor(ANALYSIS_VERSION, sampleIds, LUNA_MODEL);
+      if (lunaRows.length !== sampleIds.length) {
+        log(`Luna 결과가 아직 완성되지 않아 비교 리포트를 만들지 않습니다 (${lunaRows.length}/${sampleIds.length})`);
+        return;
+      }
+      const report = buildLunaValidationReport(sample, haikuRows, lunaRows);
+      mkdirSync(path.dirname(reportBase), { recursive: true });
+      writeFileSync(`${reportBase}.json`, `${JSON.stringify(report, null, 2)}\n`);
+      writeFileSync(`${reportBase}.md`, `${renderLunaValidationMarkdown(report)}\n`);
+      log(`Luna 검증 완료: ${report.matched_n}/${sampleIds.length}`);
+      log(`권고: ${report.recommendation.label}`);
+      log(`→ ${reportBase}.md`);
+      log(`→ ${reportBase}.json`);
       return;
     }
 
@@ -483,6 +603,7 @@ async function main() {
         projects,
         progressFile,
         model,
+        backend: "claude-cli",
         llm,
         store,
         maxAttempts: 3,

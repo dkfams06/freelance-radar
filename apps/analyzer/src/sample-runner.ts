@@ -19,7 +19,7 @@ export interface SampleRunProgress {
   sample_file: string;
   sample_ids: string[];
   model: string;
-  backend: "claude-cli";
+  backend: "claude-cli" | "codex-cli";
   total: number;
   next_index: number;
   current_project_id: string | null;
@@ -39,6 +39,7 @@ export interface RunSampleOptions {
   projects: AnalysisSourceProject[];
   progressFile: string;
   model: string;
+  backend: "claude-cli" | "codex-cli";
   llm: SyncLlm;
   store: AnalyzerStore;
   maxAttempts: number;
@@ -66,7 +67,7 @@ function emptyProgress(opts: RunSampleOptions): SampleRunProgress {
     sample_file: opts.sampleFile,
     sample_ids: [...opts.sampleIds],
     model: opts.model,
-    backend: "claude-cli",
+    backend: opts.backend,
     total: opts.sampleIds.length,
     next_index: 0,
     current_project_id: null,
@@ -91,7 +92,7 @@ function validateProgress(progress: SampleRunProgress, opts: RunSampleOptions): 
   if (progress.schema !== "analyzer-run-sample/v1") throw new Error(`지원하지 않는 progress schema: ${progress.schema}`);
   if (progress.analysis_version !== opts.version) throw new Error("progress의 analysis_version이 현재 실행과 다릅니다");
   if (progress.model !== opts.model) throw new Error(`progress의 model(${progress.model})과 현재 model(${opts.model})이 다릅니다`);
-  if (progress.backend !== "claude-cli") throw new Error("progress backend가 claude-cli가 아닙니다");
+  if (progress.backend !== opts.backend) throw new Error(`progress backend(${progress.backend})와 현재 backend(${opts.backend})가 다릅니다`);
   if (progress.total !== opts.sampleIds.length || progress.sample_ids.join("\n") !== opts.sampleIds.join("\n")) {
     throw new Error("progress의 sample ID 목록이 현재 sample file과 다릅니다");
   }

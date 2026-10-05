@@ -40,6 +40,7 @@ export interface SavedAnalysisRow {
   raw_analysis: ProjectAnalysis;
   usage: TokenUsage | null;
   cost_usd: number | null;
+  input_hash: string | null;
 }
 
 type StatsDbRow = Omit<StatsSourceRow, "platform" | "budget_min" | "budget_max" | "budget_type"> & {
@@ -311,10 +312,11 @@ export class AnalyzerStore {
     return rows.map(({ projects, ...a }) => ({ ...a, ...(projects ?? { platform: null, budget_min: null, budget_max: null, budget_type: null }) }));
   }
 
-  async analysesFor(version: string, projectIds?: string[]): Promise<SavedAnalysisRow[]> {
+  async analysesFor(version: string, projectIds?: string[], model?: string): Promise<SavedAnalysisRow[]> {
     return this.pageAll<SavedAnalysisRow>((f, t) => {
       let q = this.db.from("project_analyses").select("*").eq("analysis_version", version).order("analyzed_at").range(f, t);
       if (projectIds) q = q.in("project_id", projectIds);
+      if (model) q = q.eq("model", model);
       return q;
     });
   }

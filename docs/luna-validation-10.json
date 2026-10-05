@@ -1,0 +1,134 @@
+{
+  "schema": "analyzer-luna-validation/v1",
+  "analysis_version": "v3.3",
+  "haiku_model": "claude-haiku-4-5-20251001",
+  "luna_model": "gpt-5.6-luna",
+  "seed": "luna-validation-v3.3-10-v1",
+  "requested_size": 10,
+  "eligible_population": 764,
+  "selected_project_ids": [
+    "6e511f64-cc55-4541-a9ce-1f7f213292bd",
+    "501a527d-ebdd-470d-9aa4-5fb4aecb3e9e",
+    "48ee13f5-8763-49ce-bced-995a50664fa4",
+    "b11ce3d9-d0e1-4166-9fa2-90b51f5d979e",
+    "e92aee11-0b86-41d0-9f5c-30c152084cc9",
+    "0acc3238-f043-451e-9ae6-6f941a81ca07",
+    "95773a7f-3ca9-4266-a6cd-dc17a7abe802",
+    "d510f93c-45e1-431b-b6fa-842b397432ba",
+    "aa34a867-0993-4c78-86ba-33f8b715f94a",
+    "6c1e032d-69d7-42aa-a57a-97f36bbe79e6"
+  ],
+  "selected": [
+    {
+      "project_id": "6e511f64-cc55-4541-a9ce-1f7f213292bd",
+      "project_type": "business_management",
+      "engagement_type": "staffing",
+      "difficulty": 60,
+      "budget": 7000000,
+      "haiku_input_hash": "4c167ea2bcaf49b959c21ca34327f33a",
+      "selection_reasons": [
+        "business_management"
+      ]
+    },
+    {
+      "project_id": "501a527d-ebdd-470d-9aa4-5fb4aecb3e9e",
+      "project_type": "platform_marketplace",
+      "engagement_type": "new_build",
+      "difficulty": 45,
+      "budget": 15000000,
+      "haiku_input_hash": "eefc481d2c41954a577e2d9d236be4e3",
+      "selection_reasons": [
+        "platform_marketplace"
+      ]
+    },
+    {
+      "project_id": "48ee13f5-8763-49ce-bced-995a50664fa4",
+      "project_type": "ecommerce",
+      "engagement_type": "new_build",
+      "difficulty": 45,
+      "budget": 10000000,
+      "haiku_input_hash": "899127bb7f56ecb704e84e182fc2a168",
+      "selection_reasons": [
+        "ecommerce"
+      ]
+    },
+    {
+      "project_id": "b11ce3d9-d0e1-4166-9fa2-90b51f5d979e",
+      "project_type": "website",
+      "engagement_type": "new_build",
+      "difficulty": 28,
+      "budget": 1500000,
+      "haiku_input_hash": "6d0bda7510676a5edffff2f848a81c81",
+      "selection_reasons": [
+        "website"
+      ]
+    },
+    {
+      "project_id": "e92aee11-0b86-41d0-9f5c-30c152084cc9",
+      "project_type": "ai_service",
+      "engagement_type": "staffing",
+      "difficulty": 25,
+      "budget": 3000000,
+      "haiku_input_hash": "b4639c6d1faed529101dfa75374264a0",
+      "selection_reasons": [
+        "ai_service"
+      ]
+    },
+    {
+      "project_id": "0acc3238-f043-451e-9ae6-6f941a81ca07",
+      "project_type": "other",
+      "engagement_type": "staffing",
+      "difficulty": 20,
+      "budget": 4000000,
+      "haiku_input_hash": "026ac206ffc74ec2a77fc5a42a765c1d",
+      "selection_reasons": [
+        "staffing"
+      ]
+    },
+    {
+      "project_id": "95773a7f-3ca9-4266-a6cd-dc17a7abe802",
+      "project_type": "platform_marketplace",
+      "engagement_type": "new_build",
+      "difficulty": 40,
+      "budget": 25000000,
+      "haiku_input_hash": "f8c9982417f1e137875d4ba633b10300",
+      "selection_reasons": [
+        "쉬운 프로젝트"
+      ]
+    },
+    {
+      "project_id": "d510f93c-45e1-431b-b6fa-842b397432ba",
+      "project_type": "other",
+      "engagement_type": "new_build",
+      "difficulty": 62,
+      "budget": 50000000,
+      "haiku_input_hash": "398ff297c15e65b1fa5b4d8879254ede",
+      "selection_reasons": [
+        "어려운 프로젝트"
+      ]
+    },
+    {
+      "project_id": "aa34a867-0993-4c78-86ba-33f8b715f94a",
+      "project_type": "admin_backoffice",
+      "engagement_type": "staffing",
+      "difficulty": 55,
+      "budget": 5000000,
+      "haiku_input_hash": "570290216bc33df5fbdcfc116aeb847b",
+      "selection_reasons": [
+        "낮은 예산대"
+      ]
+    },
+    {
+      "project_id": "6c1e032d-69d7-42aa-a57a-97f36bbe79e6",
+      "project_type": "mobile_app",
+      "engagement_type": "feature_extension",
+      "difficulty": 55,
+      "budget": 25000000,
+      "haiku_input_hash": "84499b882e480cdb20d849b12012d404",
+      "selection_reasons": [
+        "높은 예산대"
+      ]
+    }
+  ],
+  "created_at": "2026-10-05T02:07:21.474Z"
+}
