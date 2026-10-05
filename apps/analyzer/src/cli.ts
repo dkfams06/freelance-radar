@@ -110,7 +110,7 @@ options:
   --limit <n>                   run / batch-submit 최대 건수
   --retry-failed                run / run-sample / batch-submit: 미해결 실패 건만
   --force                       이미 분석된 프로젝트도 다시 분석 (같은 버전 덮어쓰기)
-  --concurrency <n>             동기 분석 동시 요청 수 (기본 4)
+  --concurrency <n>             동기 분석/claude-cli worker 동시 요청 수
   --dry-run                     DB 에 쓰지 않음 (결과 파일만)
   --wait                        batch-collect: 완료까지 1분 간격 대기
   --ids-from <file>             sample: 결과 파일과 같은 프로젝트들을 다시 분석 (샘플 고정)
@@ -418,7 +418,8 @@ async function main() {
       const progressFile = values["progress-file"]
         ? resolveArg(values["progress-file"])!
         : path.join(OUT_DIR, `run-sample-${version}-progress.json`);
-      log(`run-sample total=${sampleIds.length} backend=claude-cli model=${model} concurrency=1 delay_ms=${delayMs}`);
+      const concurrency = values.concurrency === undefined ? 1 : positive(values.concurrency, "--concurrency");
+      log(`run-sample total=${sampleIds.length} backend=claude-cli model=${model} concurrency=${concurrency} delay_ms=${delayMs}`);
       log(`sample=${samplePath}`);
       log(`progress=${progressFile}`);
       const result = await runSample({
@@ -432,6 +433,7 @@ async function main() {
         store,
         maxAttempts: 3,
         delayMs,
+        concurrency,
         retryFailed: Boolean(values["retry-failed"]),
         log,
       });
@@ -470,7 +472,8 @@ async function main() {
       const progressFile = values["progress-file"]
         ? resolveArg(values["progress-file"])!
         : path.join(OUT_DIR, `run-sample-${ANALYSIS_VERSION}-${model}-progress.json`);
-      log(`run-haiku-all total=${projectIds.length} backend=claude-cli model=${model} concurrency=1 delay_ms=${delayMs}`);
+      const concurrency = values.concurrency === undefined ? 3 : positive(values.concurrency, "--concurrency");
+      log(`run-haiku-all total=${projectIds.length} backend=claude-cli model=${model} concurrency=${concurrency} delay_ms=${delayMs}`);
       log(`target=${targetPath}`);
       log(`progress=${progressFile}`);
       const result = await runSample({
@@ -484,6 +487,7 @@ async function main() {
         store,
         maxAttempts: 3,
         delayMs,
+        concurrency,
         retryFailed: Boolean(values["retry-failed"]),
         log,
       });

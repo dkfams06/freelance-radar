@@ -43,6 +43,7 @@ export interface RunSampleOptions {
   store: AnalyzerStore;
   maxAttempts: number;
   delayMs: number;
+  concurrency: number;
   retryFailed: boolean;
   log: (message: string) => void;
 }
@@ -124,6 +125,14 @@ function progressText(progress: SampleRunProgress): string {
   return `completed=${completed}/${progress.total} remaining=${progress.total - progress.next_index} success=${progress.counts.success} failed=${progress.counts.failed} skip=${progress.counts.skipped}`;
 }
 
+function advanceNextIndex(progress: SampleRunProgress): void {
+  while (progress.next_index < progress.sample_ids.length) {
+    const projectId = progress.sample_ids[progress.next_index]!;
+    if (!progress.status[projectId]) return;
+    progress.next_index++;
+  }
+}
+
 interface ProjectRunResult {
   kind: "success" | "failed" | "usage_limit";
   error?: string;
@@ -174,6 +183,9 @@ async function analyzeOne(
 }
 
 export async function runSample(opts: RunSampleOptions): Promise<RunSampleResult> {
+  if (!Number.isInteger(opts.concurrency) || opts.concurrency < 1) {
+    throw new Error("concurrency는 1 이상의 정수여야 합니다");
+  }
   const progress = loadProgress(opts);
   const byId = new Map(opts.projects.map((p) => [p.id, p]));
   const analyzed = await opts.store.analyzedHashes(opts.version, opts.model);
@@ -184,80 +196,112 @@ export async function runSample(opts: RunSampleOptions): Promise<RunSampleResult
     if (firstFailed >= 0) progress.next_index = Math.min(progress.next_index, firstFailed);
   }
 
-  for (let i = progress.next_index; i < opts.sampleIds.length; i++) {
-    const projectId = opts.sampleIds[i]!;
-    const p = byId.get(projectId);
-    if (!p) throw new Error(`sample project not found: ${projectId}`);
-    const existingStatus = progress.status[projectId];
-    const shouldRetryFailed = opts.retryFailed && existingStatus === "failed";
+  type WorkResult = ProjectRunResult & {
+    index: number;
+    projectId: string;
+    skipped?: boolean;
+    processError?: boolean;
+  };
 
-    if (analyzed.has(projectId)) {
-      updateStatus(progress, projectId, "skipped");
-      progress.next_index = i + 1;
+  let cursor = progress.next_index;
+  while (cursor < opts.sampleIds.length) {
+    const indexes: number[] = [];
+    while (indexes.length < opts.concurrency && cursor < opts.sampleIds.length) indexes.push(cursor++);
+
+    const processIndex = async (i: number): Promise<WorkResult> => {
+      const projectId = opts.sampleIds[i]!;
+      const p = byId.get(projectId);
+      if (!p) throw new Error(`sample project not found: ${projectId}`);
+      const existingStatus = progress.status[projectId];
+      const shouldRetryFailed = opts.retryFailed && existingStatus === "failed";
+
+      if ((existingStatus === "success" || existingStatus === "skipped") && !shouldRetryFailed) {
+        advanceNextIndex(progress);
+        progress.updated_at = now();
+        saveProgress(opts.progressFile, progress);
+        opts.log(`[${i + 1}/${opts.sampleIds.length}] SKIP project=${projectId} (checkpoint already complete) ${progressText(progress)}`);
+        return { kind: "success", skipped: true, index: i, projectId, usage: null };
+      }
+      if (analyzed.has(projectId)) {
+        updateStatus(progress, projectId, "skipped");
+        advanceNextIndex(progress);
+        progress.current_project_id = null;
+        progress.updated_at = now();
+        progress.stopped_reason = null;
+        saveProgress(opts.progressFile, progress);
+        opts.log(`[${i + 1}/${opts.sampleIds.length}] SKIP project=${projectId} (already analyzed) ${progressText(progress)}`);
+        return { kind: "success", skipped: true, index: i, projectId, usage: null };
+      }
+      if (existingStatus === "failed" && !shouldRetryFailed) {
+        advanceNextIndex(progress);
+        progress.current_project_id = null;
+        progress.updated_at = now();
+        saveProgress(opts.progressFile, progress);
+        opts.log(`[${i + 1}/${opts.sampleIds.length}] SKIP project=${projectId} (previous failure; use --retry-failed) ${progressText(progress)}`);
+        return { kind: "failed", skipped: true, index: i, projectId, usage: null };
+      }
+      if (unresolved.has(projectId) && !opts.retryFailed) {
+        updateStatus(progress, projectId, "skipped");
+        advanceNextIndex(progress);
+        progress.current_project_id = null;
+        progress.updated_at = now();
+        saveProgress(opts.progressFile, progress);
+        opts.log(`[${i + 1}/${opts.sampleIds.length}] SKIP project=${projectId} (unresolved previous error) ${progressText(progress)}`);
+        return { kind: "failed", skipped: true, index: i, projectId, usage: null };
+      }
+
+      progress.current_project_id = projectId;
+      progress.updated_at = now();
+      progress.stopped_reason = null;
+      progress.last_error = null;
+      saveProgress(opts.progressFile, progress);
+      let result: ProjectRunResult;
+      try {
+        result = await analyzeOne(p, opts);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        progress.current_project_id = projectId;
+        progress.updated_at = now();
+        progress.stopped_reason = "process_error";
+        progress.last_error = message;
+        saveProgress(opts.progressFile, progress);
+        return { kind: "failed", processError: true, error: message, errorType: "PROCESS_ERROR", index: i, projectId, usage: null };
+      }
+      addUsageToProgress(progress, result.usage);
+      if (result.kind === "usage_limit") {
+        progress.current_project_id = projectId;
+        progress.updated_at = now();
+        progress.stopped_reason = "usage_limit";
+        progress.last_error = result.error ?? "Claude Code usage limit";
+        saveProgress(opts.progressFile, progress);
+        return { ...result, index: i, projectId };
+      }
+
+      updateStatus(progress, projectId, result.kind);
+      advanceNextIndex(progress);
       progress.current_project_id = null;
       progress.updated_at = now();
       progress.stopped_reason = null;
+      progress.last_error = result.kind === "failed" ? result.error ?? null : null;
       saveProgress(opts.progressFile, progress);
-      opts.log(`[${i + 1}/${opts.sampleIds.length}] SKIP project=${projectId} (already analyzed) ${progressText(progress)}`);
-      continue;
-    }
-    if (existingStatus === "failed" && !shouldRetryFailed) {
-      progress.next_index = i + 1;
-      progress.current_project_id = null;
-      progress.updated_at = now();
-      saveProgress(opts.progressFile, progress);
-      opts.log(`[${i + 1}/${opts.sampleIds.length}] SKIP project=${projectId} (previous failure; use --retry-failed) ${progressText(progress)}`);
-      continue;
-    }
-    if (unresolved.has(projectId) && !opts.retryFailed) {
-      updateStatus(progress, projectId, "skipped");
-      progress.next_index = i + 1;
-      progress.current_project_id = null;
-      progress.updated_at = now();
-      saveProgress(opts.progressFile, progress);
-      opts.log(`[${i + 1}/${opts.sampleIds.length}] SKIP project=${projectId} (unresolved previous error) ${progressText(progress)}`);
-      continue;
-    }
+      const label = result.kind === "success" ? "SUCCESS" : `FAIL ${result.errorType ?? "unknown"}`;
+      opts.log(`[${i + 1}/${opts.sampleIds.length}] ${label} project=${projectId} ${progressText(progress)}`);
+      return { ...result, index: i, projectId };
+    };
 
-    progress.current_project_id = projectId;
-    progress.next_index = i;
-    progress.updated_at = now();
-    progress.stopped_reason = null;
-    progress.last_error = null;
-    saveProgress(opts.progressFile, progress);
-    let result: ProjectRunResult;
-    try {
-      result = await analyzeOne(p, opts);
-    } catch (error) {
-      progress.current_project_id = projectId;
-      progress.next_index = i;
+    const batchResults = await Promise.all(indexes.map((i) => processIndex(i)));
+    const stopResult = batchResults.find((result) => result.kind === "usage_limit" || result.processError);
+    if (stopResult) {
+      const reason = stopResult.kind === "usage_limit" ? "usage_limit" : "process_error";
+      progress.current_project_id = stopResult.projectId;
+      progress.stopped_reason = reason;
+      progress.last_error = stopResult.error ?? (reason === "usage_limit" ? "Claude Code usage limit" : "process error");
       progress.updated_at = now();
-      progress.stopped_reason = "process_error";
-      progress.last_error = error instanceof Error ? error.message : String(error);
       saveProgress(opts.progressFile, progress);
-      throw error;
-    }
-    addUsageToProgress(progress, result.usage);
-    if (result.kind === "usage_limit") {
-      progress.current_project_id = projectId;
-      progress.next_index = i;
-      progress.updated_at = now();
-      progress.stopped_reason = "usage_limit";
-      progress.last_error = result.error ?? "Claude Code usage limit";
-      saveProgress(opts.progressFile, progress);
-      opts.log(`[${i + 1}/${opts.sampleIds.length}] STOP usage_limit project=${projectId} ${progressText(progress)}`);
+      opts.log(`[${reason === "usage_limit" ? "STOP usage_limit" : "STOP process_error"}] project=${stopResult.projectId} ${progressText(progress)}`);
       return { stopped: true, progress };
     }
-
-    updateStatus(progress, projectId, result.kind);
-    progress.next_index = i + 1;
-    progress.current_project_id = null;
-    progress.updated_at = now();
-    progress.last_error = result.kind === "failed" ? result.error ?? null : null;
-    saveProgress(opts.progressFile, progress);
-    const label = result.kind === "success" ? "SUCCESS" : `FAIL ${result.errorType ?? "unknown"}`;
-    opts.log(`[${i + 1}/${opts.sampleIds.length}] ${label} project=${projectId} ${progressText(progress)}`);
-    if (i + 1 < opts.sampleIds.length && opts.delayMs > 0) await sleep(opts.delayMs);
+    if (cursor < opts.sampleIds.length && opts.delayMs > 0) await sleep(opts.delayMs);
   }
 
   progress.next_index = opts.sampleIds.length;
