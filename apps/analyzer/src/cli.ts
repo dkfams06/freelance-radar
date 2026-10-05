@@ -60,12 +60,14 @@ import {
   LUNA_VALIDATION_SAMPLE_SCHEMA,
   LUNA_VALIDATION_SEED,
   buildLunaValidationReport,
+  buildModelValidationReport,
   renderLunaValidationMarkdown,
   selectLunaValidationSample,
   validateLunaSample,
   type LunaValidationEntry,
   type LunaValidationSampleFile,
 } from "./luna-validation";
+import { TERRA_MODEL } from "./terra-validation";
 
 const CLI_BACKEND_NOTE =
   "backend=claude-cli (claude -p, Claude 구독제). 비용은 API 단가 환산 추정치이며 실제 청구되지 않음 (구독 사용량 한도에 반영)";
@@ -98,6 +100,7 @@ commands:
   run-sample       고정 시장 표본을 CLI 구독 모델로 분석 (체크포인트 재개)
                   --backend=claude-cli 또는 --backend=codex-cli
   luna-validate    기존 Haiku v3.3 결과와 Codex Luna 10건 비교 (API/Batch 없음)
+  terra-validate   기존 Haiku v3.3 결과와 Codex Terra 10건 비교 (Luna 고정 표본 재사용)
   run-haiku-all    전체 projects 중 Haiku v3.3 결과가 없는 건만 claude -p 순차 분석 (모델별 skip/resume)
   haiku-validate-report  Sonnet v3.3 vs Haiku 검증 결과·opportunity 순위 비교 리포트 생성
   run             미분석 프로젝트를 동기(Messages API) 분석
@@ -132,7 +135,7 @@ options:
   --model <name>                run-sample: 모델 (Codex Luna: gpt-5.6-luna)
   --delay-ms <n>                run-sample: 호출 사이 대기(ms, 기본 250)
   --progress-file <file>        run-sample: 체크포인트 파일 경로
-  --select-only                 luna-validate: 10건 표본만 만들고 Luna 호출은 하지 않음
+  --select-only                 luna/terra-validate: 표본 확인만 하고 모델 호출은 하지 않음
   --target-file <file>          run-haiku-all: 전체 대상 project_id 목록 파일
   --all                         classify: 이미 분석된 프로젝트도 포함 (--force 와 같음)
   --execute                     classify: 추정만 하지 않고 실제로 실행
@@ -556,6 +559,141 @@ async function main() {
       writeFileSync(`${reportBase}.md`, `${renderLunaValidationMarkdown(report)}\n`);
       log(`Luna 검증 완료: ${report.matched_n}/${sampleIds.length}`);
       log(`권고: ${report.recommendation.label}`);
+      log(`→ ${reportBase}.md`);
+      log(`→ ${reportBase}.json`);
+      return;
+    }
+
+    case "terra-validate": {
+      const samplePath = resolveArg(values["sample-file"] ?? "docs/luna-validation-10.json")!;
+      if (!existsSync(samplePath)) throw new Error(`${samplePath}: 기존 Luna 고정 표본 파일이 없습니다`);
+      const sample = JSON.parse(readFileSync(samplePath, "utf8")) as LunaValidationSampleFile;
+      if (sample.requested_size !== 10 || sample.selected_project_ids.length !== 10) {
+        throw new Error(`${samplePath}: Terra 검증은 기존 10건 표본만 허용합니다`);
+      }
+      if (sample.luna_model !== LUNA_MODEL) throw new Error(`${samplePath}: Luna 기준 모델이 ${LUNA_MODEL}이 아닙니다`);
+      const reportBase = resolveArg(values.out ?? "docs/terra-validation-10-report")!;
+      const progressFile = values["progress-file"]
+        ? resolveArg(values["progress-file"])!
+        : path.join(OUT_DIR, `terra-validation-v3.3-${TERRA_MODEL}-progress.json`);
+      const haikuRows = await store.analysesFor(ANALYSIS_VERSION, undefined, HAIKU_MODEL);
+      const haikuIds = haikuRows.map((row) => row.project_id);
+      const [haikuProjects, marketRows] = await Promise.all([
+        store.projectsByIds(haikuIds),
+        store.marketRows(ANALYSIS_VERSION, HAIKU_MODEL),
+      ]);
+      const projectById = new Map(haikuProjects.map((project) => [project.id, project]));
+      const analyzedById = new Map(marketRows.analyzed.map((row) => [row.project_id, row]));
+      const entries: LunaValidationEntry[] = haikuRows.flatMap((saved) => {
+        const project = projectById.get(saved.project_id);
+        const analyzed = analyzedById.get(saved.project_id);
+        if (!project || !analyzed) return [];
+        return [{ project, analyzed, saved, analysis: saved.raw_analysis }];
+      });
+      const sampleErrors = validateLunaSample(sample, entries);
+      if (sampleErrors.length) throw new Error(`고정 표본 검증 실패:\n${sampleErrors.map((error) => `- ${error}`).join("\n")}`);
+      log(`Terra 검증은 기존 Luna 표본 ${sample.selected_project_ids.length}건을 그대로 사용합니다`);
+      log(`기준 Haiku 모집단=${entries.length}건 / model=${TERRA_MODEL}`);
+      for (const row of sample.selected) log(`  ${row.project_id} · ${row.project_type ?? "unknown"} · ${row.engagement_type ?? "unknown"} · ${row.selection_reasons.join(", ")}`);
+      if (values["select-only"]) return;
+
+      const sampleIds = sample.selected_project_ids;
+      const projects = await store.projectsByIds(sampleIds);
+      if (projects.length !== sampleIds.length) throw new Error(`Terra 표본 프로젝트를 모두 찾지 못했습니다 (${projects.length}/${sampleIds.length})`);
+      const cfg = { ...loadLlmConfig(), model: TERRA_MODEL };
+      const llm = new CodexCliClient(cfg);
+      const delayMs = values["delay-ms"] === undefined
+        ? Number.parseInt(process.env.ANALYZER_CLI_DELAY_MS || "250", 10)
+        : nonNegative(values["delay-ms"], "--delay-ms");
+      if (!Number.isFinite(delayMs) || delayMs < 0) throw new Error("ANALYZER_CLI_DELAY_MS 는 0 이상의 정수여야 합니다");
+      const concurrency = values.concurrency === undefined ? 1 : positive(values.concurrency, "--concurrency");
+      if (concurrency !== 1) throw new Error("terra-validate는 구독 사용량 보호를 위해 concurrency=1만 허용합니다");
+      log(`terra-validate total=${sampleIds.length} backend=codex-cli model=${TERRA_MODEL} concurrency=1 delay_ms=${delayMs}`);
+      log(`sample=${samplePath}`);
+      log(`progress=${progressFile}`);
+      const result = await runSample({
+        version: ANALYSIS_VERSION,
+        sampleFile: samplePath,
+        sampleIds,
+        projects,
+        progressFile,
+        model: TERRA_MODEL,
+        backend: "codex-cli",
+        llm,
+        store,
+        maxAttempts: 3,
+        delayMs,
+        concurrency: 1,
+        retryFailed: Boolean(values["retry-failed"]),
+        log,
+      });
+      if (result.stopped) {
+        log(`Terra 분석 일시중지: ${result.progress.stopped_reason}. Haiku/Luna 결과는 변경하지 않았습니다.`);
+        return;
+      }
+      const terraRows = await store.analysesFor(ANALYSIS_VERSION, sampleIds, TERRA_MODEL);
+      if (terraRows.length !== sampleIds.length) {
+        log(`Terra 결과가 아직 완성되지 않아 비교 리포트를 만들지 않습니다 (${terraRows.length}/${sampleIds.length})`);
+        return;
+      }
+      const report = buildModelValidationReport(sample, haikuRows, terraRows, TERRA_MODEL, "Terra");
+      const lunaReportPath = path.resolve(process.env.INIT_CWD ?? process.cwd(), "docs/luna-validation-10-report.json");
+      const lunaReport = existsSync(lunaReportPath)
+        ? JSON.parse(readFileSync(lunaReportPath, "utf8")) as { agreement?: Record<string, any>; recommendation?: { thresholds?: Record<string, boolean> } }
+        : null;
+      const comparable = {
+        project_type: report.agreement.project_type.rate,
+        engagement_type: report.agreement.engagement_type.rate,
+        reuse_level_3: report.agreement.reuse_level_3.rate,
+        vibe_mae: report.agreement.numeric.vibe_coding_difficulty.mae,
+        hours_midpoint_median_relative_error: report.agreement.estimated_hours_midpoint.median_relative_error,
+        learning_mae: report.agreement.numeric.learning_value.mae,
+        reusability_mae: report.agreement.numeric.reusability_value.mae,
+        market_mae: report.agreement.numeric.market_value.mae,
+      };
+      const lunaComparable = lunaReport?.agreement ? {
+        project_type: lunaReport.agreement.project_type?.rate ?? null,
+        engagement_type: lunaReport.agreement.engagement_type?.rate ?? null,
+        reuse_level_3: lunaReport.agreement.reuse_level_3?.rate ?? null,
+        vibe_mae: lunaReport.agreement.numeric?.vibe_coding_difficulty?.mae ?? null,
+        hours_midpoint_median_relative_error: lunaReport.agreement.estimated_hours_midpoint?.median_relative_error ?? null,
+        learning_mae: lunaReport.agreement.numeric?.learning_value?.mae ?? null,
+        reusability_mae: lunaReport.agreement.numeric?.reusability_value?.mae ?? null,
+        market_mae: lunaReport.agreement.numeric?.market_value?.mae ?? null,
+      } : null;
+      const output = { ...report, comparison_to_luna: { terra: comparable, luna: lunaComparable } };
+      const metricRows = [
+        ["project_type 일치", comparable.project_type, lunaComparable?.project_type ?? null],
+        ["engagement 일치", comparable.engagement_type, lunaComparable?.engagement_type ?? null],
+        ["reuse 3단계 일치", comparable.reuse_level_3, lunaComparable?.reuse_level_3 ?? null],
+        ["vibe MAE", comparable.vibe_mae, lunaComparable?.vibe_mae ?? null],
+        ["시간 중앙 상대오차", comparable.hours_midpoint_median_relative_error, lunaComparable?.hours_midpoint_median_relative_error ?? null],
+        ["learning MAE", comparable.learning_mae, lunaComparable?.learning_mae ?? null],
+        ["reusability MAE", comparable.reusability_mae, lunaComparable?.reusability_mae ?? null],
+        ["market MAE", comparable.market_mae, lunaComparable?.market_mae ?? null],
+      ];
+      const formatComparable = (name: string, value: number | null) => value === null ? "—" : name.includes("일치") || name.includes("오차") ? `${(value * 100).toFixed(1)}%` : value.toFixed(2);
+      const terraPasses = Object.values(report.recommendation.thresholds).filter(Boolean).length;
+      const lunaPasses = lunaReport?.recommendation?.thresholds ? Object.values(lunaReport.recommendation.thresholds).filter(Boolean).length : null;
+      const closer = lunaPasses === null ? "Luna 리포트 없음" : terraPasses > lunaPasses ? "Terra" : terraPasses < lunaPasses ? "Luna" : "비슷함";
+      const sideBySide = [
+        "",
+        "## Luna와 참고 비교",
+        "",
+        "| 지표 | Terra vs Haiku | Luna vs Haiku |",
+        "|---|---:|---:|",
+        ...metricRows.map(([name, terra, luna]) => `| ${name} | ${formatComparable(String(name), terra as number | null)} | ${formatComparable(String(name), luna as number | null)} |`),
+        "",
+        `- 임시 기준 통과 수: Terra ${terraPasses}/6 · Luna ${lunaPasses ?? "—"}/6`,
+        `- Haiku에 더 가까운 모델(임시 기준 통과 수 기준): **${closer}**`,
+        "",
+      ].join("\n");
+      mkdirSync(path.dirname(reportBase), { recursive: true });
+      writeFileSync(`${reportBase}.json`, `${JSON.stringify(output, null, 2)}\n`);
+      writeFileSync(`${reportBase}.md`, `${renderLunaValidationMarkdown(report, "Terra")}${sideBySide}`);
+      log(`Terra 검증 완료: ${report.matched_n}/${sampleIds.length}`);
+      log(`권고: ${report.recommendation.label}`);
+      log(`Haiku에 더 가까운 모델(임시 기준 통과 수): ${closer}`);
       log(`→ ${reportBase}.md`);
       log(`→ ${reportBase}.json`);
       return;

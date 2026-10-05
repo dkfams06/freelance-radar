@@ -337,7 +337,34 @@ export function buildLunaValidationReport(sample: LunaValidationSampleFile, haik
   };
 }
 
-export function renderLunaValidationMarkdown(report: LunaValidationReport): string {
+/** 같은 고정 표본을 다른 Codex 모델과 비교할 때 사용하는 공통 빌더. */
+export function buildModelValidationReport(
+  sample: LunaValidationSampleFile,
+  haikuRows: SavedAnalysisRow[],
+  comparisonRows: SavedAnalysisRow[],
+  comparisonModel: string,
+  comparisonLabel = comparisonModel,
+): LunaValidationReport {
+  const report = buildLunaValidationReport(
+    { ...sample, luna_model: comparisonModel },
+    haikuRows,
+    comparisonRows,
+  );
+  // sample은 실제로 사용한 고정 표본의 원본 메타데이터를 보존하고, 비교 모델은 top-level model에 기록한다.
+  const label = comparisonLabel;
+  return {
+    ...report,
+    sample,
+    model: comparisonModel,
+    recommendation: {
+      ...report.recommendation,
+      label: report.recommendation.label.replaceAll("Luna", label),
+      reasons: report.recommendation.reasons.map((reason) => reason.replaceAll("Luna", label)),
+    },
+  };
+}
+
+export function renderLunaValidationMarkdown(report: LunaValidationReport, comparisonLabel = "Luna"): string {
   const a = report.agreement;
   const rows = [
     ["project_type 일치율", pct(a.project_type.rate)],
@@ -351,7 +378,7 @@ export function renderLunaValidationMarkdown(report: LunaValidationReport): stri
     ["learning_value MAE", num(a.numeric.learning_value.mae)],
     ["reusability_value MAE", num(a.numeric.reusability_value.mae)],
     ["market_value MAE", num(a.numeric.market_value.mae)],
-    ["uncertain_fields Haiku/Luna/either", `${pct(a.uncertain_fields.haiku_rate)} / ${pct(a.uncertain_fields.luna_rate)} / ${pct(a.uncertain_fields.either_rate)}`],
+    [`uncertain_fields Haiku/${comparisonLabel}/either`, `${pct(a.uncertain_fields.haiku_rate)} / ${pct(a.uncertain_fields.luna_rate)} / ${pct(a.uncertain_fields.either_rate)}`],
   ];
   const projectRows = report.projects.map((p) => {
     const type = p.project_type as { haiku: string; luna: string };
@@ -366,12 +393,12 @@ export function renderLunaValidationMarkdown(report: LunaValidationReport): stri
     const reasons = p.differences as string[];
     const numeric = p.largest_numeric_differences as Array<{ field: string; difference: number }>;
     const r = p.rationale as { haiku: Record<string, string>; luna: Record<string, string> };
-    return `### ${p.project_id}\n- 차이 필드: ${reasons.length ? reasons.join(", ") : "수치 편차"}\n- 주요 수치 편차: ${numeric.map((x) => `${x.field} ${x.difference >= 0 ? "+" : ""}${x.difference}`).join(", ")}\n- Haiku 근거: ${Object.values(r.haiku).join(" | ")}\n- Luna 근거: ${Object.values(r.luna).join(" | ")}`;
+    return `### ${p.project_id}\n- 차이 필드: ${reasons.length ? reasons.join(", ") : "수치 편차"}\n- 주요 수치 편차: ${numeric.map((x) => `${x.field} ${x.difference >= 0 ? "+" : ""}${x.difference}`).join(", ")}\n- Haiku 근거: ${Object.values(r.haiku).join(" | ")}\n- ${comparisonLabel} 근거: ${Object.values(r.luna).join(" | ")}`;
   }).join("\n\n");
   return [
-    `# Luna ${report.sample.analysis_version} 10건 교차검증`,
+    `# ${comparisonLabel} ${report.sample.analysis_version} 10건 교차검증`,
     "",
-    `- 모델: **${report.model}** (Codex CLI 구독)`,
+    `- 모델: **${report.model}** (${comparisonLabel}, Codex CLI 구독)`,
     `- 기준: **${report.sample.haiku_model}** 기존 DB 결과`,
     `- 표본: ${report.matched_n}/${report.sample.requested_size}건 · seed=${report.sample.seed}`,
     "- Haiku 결과는 재분석하지 않았고 기존 행을 그대로 사용했습니다.",
@@ -385,25 +412,25 @@ export function renderLunaValidationMarkdown(report: LunaValidationReport): stri
     "",
     "## 숫자 항목 세부",
     "",
-    "| 항목 | MAE | 중앙 절대차 | 최대 차이 | Luna-Haiku 평균 부호차 |",
+    `| 항목 | MAE | 중앙 절대차 | 최대 차이 | ${comparisonLabel}-Haiku 평균 부호차 |`,
     "|---|---:|---:|---:|---:|",
     ...(["vibe_coding_difficulty", "estimated_hours_min", "estimated_hours_max", "learning_value", "reusability_value", "market_value", "technical_risk", "requirement_clarity"] as NumericField[]).map((field) => `| ${field} | ${num(a.numeric[field].mae)} | ${num(a.numeric[field].median_absolute_error)} | ${num(a.numeric[field].max_absolute_error)} | ${signed(a.numeric[field].mean_signed_difference)} |`),
     `| estimated_hours_midpoint 상대차 | ${num(a.estimated_hours_midpoint.mae)} | ${pct(a.estimated_hours_midpoint.median_relative_error)} | ${pct(a.estimated_hours_midpoint.max_relative_error)} | ${signed(a.estimated_hours_midpoint.mean_signed_difference)} |`,
     "",
     "## 프로젝트별 비교",
     "",
-    "| project_id | project_type H/L | engagement H/L | reuse H/L | 난이도 H/L | 시간 중앙 H/L | learning H/L | reuse H/L | market H/L |",
+    `| project_id | project_type H/${comparisonLabel} | engagement H/${comparisonLabel} | reuse H/${comparisonLabel} | 난이도 H/${comparisonLabel} | 시간 중앙 H/${comparisonLabel} | learning H/${comparisonLabel} | reuse H/${comparisonLabel} | market H/${comparisonLabel} |`,
     "|---|---|---|---|---:|---:|---:|---:|---:|",
     projectRows,
     "",
     "## 편향 확인",
     "",
-    `- 난이도 평균 부호차(Luna-Haiku): **${signed(bias.vibe_coding_difficulty_mean_signed)}**`,
+    `- 난이도 평균 부호차(${comparisonLabel}-Haiku): **${signed(bias.vibe_coding_difficulty_mean_signed)}**`,
     `- 시간 중앙값 평균 부호차: **${signed(bias.estimated_hours_midpoint_mean_signed)}시간**`,
     `- learning 평균 부호차: **${signed(bias.learning_value_mean_signed)}**`,
     `- reusability 평균 부호차: **${signed(bias.reusability_value_mean_signed)}**`,
     `- market 평균 부호차: **${signed(bias.market_value_mean_signed)}**`,
-    `- Luna project_type 분포: ${Object.entries(bias.project_type_luna_counts).map(([k, v]) => `${k} ${v}건`).join(", ") || "—"}`,
+    `- ${comparisonLabel} project_type 분포: ${Object.entries(bias.project_type_luna_counts).map(([k, v]) => `${k} ${v}건`).join(", ") || "—"}`,
     "",
     "## 차이가 큰 프로젝트 근거",
     "",

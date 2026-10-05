@@ -1,0 +1,1047 @@
+{
+  "schema": "analyzer-luna-validation-report/v1",
+  "generated_at": "2026-10-05T03:07:20.778Z",
+  "sample": {
+    "schema": "analyzer-luna-validation/v1",
+    "analysis_version": "v3.3",
+    "haiku_model": "claude-haiku-4-5-20251001",
+    "luna_model": "gpt-5.6-luna",
+    "seed": "luna-validation-v3.3-10-v1",
+    "requested_size": 10,
+    "eligible_population": 764,
+    "selected_project_ids": [
+      "6e511f64-cc55-4541-a9ce-1f7f213292bd",
+      "501a527d-ebdd-470d-9aa4-5fb4aecb3e9e",
+      "48ee13f5-8763-49ce-bced-995a50664fa4",
+      "b11ce3d9-d0e1-4166-9fa2-90b51f5d979e",
+      "e92aee11-0b86-41d0-9f5c-30c152084cc9",
+      "0acc3238-f043-451e-9ae6-6f941a81ca07",
+      "95773a7f-3ca9-4266-a6cd-dc17a7abe802",
+      "d510f93c-45e1-431b-b6fa-842b397432ba",
+      "aa34a867-0993-4c78-86ba-33f8b715f94a",
+      "6c1e032d-69d7-42aa-a57a-97f36bbe79e6"
+    ],
+    "selected": [
+      {
+        "project_id": "6e511f64-cc55-4541-a9ce-1f7f213292bd",
+        "project_type": "business_management",
+        "engagement_type": "staffing",
+        "difficulty": 60,
+        "budget": 7000000,
+        "haiku_input_hash": "4c167ea2bcaf49b959c21ca34327f33a",
+        "selection_reasons": [
+          "business_management"
+        ]
+      },
+      {
+        "project_id": "501a527d-ebdd-470d-9aa4-5fb4aecb3e9e",
+        "project_type": "platform_marketplace",
+        "engagement_type": "new_build",
+        "difficulty": 45,
+        "budget": 15000000,
+        "haiku_input_hash": "eefc481d2c41954a577e2d9d236be4e3",
+        "selection_reasons": [
+          "platform_marketplace"
+        ]
+      },
+      {
+        "project_id": "48ee13f5-8763-49ce-bced-995a50664fa4",
+        "project_type": "ecommerce",
+        "engagement_type": "new_build",
+        "difficulty": 45,
+        "budget": 10000000,
+        "haiku_input_hash": "899127bb7f56ecb704e84e182fc2a168",
+        "selection_reasons": [
+          "ecommerce"
+        ]
+      },
+      {
+        "project_id": "b11ce3d9-d0e1-4166-9fa2-90b51f5d979e",
+        "project_type": "website",
+        "engagement_type": "new_build",
+        "difficulty": 28,
+        "budget": 1500000,
+        "haiku_input_hash": "6d0bda7510676a5edffff2f848a81c81",
+        "selection_reasons": [
+          "website"
+        ]
+      },
+      {
+        "project_id": "e92aee11-0b86-41d0-9f5c-30c152084cc9",
+        "project_type": "ai_service",
+        "engagement_type": "staffing",
+        "difficulty": 25,
+        "budget": 3000000,
+        "haiku_input_hash": "b4639c6d1faed529101dfa75374264a0",
+        "selection_reasons": [
+          "ai_service"
+        ]
+      },
+      {
+        "project_id": "0acc3238-f043-451e-9ae6-6f941a81ca07",
+        "project_type": "other",
+        "engagement_type": "staffing",
+        "difficulty": 20,
+        "budget": 4000000,
+        "haiku_input_hash": "026ac206ffc74ec2a77fc5a42a765c1d",
+        "selection_reasons": [
+          "staffing"
+        ]
+      },
+      {
+        "project_id": "95773a7f-3ca9-4266-a6cd-dc17a7abe802",
+        "project_type": "platform_marketplace",
+        "engagement_type": "new_build",
+        "difficulty": 40,
+        "budget": 25000000,
+        "haiku_input_hash": "f8c9982417f1e137875d4ba633b10300",
+        "selection_reasons": [
+          "쉬운 프로젝트"
+        ]
+      },
+      {
+        "project_id": "d510f93c-45e1-431b-b6fa-842b397432ba",
+        "project_type": "other",
+        "engagement_type": "new_build",
+        "difficulty": 62,
+        "budget": 50000000,
+        "haiku_input_hash": "398ff297c15e65b1fa5b4d8879254ede",
+        "selection_reasons": [
+          "어려운 프로젝트"
+        ]
+      },
+      {
+        "project_id": "aa34a867-0993-4c78-86ba-33f8b715f94a",
+        "project_type": "admin_backoffice",
+        "engagement_type": "staffing",
+        "difficulty": 55,
+        "budget": 5000000,
+        "haiku_input_hash": "570290216bc33df5fbdcfc116aeb847b",
+        "selection_reasons": [
+          "낮은 예산대"
+        ]
+      },
+      {
+        "project_id": "6c1e032d-69d7-42aa-a57a-97f36bbe79e6",
+        "project_type": "mobile_app",
+        "engagement_type": "feature_extension",
+        "difficulty": 55,
+        "budget": 25000000,
+        "haiku_input_hash": "84499b882e480cdb20d849b12012d404",
+        "selection_reasons": [
+          "높은 예산대"
+        ]
+      }
+    ],
+    "created_at": "2026-10-05T02:07:21.474Z"
+  },
+  "model": "gpt-5.6-terra",
+  "matched_n": 10,
+  "agreement": {
+    "project_type": {
+      "n": 10,
+      "matches": 8,
+      "rate": 0.8
+    },
+    "engagement_type": {
+      "n": 10,
+      "matches": 8,
+      "rate": 0.8
+    },
+    "reuse_level_4": {
+      "n": 10,
+      "matches": 4,
+      "rate": 0.4
+    },
+    "reuse_level_3": {
+      "n": 10,
+      "matches": 5,
+      "rate": 0.5
+    },
+    "complexity_types": {
+      "n": 10,
+      "mean": 0.5166666666666667,
+      "median": 0.5,
+      "p75": 0.9166666666666666
+    },
+    "technology_assets": {
+      "n": 10,
+      "mean": 0.6986111111111112,
+      "median": 0.75,
+      "p75": 0.8506944444444444
+    },
+    "numeric": {
+      "vibe_coding_difficulty": {
+        "n": 10,
+        "mae": 9.7,
+        "median_absolute_error": 6,
+        "max_absolute_error": 30,
+        "mean_signed_difference": 8.5
+      },
+      "estimated_hours_min": {
+        "n": 10,
+        "mae": 208.5,
+        "median_absolute_error": 207.5,
+        "max_absolute_error": 500,
+        "mean_signed_difference": 188.5
+      },
+      "estimated_hours_max": {
+        "n": 10,
+        "mae": 257,
+        "median_absolute_error": 205,
+        "max_absolute_error": 700,
+        "mean_signed_difference": 243
+      },
+      "learning_value": {
+        "n": 10,
+        "mae": 15.7,
+        "median_absolute_error": 16,
+        "max_absolute_error": 31,
+        "mean_signed_difference": 12.3
+      },
+      "reusability_value": {
+        "n": 10,
+        "mae": 12.2,
+        "median_absolute_error": 11,
+        "max_absolute_error": 38,
+        "mean_signed_difference": 6.6
+      },
+      "market_value": {
+        "n": 10,
+        "mae": 12.5,
+        "median_absolute_error": 12,
+        "max_absolute_error": 27,
+        "mean_signed_difference": 10.5
+      },
+      "technical_risk": {
+        "n": 10,
+        "mae": 11.5,
+        "median_absolute_error": 8,
+        "max_absolute_error": 29,
+        "mean_signed_difference": 8.5
+      },
+      "requirement_clarity": {
+        "n": 10,
+        "mae": 13.1,
+        "median_absolute_error": 14.5,
+        "max_absolute_error": 23,
+        "mean_signed_difference": 9.9
+      }
+    },
+    "estimated_hours_midpoint": {
+      "n": 10,
+      "mae": 232.75,
+      "median_absolute_error": 210,
+      "max_absolute_error": 600,
+      "mean_signed_difference": 215.75,
+      "median_relative_error": 0.5123106060606061,
+      "mean_relative_error": 1.1465549187204673,
+      "max_relative_error": 5.782608695652174
+    },
+    "uncertain_fields": {
+      "haiku_rate": 0.2,
+      "luna_rate": 0,
+      "either_rate": 0.2
+    }
+  },
+  "bias": {
+    "vibe_coding_difficulty_mean_signed": 8.5,
+    "estimated_hours_midpoint_mean_signed": 215.75,
+    "learning_value_mean_signed": 12.3,
+    "reusability_value_mean_signed": 6.6,
+    "market_value_mean_signed": 10.5,
+    "project_type_luna_counts": {
+      "business_management": 1,
+      "platform_marketplace": 3,
+      "ecommerce": 1,
+      "website": 1,
+      "ai_service": 1,
+      "iot_device": 1,
+      "other": 1,
+      "mobile_app": 1
+    }
+  },
+  "projects": [
+    {
+      "project_id": "6e511f64-cc55-4541-a9ce-1f7f213292bd",
+      "project_type": {
+        "haiku": "business_management",
+        "luna": "business_management"
+      },
+      "engagement_type": {
+        "haiku": "staffing",
+        "luna": "staffing"
+      },
+      "reuse_level": {
+        "haiku": "low",
+        "luna": "one_off"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 60,
+        "luna": 68
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 550,
+        "luna": 850
+      },
+      "learning_value": {
+        "haiku": 45,
+        "luna": 45
+      },
+      "reusability_value": {
+        "haiku": 35,
+        "luna": 22
+      },
+      "market_value": {
+        "haiku": 40,
+        "luna": 42
+      },
+      "uncertain_fields": {
+        "haiku": [],
+        "luna": []
+      },
+      "differences": [
+        "reuse_level"
+      ],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_min",
+          "difference": 320
+        },
+        {
+          "field": "estimated_hours_max",
+          "difference": 280
+        },
+        {
+          "field": "requirement_clarity",
+          "difference": 21
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "반도체 측위 시스템은 매우 특수한 조합으로 시장 반복성 낮은 편",
+          "learning_value": "C#/Java/Oracle은 이미 요구 기술이며 반도체/측위 도메인 지식 재사용성 낮음",
+          "technical_risk": "기존 대형 시스템 연동 복잡성과 높은 품질 요구로 기술적 실패 위험 높음",
+          "estimated_hours": "5개월 프로젝트에서 개별 인력 담당 범위 불명확하나 400~700시간 추정",
+          "reusability_value": "특정 MAPS 시스템 종속 코드로 다른 외주에서 재사용 불가능",
+          "vibe_coding_difficulty": "기존 MAPS 시스템 연동 및 측위 로직의 특수성으로 AI 구현 검증이 어려움"
+        },
+        "luna": {
+          "market_value": "제조 현장의 품질관리·시스템 연동 수요는 있으나 측위 영역은 제한적입니다.",
+          "learning_value": "Oracle 기반 엔터프라이즈 인터페이스와 제조 품질관리 경험을 축적할 수 있습니다.",
+          "technical_risk": "기존 구축 진행 상황, 대용량 처리와 현장 인터페이스의 불확실성이 있습니다.",
+          "estimated_hours": "5개월 상주 기준의 클라이언트·인터페이스·DB·테스트 업무 범위를 반영했습니다.",
+          "reusability_value": "특정 반도체 공장 MAPS와 측위 업무 규칙에 강하게 결합됩니다.",
+          "vibe_coding_difficulty": "기존 반도체 공장 구축 환경에서 측위 로직과 C#/Java 연동을 검증해야 합니다."
+        }
+      }
+    },
+    {
+      "project_id": "501a527d-ebdd-470d-9aa4-5fb4aecb3e9e",
+      "project_type": {
+        "haiku": "platform_marketplace",
+        "luna": "platform_marketplace"
+      },
+      "engagement_type": {
+        "haiku": "new_build",
+        "luna": "new_build"
+      },
+      "reuse_level": {
+        "haiku": "medium",
+        "luna": "high"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 45,
+        "luna": 48
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 425,
+        "luna": 520
+      },
+      "learning_value": {
+        "haiku": 60,
+        "luna": 67
+      },
+      "reusability_value": {
+        "haiku": 65,
+        "luna": 81
+      },
+      "market_value": {
+        "haiku": 72,
+        "luna": 82
+      },
+      "uncertain_fields": {
+        "haiku": [],
+        "luna": []
+      },
+      "differences": [
+        "reuse_level"
+      ],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_max",
+          "difference": 120
+        },
+        {
+          "field": "estimated_hours_min",
+          "difference": 70
+        },
+        {
+          "field": "reusability_value",
+          "difference": 16
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "거래 플랫폼, 결제, 정산은 매우 반복적이나 미술품 특화로 다소 시장성 제약",
+          "learning_value": "결제/정산은 표준적 기술이나 정산 프로세스는 향후 재사용 가능한 새로운 학습 기회 제공",
+          "technical_risk": "결제 게이트웨이 심사, 정산 정확도 요구로 외부 의존도 높으나 기술은 검증됨",
+          "estimated_hours": "기본 CRUD 기반 350시간(순조로운 경우)부터 요구 변경, 결제 연동 이슈, 디자인 반복 등 변수 포함 500시간(최대)",
+          "reusability_value": "회원, 관리자, 승인 구조는 거래 플랫폼에 재사용 가능하나 미술품 특화로 재사용성 제약",
+          "vibe_coding_difficulty": "결제/정산 복잡성이 있으나 표준 기술 기반이며, AI 활용으로 코드 생성 시간 단축, 다만 디자인과 검증 필요"
+        },
+        "luna": {
+          "market_value": "판매자 등록, 중개 결제, 관리자 승인 구조의 커머스 플랫폼 수요가 반복됩니다.",
+          "learning_value": "결제·정산, 역할 기반 승인, 모바일 웹 패키징과 운영 배포 경험을 축적합니다.",
+          "technical_risk": "결제 승인과 정산 정책, 앱 스토어 심사 및 디자인 품질 확보에 변수가 있습니다.",
+          "estimated_hours": "고객 웹 약 20화면과 관리자, 결제·정산, 디자인·배포·앱 등록 대응을 포함했습니다.",
+          "reusability_value": "회원·상품·주문·결제·관리자 구조는 다른 중개·커머스 서비스에 널리 재사용됩니다.",
+          "vibe_coding_difficulty": "표준 커머스 구조지만 승인·정산 흐름, 디자인, Android 패키징을 함께 구현해야 합니다."
+        }
+      }
+    },
+    {
+      "project_id": "48ee13f5-8763-49ce-bced-995a50664fa4",
+      "project_type": {
+        "haiku": "ecommerce",
+        "luna": "ecommerce"
+      },
+      "engagement_type": {
+        "haiku": "new_build",
+        "luna": "new_build"
+      },
+      "reuse_level": {
+        "haiku": "medium",
+        "luna": "medium"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 45,
+        "luna": 48
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 240,
+        "luna": 355
+      },
+      "learning_value": {
+        "haiku": 50,
+        "luna": 69
+      },
+      "reusability_value": {
+        "haiku": 60,
+        "luna": 70
+      },
+      "market_value": {
+        "haiku": 65,
+        "luna": 79
+      },
+      "uncertain_fields": {
+        "haiku": [],
+        "luna": []
+      },
+      "differences": [],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_max",
+          "difference": 130
+        },
+        {
+          "field": "estimated_hours_min",
+          "difference": 100
+        },
+        {
+          "field": "requirement_clarity",
+          "difference": 23
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "주문제작·인쇄물 쇼핑몰은 외주에서 꽤 자주 나온다.",
+          "learning_value": "템플릿 편집기와 PDF 생성은 배울 만하지만 나머지는 표준 쇼핑몰이다.",
+          "technical_risk": "카페24 제약 안에서 실시간 편집기를 만들어야 하고 인쇄 품질 PDF 요구도 있다.",
+          "estimated_hours": "기획·디자인·프론트·백엔드·관리자·인프라를 모두 포함해 180~300시간이다.",
+          "reusability_value": "주문제작 편집기, 결제, 관리자 구조는 다른 주문제작몰에 재사용할 수 있다.",
+          "vibe_coding_difficulty": "카페24 커스터마이징과 템플릿 편집기, 인쇄용 PDF 생성이 핵심이다."
+        },
+        "luna": {
+          "market_value": "주문제작 상품의 템플릿 선택과 결제·관리 기능은 커머스 외주에서 반복 수요가 있습니다.",
+          "learning_value": "주문제작 커머스, PG 연동, 관리자 및 문서 생성 구현 경험을 축적할 수 있습니다.",
+          "technical_risk": "쇼핑몰 솔루션 제약과 편집 결과가 인쇄용 PDF로 정확히 변환되는지의 검증 위험이 있습니다.",
+          "estimated_hours": "기획·디자인부터 반응형 주문몰, 관리자, 템플릿 편집과 PDF 생성까지 포함한 범위입니다.",
+          "reusability_value": "인증·주문·결제·관리자 구조는 다른 주문형 커머스 프로젝트에 재사용 가능합니다.",
+          "vibe_coding_difficulty": "일반 쇼핑몰 기능은 표준적이나 템플릿 편집·미리보기·인쇄용 PDF 생성 검증이 필요합니다."
+        }
+      }
+    },
+    {
+      "project_id": "b11ce3d9-d0e1-4166-9fa2-90b51f5d979e",
+      "project_type": {
+        "haiku": "website",
+        "luna": "website"
+      },
+      "engagement_type": {
+        "haiku": "new_build",
+        "luna": "design_publishing"
+      },
+      "reuse_level": {
+        "haiku": "high",
+        "luna": "high"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 28,
+        "luna": 24
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 87.5,
+        "luna": 62.5
+      },
+      "learning_value": {
+        "haiku": 60,
+        "luna": 56
+      },
+      "reusability_value": {
+        "haiku": 72,
+        "luna": 78
+      },
+      "market_value": {
+        "haiku": 71,
+        "luna": 88
+      },
+      "uncertain_fields": {
+        "haiku": [],
+        "luna": []
+      },
+      "differences": [
+        "engagement_type"
+      ],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_max",
+          "difference": -30
+        },
+        {
+          "field": "estimated_hours_min",
+          "difference": -20
+        },
+        {
+          "field": "market_value",
+          "difference": 17
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "상담중심 랜딩+분석설정이 교육·부동산·금융 등에서 표준화되어 반복 수요 높음",
+          "learning_value": "GA4·네이버·SEO 설정은 마케팅 프로젝트에서 지속 활용, 기술적 새로움은 제한적",
+          "technical_risk": "표준웹기술·기존API로 기술위험 낮음, 주위험은 설정오류·클라이언트변경·콘텐츠일정",
+          "estimated_hours": "기획 12h, 디자인 25h, 제작 25h, 분석설정 5h 예상 (순조로운 경우)",
+          "reusability_value": "GA4/추적설정·상담폼·반응형구조를 다른 랜딩/예약 프로젝트에 재사용 가능",
+          "vibe_coding_difficulty": "표준 랜딩페이지+상담폼, GA4/네이버 설정은 문서기반으로 기술적 난이도 낮음"
+        },
+        "luna": {
+          "market_value": "교육기관을 포함한 광고 유입형 랜딩페이지 구축 수요가 폭넓게 반복됩니다.",
+          "learning_value": "전환형 랜딩 설계와 GA4·광고 전환 측정 역량을 축적할 수 있습니다.",
+          "technical_risk": "외부 API 개발이나 복잡한 기능은 없고 태그 설정 검증이 주요 변수입니다.",
+          "estimated_hours": "기획·카피·디자인·반응형 제작과 추적·SEO 설정을 모두 포함한 범위입니다.",
+          "reusability_value": "반응형 랜딩, CTA, 폼, CMS 구성과 추적 설정 패턴을 다른 프로젝트에 재사용할 수 있습니다.",
+          "vibe_coding_difficulty": "표준 랜딩페이지와 폼·추적 태그 설정 중심으로 AI 도구 활용이 용이합니다."
+        }
+      }
+    },
+    {
+      "project_id": "e92aee11-0b86-41d0-9f5c-30c152084cc9",
+      "project_type": {
+        "haiku": "ai_service",
+        "luna": "ai_service"
+      },
+      "engagement_type": {
+        "haiku": "staffing",
+        "luna": "staffing"
+      },
+      "reuse_level": {
+        "haiku": "medium",
+        "luna": "low"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 25,
+        "luna": 42
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 300,
+        "luna": 420
+      },
+      "learning_value": {
+        "haiku": 45,
+        "luna": 65
+      },
+      "reusability_value": {
+        "haiku": 40,
+        "luna": 38
+      },
+      "market_value": {
+        "haiku": 60,
+        "luna": 76
+      },
+      "uncertain_fields": {
+        "haiku": [],
+        "luna": []
+      },
+      "differences": [
+        "reuse_level"
+      ],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_min",
+          "difference": 160
+        },
+        {
+          "field": "estimated_hours_max",
+          "difference": 80
+        },
+        {
+          "field": "learning_value",
+          "difference": 20
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "AI 챗봇 서비스 기획은 수요가 있으나 법률 특화는 좁다.",
+          "learning_value": "LLM 상담 UX 기획 경험은 있으나 범위가 제한적이다.",
+          "technical_risk": "법률 답변 정확도 이슈가 있으나 디자인 중심이라 위험은 낮다.",
+          "estimated_hours": "3개월 상주 기획·디자인 업무 범위에서 유추했다.",
+          "reusability_value": "챗 UI와 디자인 시스템은 재사용 가능하나 법률 도메인에 한정된다.",
+          "vibe_coding_difficulty": "기획·디자인 중심이며 LLM 연동은 표준 챗 UI 수준이다."
+        },
+        "luna": {
+          "market_value": "AI 상담·챗봇 기반 웹서비스 기획과 디자인 수요는 다양한 산업에서 반복된다.",
+          "learning_value": "LLM 상담 서비스의 대화 경험과 신뢰성 중심 UX 설계 경험을 축적할 수 있다.",
+          "technical_risk": "법률 상담 결과의 신뢰성과 LLM 응답 범위 설계가 서비스 품질 위험 요인이다.",
+          "estimated_hours": "3개월 상주 계약에서 서비스 기획·UX 설계·UI 디자인과 개발 협업 시간을 반영했다.",
+          "reusability_value": "일반 웹·챗봇 UX 일부는 재사용 가능하지만 법률 상담 흐름은 도메인 특화다.",
+          "vibe_coding_difficulty": "LLM 상담 UX 설계가 중심이나 구체적 기능과 화면 범위가 제한적으로 제시됐다."
+        }
+      }
+    },
+    {
+      "project_id": "0acc3238-f043-451e-9ae6-6f941a81ca07",
+      "project_type": {
+        "haiku": "other",
+        "luna": "iot_device"
+      },
+      "engagement_type": {
+        "haiku": "staffing",
+        "luna": "staffing"
+      },
+      "reuse_level": {
+        "haiku": "low",
+        "luna": "medium"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 20,
+        "luna": 50
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 900,
+        "luna": 840
+      },
+      "learning_value": {
+        "haiku": 25,
+        "luna": 54
+      },
+      "reusability_value": {
+        "haiku": 20,
+        "luna": 58
+      },
+      "market_value": {
+        "haiku": 40,
+        "luna": 67
+      },
+      "uncertain_fields": {
+        "haiku": [
+          "project_type",
+          "industry"
+        ],
+        "luna": []
+      },
+      "differences": [
+        "project_type",
+        "reuse_level"
+      ],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_min",
+          "difference": -80
+        },
+        {
+          "field": "estimated_hours_max",
+          "difference": -40
+        },
+        {
+          "field": "reusability_value",
+          "difference": 38
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "UX 기획 상주 공고는 흔하나 개발 외주와는 거리가 있음.",
+          "learning_value": "POS·주문 UX 도메인 경험은 있으나 코드 기술 학습은 적음.",
+          "technical_risk": "기술적 위험은 낮고 상주·면접 조건만 변수.",
+          "estimated_hours": "6개월 상주 기간제로 월 약 140~170시간 기준 추정.",
+          "reusability_value": "Figma 산출물은 특정 회사 제품에 종속되어 재사용 제한적.",
+          "vibe_coding_difficulty": "개발이 아닌 UX 기획 상주 업무로 AI 코딩 난이도는 낮음."
+        },
+        "luna": {
+          "market_value": "키오스크·테이블오더·매장 관리 서비스는 외식 업계에서 반복 수요가 있습니다.",
+          "learning_value": "주문·결제·매장 운영 단말의 UX 구조와 디자인 시스템 경험을 축적합니다.",
+          "technical_risk": "실기기별 제약과 현장 운영 흐름이 UX 품질 및 검증 범위에 영향을 줍니다.",
+          "estimated_hours": "6개월 상주형 업무이며 제품별 담당 범위와 개선 반복을 고려했습니다.",
+          "reusability_value": "Figma 컴포넌트와 주문·관리 UX 패턴은 유사 서비스에 활용할 수 있습니다.",
+          "vibe_coding_difficulty": "다수 주문 단말과 관리자 화면의 일관된 UX를 설계해야 해 검증 부담이 있습니다."
+        }
+      }
+    },
+    {
+      "project_id": "95773a7f-3ca9-4266-a6cd-dc17a7abe802",
+      "project_type": {
+        "haiku": "platform_marketplace",
+        "luna": "platform_marketplace"
+      },
+      "engagement_type": {
+        "haiku": "new_build",
+        "luna": "new_build"
+      },
+      "reuse_level": {
+        "haiku": "high",
+        "luna": "medium"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 40,
+        "luna": 38
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 57.5,
+        "luna": 390
+      },
+      "learning_value": {
+        "haiku": 75,
+        "luna": 62
+      },
+      "reusability_value": {
+        "haiku": 80,
+        "luna": 68
+      },
+      "market_value": {
+        "haiku": 75,
+        "luna": 65
+      },
+      "uncertain_fields": {
+        "haiku": [],
+        "luna": []
+      },
+      "differences": [
+        "reuse_level"
+      ],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_max",
+          "difference": 410
+        },
+        {
+          "field": "estimated_hours_min",
+          "difference": 255
+        },
+        {
+          "field": "requirement_clarity",
+          "difference": -16
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "위치기반 커뮤니티 플랫폼은 반복적 요청(O2O·지역정보 등)이 많으나 해양도메인 특수",
+          "learning_value": "PWA 구조·지도API·커뮤니티패턴 모두 향후 위치기반 서비스에 반복 적용 가능",
+          "technical_risk": "지도API·인증·DB 기술은 안정적, 해양안전 데이터 소스(공공API vs 수동입력) 불명확",
+          "estimated_hours": "회원인증 12시간+커뮤니티CRUD 15시간+지도연동 12시간+UI/반복 8시간, 변수 포함시 70시간",
+          "reusability_value": "인증·게시판·API연동 등 표준패턴으로 80% 코드/구조 다른 프로젝트 재사용 가능",
+          "vibe_coding_difficulty": "지도 API + CRUD 게시판은 표준 구현, AI 자동화 80% 가능, 복잡한 알고리즘 없음"
+        },
+        "luna": {
+          "market_value": "지역·안전 정보와 지도 기반 커뮤니티 플랫폼 수요는 반복적으로 존재합니다.",
+          "learning_value": "지도 기반 서비스와 PWA, 회원·커뮤니티 구조 경험을 축적할 수 있습니다.",
+          "technical_risk": "지도 데이터·지도 API 범위와 비공개 상세 요구사항이 구현 변수가 됩니다.",
+          "estimated_hours": "PWA 지도 화면, 회원·커뮤니티와 운영 기능을 포함한 MVP 구축 범위입니다.",
+          "reusability_value": "인증·커뮤니티·관리자·웹앱 구조는 다른 정보 플랫폼에 재사용 가능합니다.",
+          "vibe_coding_difficulty": "지도 UI와 커뮤니티·회원 기능은 필요하지만 상세 명세가 제한돼 있습니다."
+        }
+      }
+    },
+    {
+      "project_id": "d510f93c-45e1-431b-b6fa-842b397432ba",
+      "project_type": {
+        "haiku": "other",
+        "luna": "other"
+      },
+      "engagement_type": {
+        "haiku": "new_build",
+        "luna": "new_build"
+      },
+      "reuse_level": {
+        "haiku": "low",
+        "luna": "low"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 62,
+        "luna": 76
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 550,
+        "luna": 1150
+      },
+      "learning_value": {
+        "haiku": 45,
+        "luna": 76
+      },
+      "reusability_value": {
+        "haiku": 30,
+        "luna": 31
+      },
+      "market_value": {
+        "haiku": 40,
+        "luna": 48
+      },
+      "uncertain_fields": {
+        "haiku": [],
+        "luna": []
+      },
+      "differences": [],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_max",
+          "difference": 700
+        },
+        {
+          "field": "estimated_hours_min",
+          "difference": 500
+        },
+        {
+          "field": "learning_value",
+          "difference": 31
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "VR·시뮬레이션 교육 수요는 있으나 시장이 작다.",
+          "learning_value": "Unity 시뮬레이션 경험은 쌓이지만 도메인은 한정적이다.",
+          "technical_risk": "정밀 3D 조작 품질, 360 합성, 현장 자료 의존이 위험하다.",
+          "estimated_hours": "기획, 모델링, UI, 인터랙션, 채점, 암호화 DB까지 범위가 넓다.",
+          "reusability_value": "채점, 로컬 DB 구조는 재사용 가능하나 콘텐츠는 전용이다.",
+          "vibe_coding_difficulty": "Unity 3D 정밀 인터랙션과 3D 모델링은 AI 검증이 어렵다."
+        },
+        "luna": {
+          "market_value": "산업 안전·기술 교육용 시뮬레이션 수요는 있으나 일반 웹 외주보다 반복성이 낮습니다.",
+          "learning_value": "Unity 기반 산업 교육 시뮬레이션, 로컬 보안 저장, 인터랙션 설계 역량을 축적합니다.",
+          "technical_risk": "현장감 있는 자산 품질, 조작 정확도, 고사양 PC 성능 및 교육 평가 기준 합의가 위험 요소입니다.",
+          "estimated_hours": "시나리오 기획부터 3D 콘텐츠, 데스크톱 앱, 최적화·설치 배포까지 포함한 범위입니다.",
+          "reusability_value": "로그인·로컬 저장 구조는 재사용 가능하지만 통신설비 작업 시나리오와 자산은 고객 특화입니다.",
+          "vibe_coding_difficulty": "고품질 3D 자산, 정밀 조작, 성능 최적화와 자동 채점 검증이 핵심 난점입니다."
+        }
+      }
+    },
+    {
+      "project_id": "aa34a867-0993-4c78-86ba-33f8b715f94a",
+      "project_type": {
+        "haiku": "admin_backoffice",
+        "luna": "platform_marketplace"
+      },
+      "engagement_type": {
+        "haiku": "staffing",
+        "luna": "staffing"
+      },
+      "reuse_level": {
+        "haiku": "low",
+        "luna": "medium"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 55,
+        "luna": 58
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 195,
+        "luna": 500
+      },
+      "learning_value": {
+        "haiku": 60,
+        "luna": 72
+      },
+      "reusability_value": {
+        "haiku": 40,
+        "luna": 63
+      },
+      "market_value": {
+        "haiku": 70,
+        "luna": 73
+      },
+      "uncertain_fields": {
+        "haiku": [],
+        "luna": []
+      },
+      "differences": [
+        "project_type",
+        "reuse_level"
+      ],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_max",
+          "difference": 350
+        },
+        {
+          "field": "estimated_hours_min",
+          "difference": 260
+        },
+        {
+          "field": "reusability_value",
+          "difference": 23
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "포털, 관리자, 배치 구조는 일반적이며 유사 플랫폼 개발이 자주 반복되는 영역.",
+          "learning_value": "AI 코딩 도구 실무 활용, 배치 스케줄러, API 연동 패턴 등 향후 재사용 가능한 기술.",
+          "technical_risk": "광고 서버 API 연동, 배치 시간 동기화, 금액 계산 정확도 보장 등이 중등도 위험.",
+          "estimated_hours": "설계서 완료, 명확한 기능 목록 있지만 광고 서버 연동, 배치, 검증이 변수인 140~250시간.",
+          "reusability_value": "광고 플랫폼 도메인 특화이지만, 배치, 권한, API 연동 등 일부 모듈 재사용 가능.",
+          "vibe_coding_difficulty": "AI 생성 코드 검증, 광고 서버 연동 4종, 배치/금액 로직이 있지만 표준 기술 스택으로 중상 난이도."
+        },
+        "luna": {
+          "market_value": "관리자 포털, 캠페인 운영, 외부 연동과 배치 집계는 반복 수요가 있는 조합입니다.",
+          "learning_value": "광고 운영 도메인의 배치 집계, 외부 API 연동, 정산성 로직 경험을 축적합니다.",
+          "technical_risk": "광고 서버 규격 준수와 금액 계산·대량 배치의 정확성 검증이 주요 위험입니다.",
+          "estimated_hours": "두 웹 콘솔과 공통 권한·DB·배치, 광고 서버 연동 4종의 구현·검증 범위입니다.",
+          "reusability_value": "권한·관리자·API 연동·배치 구조는 재사용 가능하지만 광고 서버 규격은 고객 종속적입니다.",
+          "vibe_coding_difficulty": "광고 서버 연동, 배치 집계, 심사·정산 흐름이 있으나 설계 문서가 준비돼 있습니다."
+        }
+      }
+    },
+    {
+      "project_id": "6c1e032d-69d7-42aa-a57a-97f36bbe79e6",
+      "project_type": {
+        "haiku": "mobile_app",
+        "luna": "mobile_app"
+      },
+      "engagement_type": {
+        "haiku": "feature_extension",
+        "luna": "maintenance"
+      },
+      "reuse_level": {
+        "haiku": "low",
+        "luna": "low"
+      },
+      "vibe_coding_difficulty": {
+        "haiku": 55,
+        "luna": 68
+      },
+      "estimated_hours_midpoint": {
+        "haiku": 365,
+        "luna": 740
+      },
+      "learning_value": {
+        "haiku": 45,
+        "luna": 67
+      },
+      "reusability_value": {
+        "haiku": 35,
+        "luna": 34
+      },
+      "market_value": {
+        "haiku": 60,
+        "luna": 78
+      },
+      "uncertain_fields": {
+        "haiku": [
+          "engagement_type"
+        ],
+        "luna": []
+      },
+      "differences": [
+        "engagement_type"
+      ],
+      "largest_numeric_differences": [
+        {
+          "field": "estimated_hours_max",
+          "difference": 430
+        },
+        {
+          "field": "estimated_hours_min",
+          "difference": 320
+        },
+        {
+          "field": "technical_risk",
+          "difference": 23
+        }
+      ],
+      "rationale": {
+        "haiku": {
+          "market_value": "앱 결제 교체와 유지보수 수요는 꾸준하다.",
+          "learning_value": "네이티브 PG SDK 연동과 스토어 운영 경험은 쌓이지만 범위는 한정적이다.",
+          "technical_risk": "기존 코드 불확실성, 실결제 검증, 스토어 심사 의존이 있다.",
+          "estimated_hours": "결제 개편 150~250시간에 3개월 유지보수 130~200시간을 더했다.",
+          "reusability_value": "PG 연동 패턴은 재사용할 수 있으나 기존 앱 코드에 종속돼 있다.",
+          "vibe_coding_difficulty": "기존 네이티브 코드 2종 위에서 결제 SDK 교체와 실결제 검증이 필요하다."
+        },
+        "luna": {
+          "market_value": "주문·커머스 앱의 결제 개편과 네이티브 운영 수요는 반복적으로 발생합니다.",
+          "learning_value": "네이티브 PG 연동, 스토어 릴리즈, 크래시 분석과 운영 경험을 축적할 수 있습니다.",
+          "technical_risk": "실결제 승인·취소·환불 오류의 금전 영향과 기존 코드 및 OS 호환성 변수가 큽니다.",
+          "estimated_hours": "양 플랫폼 결제 로직 교체, QA·스토어 배포 및 3개월 운영 대응 범위를 반영했습니다.",
+          "reusability_value": "결제 연동 경험은 남지만 기존 주문앱 구조와 특정 PG 정책에 코드가 크게 묶입니다.",
+          "vibe_coding_difficulty": "기존 네이티브 양 플랫폼 코드와 결제 SDK를 함께 수정하고 실결제를 검증해야 합니다."
+        }
+      }
+    }
+  ],
+  "recommendation": {
+    "code": "different",
+    "label": "차이가 큼 → Terra 혼용 비추천",
+    "reasons": [
+      "임시 기준 2/6개만 통과했습니다.",
+      "Haiku와 Terra를 같은 시장 통계에 섞지 않는 것이 안전합니다."
+    ],
+    "thresholds": {
+      "project_type": true,
+      "engagement_type": false,
+      "reuse_level_3": false,
+      "vibe_difficulty_mae": true,
+      "value_mae": false,
+      "hours_median_relative_error": false
+    }
+  },
+  "comparison_to_luna": {
+    "terra": {
+      "project_type": 0.8,
+      "engagement_type": 0.8,
+      "reuse_level_3": 0.5,
+      "vibe_mae": 9.7,
+      "hours_midpoint_median_relative_error": 0.5123106060606061,
+      "learning_mae": 15.7,
+      "reusability_mae": 12.2,
+      "market_mae": 12.5
+    },
+    "luna": {
+      "project_type": 0.9,
+      "engagement_type": 1,
+      "reuse_level_3": 0.3,
+      "vibe_mae": 10.9,
+      "hours_midpoint_median_relative_error": 0.31467710371819957,
+      "learning_mae": 25.5,
+      "reusability_mae": 15.4,
+      "market_mae": 20.6
+    }
+  }
+}
