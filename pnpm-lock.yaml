@@ -59,6 +59,9 @@ importers:
 
   apps/dashboard:
     dependencies:
+      '@fr/analysis':
+        specifier: workspace:*
+        version: link:../../packages/analysis
       '@fr/db':
         specifier: workspace:*
         version: link:../../packages/db

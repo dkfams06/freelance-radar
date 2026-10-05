@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@fr/analysis": "workspace:*",
     "@fr/db": "workspace:*",
     "@fr/shared": "workspace:*",
     "next": "^16.3.8",

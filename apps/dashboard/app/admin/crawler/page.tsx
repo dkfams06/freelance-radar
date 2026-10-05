@@ -105,7 +105,10 @@ export default async function CrawlerPage() {
           <p className="eyebrow">freelance-radar · Collector V1</p>
           <h1>Crawler</h1>
         </div>
-        <AutoRefresh />
+        <div className="command-row">
+          <a className="btn" href="/admin/analysis">분석 미리보기</a>
+          <AutoRefresh />
+        </div>
       </header>
 
       <section className="stats" aria-label="요약">
