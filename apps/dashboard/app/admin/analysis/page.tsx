@@ -4,11 +4,37 @@ import { getDb, hasSupabaseEnv } from "@/lib/db";
 import { AutoRefresh } from "../crawler/_components/AutoRefresh";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Analysis · freelance-radar" };
+export const metadata = { title: "분석 · freelance-radar" };
 
 const VERSION = "v3.3";
 const MODEL = "claude-haiku-4-5-20251001";
 const PAGE_SIZE = 1000;
+
+const PROJECT_TYPE_LABEL: Record<string, string> = {
+  website: "웹사이트",
+  ecommerce: "이커머스",
+  reservation: "예약 서비스",
+  admin_backoffice: "관리자/백오피스",
+  business_management: "업무관리",
+  saas: "SaaS",
+  platform_marketplace: "플랫폼/마켓플레이스",
+  mobile_app: "모바일 앱",
+  ai_service: "AI 서비스",
+  crawler_data_collection: "크롤러/데이터 수집",
+  automation_rpa: "자동화/RPA",
+  data_dashboard: "데이터 대시보드",
+  fintech_payment: "핀테크/결제",
+  iot_device: "IoT/장치",
+  media_processing: "미디어 처리",
+  enterprise_infra: "엔터프라이즈 인프라",
+  qa_testing: "QA/테스트",
+  other: "기타",
+  "(none)": "미분류",
+};
+
+function projectTypeLabel(key: string): string {
+  return PROJECT_TYPE_LABEL[key] ?? "기타";
+}
 
 type ProjectDbRow = {
   id: string;
@@ -121,8 +147,8 @@ function TypeTable({ title, types }: { title: string; types: TypeStat[] }) {
           <table>
             <thead>
               <tr>
-                <th>project_type</th>
-                <th>n</th>
+                <th>프로젝트 유형</th>
+                <th>건수</th>
                 <th>비율</th>
                 <th>월평균</th>
                 <th>중앙 견적</th>
@@ -136,7 +162,7 @@ function TypeTable({ title, types }: { title: string; types: TypeStat[] }) {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.key}>
-                  <td><b>{row.key}</b>{row.low_sample && <span className="badge badge-warn" style={{ marginLeft: 6 }}>n&lt;10</span>}</td>
+                  <td><b>{projectTypeLabel(row.key)}</b>{row.low_sample && <span className="badge badge-warn" style={{ marginLeft: 6 }}>표본 적음</span>}</td>
                   <td className="num">{row.n}</td>
                   <td className="num">{percent(row.share)}</td>
                   <td className="num">{score(row.monthly_avg_estimated ?? row.monthly_avg_in_sample)}</td>
@@ -164,7 +190,7 @@ function RankedList({ title, items, formatter }: { title: string; items: Array<{
         <ol className="rank-list">
           {items.slice(0, 5).map((item) => (
             <li key={item.key}>
-              <span><b>{item.key}</b> <span className="muted">n={item.n}</span></span>
+              <span><b>{projectTypeLabel(item.key)}</b> <span className="muted">표본 {item.n}건</span></span>
               <strong>{formatter(item.value)}</strong>
             </li>
           ))}
@@ -176,7 +202,7 @@ function RankedList({ title, items, formatter }: { title: string; items: Array<{
 
 export default async function AnalysisPage() {
   if (!hasSupabaseEnv()) {
-    return <main className="wrap"><h1>Analysis preview</h1><div className="notice">Supabase 환경변수가 없습니다.</div></main>;
+    return <main className="wrap"><h1>분석 미리보기</h1><div className="notice">Supabase 환경변수가 없습니다.</div></main>;
   }
 
   const report = await loadReport();
@@ -187,7 +213,7 @@ export default async function AnalysisPage() {
     <main className="wrap">
       <header className="page-head">
         <div>
-          <p className="eyebrow">freelance-radar · market analysis preview</p>
+          <p className="eyebrow">freelance-radar · 시장 분석 미리보기</p>
           <h1>Haiku v3.3 분석 미리보기</h1>
           <p className="muted">DB의 성공 분석만 사용합니다. 분석 중에는 15초마다 갱신됩니다.</p>
         </div>
@@ -195,27 +221,27 @@ export default async function AnalysisPage() {
       </header>
 
       <nav className="notice">
-        <a href="/admin/crawler">← Crawler</a>
-        <span className="muted" style={{ marginLeft: 12 }}>model: {MODEL}</span>
+        <a href="/admin/crawler">← 수집 관리</a>
+        <span className="muted" style={{ marginLeft: 12 }} title={MODEL}>사용 모델: Haiku 4.5</span>
       </nav>
 
       <section className="stats" aria-label="분석 커버리지">
         <Stat label="전체 프로젝트" value={integer(report.base.total)} />
-        <Stat label="Haiku 성공" value={integer(report.coverage.analyzed)} sub={percent(report.coverage.coverage_rate)} />
+        <Stat label="분석 완료" value={integer(report.coverage.analyzed)} sub={percent(report.coverage.coverage_rate)} />
         <Stat label="미분석" value={integer(pending)} />
         <Stat label="일반 외주" value={integer(report.non_staffing.n)} />
-        <Stat label="Staffing" value={integer(report.staffing.n)} />
-        <Stat label="schema failure" value={integer(report.quality.schema_failure_projects)} tone={report.quality.schema_failure_projects ? "bad" : undefined} />
+        <Stat label="인력 투입" value={integer(report.staffing.n)} />
+        <Stat label="스키마 실패" value={integer(report.quality.schema_failure_projects)} tone={report.quality.schema_failure_projects ? "bad" : undefined} />
       </section>
 
       <section className="platforms">
         <div className="card">
           <h2>분석 품질</h2>
           <dl className="kv">
-            <div><dt>retry 기록</dt><dd>{integer(report.quality.retry_count)}건</dd></div>
-            <div><dt>uncertain_fields</dt><dd>{integer(report.quality.uncertain_fields.projects_with_any)}건 ({percent(report.quality.uncertain_fields.rate)})</dd></div>
-            <div><dt>project_type=other</dt><dd>{percent(report.quality.other_ratio.project_type)}</dd></div>
-            <div><dt>technology_assets=other</dt><dd>{percent(report.quality.other_ratio.technology_assets)}</dd></div>
+            <div><dt>재시도 기록</dt><dd>{integer(report.quality.retry_count)}건</dd></div>
+            <div><dt>불확실한 필드</dt><dd>{integer(report.quality.uncertain_fields.projects_with_any)}건 ({percent(report.quality.uncertain_fields.rate)})</dd></div>
+            <div><dt>기타 프로젝트 유형</dt><dd>{percent(report.quality.other_ratio.project_type)}</dd></div>
+            <div><dt>기타 기술자산</dt><dd>{percent(report.quality.other_ratio.technology_assets)}</dd></div>
             <div><dt>시간 중앙값</dt><dd>{integer(report.quality.estimated_hours.midpoint_median)}시간</dd></div>
             <div><dt>결과 생성</dt><dd>{new Date(report.generated_at).toLocaleString("ko-KR")}</dd></div>
           </dl>
@@ -242,8 +268,8 @@ export default async function AnalysisPage() {
         </section>
       )}
 
-      <TypeTable title="일반 외주 project_type별" types={report.non_staffing.types} />
-      <TypeTable title="Staffing project_type별" types={report.staffing.types} />
+      <TypeTable title="일반 외주 유형별" types={report.non_staffing.types} />
+      <TypeTable title="인력 투입 유형별" types={report.staffing.types} />
     </main>
   );
 }

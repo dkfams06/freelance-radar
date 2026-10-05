@@ -84,7 +84,7 @@ export function ProjectTable({ projects }: { projects: RecentProject[] }) {
             <nav className="tabs">
               {(["normalized", "raw", "text"] as Tab[]).map((t) => (
                 <button key={t} type="button" className={tab === t ? "tab active" : "tab"} onClick={() => setTab(t)}>
-                  {t === "normalized" ? "Normalized" : t === "raw" ? "Raw" : "본문 텍스트"}
+                  {t === "normalized" ? "정규화 데이터" : t === "raw" ? "원문 데이터" : "본문 텍스트"}
                 </button>
               ))}
             </nav>

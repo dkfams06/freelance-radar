@@ -13,7 +13,7 @@ import { CommandButtons } from "./_components/CommandButtons";
 import { ProjectTable } from "./_components/ProjectTable";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Crawler · freelance-radar" };
+export const metadata = { title: "수집 관리 · freelance-radar" };
 
 const ONLINE_WINDOW_MS = 90_000;
 
@@ -35,6 +35,23 @@ const LOGIN_LABEL: Record<string, string> = {
   LOGGED_OUT: "로그아웃",
   LOGIN_REQUIRED: "로그인 필요",
   UNKNOWN: "확인 전",
+};
+
+const JOB_TYPE_LABEL: Record<string, string> = {
+  BACKFILL: "백필",
+  CHECK_NEW: "신규 확인",
+  RESUME: "재개",
+  RETRY_ERRORS: "실패 재시도",
+};
+
+const ERROR_TYPE_LABEL: Record<string, string> = {
+  UNKNOWN: "알 수 없음",
+};
+
+const REQUESTED_BY_LABEL: Record<string, string> = {
+  scheduler: "자동 스케줄러",
+  dashboard: "대시보드",
+  cli: "명령줄",
 };
 
 function tone(status: string | null | undefined): string {
@@ -68,7 +85,7 @@ export default async function CrawlerPage() {
   if (!hasSupabaseEnv()) {
     return (
       <main className="wrap">
-        <h1>Crawler</h1>
+        <h1>수집 관리</h1>
         <div className="notice">
           <p>
             Supabase 환경변수가 없습니다. 프로젝트 루트 <code>.env</code> 또는 배포 환경에 <code>SUPABASE_URL</code>,{" "}
@@ -102,8 +119,8 @@ export default async function CrawlerPage() {
     <main className="wrap">
       <header className="page-head">
         <div>
-          <p className="eyebrow">freelance-radar · Collector V1</p>
-          <h1>Crawler</h1>
+          <p className="eyebrow">freelance-radar · 수집기 V1</p>
+          <h1>수집 관리</h1>
         </div>
         <div className="command-row">
           <a className="btn" href="/admin/analysis">분석 미리보기</a>
@@ -118,7 +135,7 @@ export default async function CrawlerPage() {
         <Stat label="최근 수집" value={formatRelative(overview.lastCollectedAt, now)} sub={formatDateTime(overview.lastCollectedAt)} />
         <Stat label="미해결 실패" value={formatNumber(overview.unresolvedErrors)} tone={overview.unresolvedErrors ? "bad" : undefined} />
         <div className="stat">
-          <p className="stat-label">Collector</p>
+          <p className="stat-label">수집기</p>
           <p className="stat-value">
             <Badge value={collectorState} />
           </p>
@@ -164,7 +181,7 @@ export default async function CrawlerPage() {
                         (e.external_project_id ?? `page ${e.page ?? "—"}`)
                       )}
                     </td>
-                    <td><span className={`badge badge-${e.resolved_at ? "neutral" : "bad"}`}>{e.error_type}</span></td>
+                    <td><span className={`badge badge-${e.resolved_at ? "neutral" : "bad"}`}>{ERROR_TYPE_LABEL[e.error_type] ?? e.error_type}</span></td>
                     <td className="msg-cell" title={e.error_message}>{e.error_message}</td>
                     <td className="num">{e.retry_count}</td>
                     <td className="nowrap muted">{formatDateTime(e.occurred_at)}</td>
@@ -198,13 +215,13 @@ export default async function CrawlerPage() {
                 {jobs.map((j) => (
                   <tr key={j.id}>
                     <td><span className={`chip chip-${j.platform}`}>{PLATFORM_NAME[j.platform]}</span></td>
-                    <td className="nowrap">{j.job_type}</td>
+                    <td className="nowrap">{JOB_TYPE_LABEL[j.job_type] ?? j.job_type}</td>
                     <td><Badge value={j.status} /></td>
                     <td className="msg-cell" title={j.error_message ?? String(j.result?.reason ?? "")}>
                       {j.result ? `성공 ${j.result.success ?? 0} · 실패 ${j.result.failure ?? 0} · 신규 ${j.result.inserted ?? 0}` : ""}
                       {j.error_message ? ` — ${j.error_message}` : ""}
                     </td>
-                    <td className="muted">{j.requested_by ?? "—"}</td>
+                    <td className="muted">{j.requested_by ? (REQUESTED_BY_LABEL[j.requested_by] ?? j.requested_by) : "—"}</td>
                     <td className="nowrap muted">{formatDateTime(j.created_at)}</td>
                     <td className="nowrap muted">{formatDateTime(j.finished_at)}</td>
                   </tr>
@@ -265,12 +282,12 @@ function PlatformCard({ panel, now }: { panel: PlatformPanel; now: number }) {
       </div>
 
       <dl className="kv">
-        <div><dt>현재 작업</dt><dd>{panel.currentJob ? `${panel.currentJob.job_type} (${STATUS_LABEL[panel.currentJob.status] ?? panel.currentJob.status})` : "—"}</dd></div>
+        <div><dt>현재 작업</dt><dd>{panel.currentJob ? `${JOB_TYPE_LABEL[panel.currentJob.job_type] ?? panel.currentJob.job_type} (${STATUS_LABEL[panel.currentJob.status] ?? panel.currentJob.status})` : "—"}</dd></div>
         <div><dt>현재 페이지</dt><dd className="num">{s?.current_page ?? "—"}</dd></div>
         <div><dt>성공</dt><dd className="num">{formatNumber(s?.success_count)}</dd></div>
         <div><dt>실패</dt><dd className="num">{formatNumber(s?.failure_count)}</dd></div>
         <div><dt>마지막 성공</dt><dd>{formatRelative(s?.last_success_at, now)}</dd></div>
-        <div><dt>Heartbeat</dt><dd>{formatRelative(s?.heartbeat_at, now)}</dd></div>
+        <div><dt>상태 신호</dt><dd>{formatRelative(s?.heartbeat_at, now)}</dd></div>
       </dl>
       {s?.last_error_message && (
         <p className="last-error" title={s.last_error_message}>
