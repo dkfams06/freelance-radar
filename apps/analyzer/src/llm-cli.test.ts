@@ -34,6 +34,15 @@ describe("interpretCliOutput", () => {
     expect(out.ok).toBe(true);
   });
 
+  it("보조 호출이 modelUsage 첫 항목이어도 요청 모델을 저장", () => {
+    const out = interpretCliOutput(
+      cliJson({ modelUsage: { "claude-haiku-4-5-20251001": {}, "claude-sonnet-5-5": {} }, structured_output: validAnalysis }),
+      "claude-sonnet-5-5",
+    );
+    expect(out.ok).toBe(true);
+    if (out.ok) expect(out.model).toBe("claude-sonnet-5-5");
+  });
+
   it("로그인 만료(401)는 재시도하지 않는다", () => {
     const out = interpretCliOutput(
       cliJson({ is_error: true, api_error_status: 401, result: "Failed to authenticate. OAuth access token has expired." }),

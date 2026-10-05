@@ -101,6 +101,7 @@ commands:
                   --backend=claude-cli 또는 --backend=codex-cli
   luna-validate    기존 Haiku v3.3 결과와 Codex Luna 10건 비교 (API/Batch 없음)
   terra-validate   기존 Haiku v3.3 결과와 Codex Terra 10건 비교 (Luna 고정 표본 재사용)
+  sonnet-validate  기존 Haiku v3.3 결과와 Claude Sonnet 10건 비교 (Luna 고정 표본 재사용)
   run-haiku-all    전체 projects 중 Haiku v3.3 결과가 없는 건만 claude -p 순차 분석 (모델별 skip/resume)
   haiku-validate-report  Sonnet v3.3 vs Haiku 검증 결과·opportunity 순위 비교 리포트 생성
   run             미분석 프로젝트를 동기(Messages API) 분석
@@ -414,10 +415,13 @@ async function main() {
       if (!samplePath) throw new Error("run-sample --sample-file <sample.json>");
       const sample = JSON.parse(readFileSync(samplePath, "utf8")) as Partial<StratifiedSampleFile> & Partial<HaikuValidationSampleFile>;
       const isHaikuValidationSample = sample.schema === HAIKU_VALIDATION_SAMPLE_SCHEMA;
+      const isLunaValidationSample = sample.schema === LUNA_VALIDATION_SAMPLE_SCHEMA;
       const version = values.version ?? (isHaikuValidationSample ? sample.target_analysis_version ?? HAIKU_VALIDATION_ANALYSIS_VERSION : ANALYSIS_VERSION);
       if (!isHaikuValidationSample && version !== ANALYSIS_VERSION) throw new Error(`일반 run-sample은 고정된 ${ANALYSIS_VERSION}만 지원합니다`);
       const validSample = isHaikuValidationSample
         ? sample.target_analysis_version === version && sample.base_analysis_version === ANALYSIS_VERSION
+        : isLunaValidationSample
+          ? sample.analysis_version === version && sample.requested_size === 10
         : sample.schema === "analyzer-v3.3-market-sample/v1" && sample.analysis_version === version;
       if (!validSample || !Array.isArray(sample.selected_project_ids) || sample.selected_project_ids.length === 0 || sample.selected_project_ids.some((id) => typeof id !== "string")) {
         throw new Error(`${samplePath}: 지원하지 않는 v3.3 표본 JSON 형식입니다`);
@@ -456,6 +460,7 @@ async function main() {
         delayMs,
         concurrency,
         retryFailed: Boolean(values["retry-failed"]),
+        force: Boolean(values.force),
         log,
       });
       if (result.stopped) log(`분석 일시중지: ${result.progress.stopped_reason}. 다음 실행에서 project=${result.progress.current_project_id}부터 재개합니다.`);
@@ -694,6 +699,187 @@ async function main() {
       log(`Terra 검증 완료: ${report.matched_n}/${sampleIds.length}`);
       log(`권고: ${report.recommendation.label}`);
       log(`Haiku에 더 가까운 모델(임시 기준 통과 수): ${closer}`);
+      log(`→ ${reportBase}.md`);
+      log(`→ ${reportBase}.json`);
+      return;
+    }
+
+    case "sonnet-validate": {
+      const samplePath = resolveArg(values["sample-file"] ?? "docs/luna-validation-10.json")!;
+      if (!existsSync(samplePath)) throw new Error(`${samplePath}: 기존 Luna 고정 표본 파일이 없습니다`);
+      const sample = JSON.parse(readFileSync(samplePath, "utf8")) as LunaValidationSampleFile;
+      if (sample.requested_size !== 10 || sample.selected_project_ids.length !== 10) {
+        throw new Error(`${samplePath}: Sonnet 검증은 기존 10건 표본만 허용합니다`);
+      }
+      if (sample.luna_model !== LUNA_MODEL) throw new Error(`${samplePath}: Luna 기준 모델이 ${LUNA_MODEL}이 아닙니다`);
+      const reportBase = resolveArg(values.out ?? "docs/sonnet-validation-10-report")!;
+      const progressFile = values["progress-file"]
+        ? resolveArg(values["progress-file"])!
+        : path.join(OUT_DIR, `sonnet-validation-v3.3-${SONNET_MODEL}-progress.json`);
+      const haikuRows = await store.analysesFor(ANALYSIS_VERSION, undefined, HAIKU_MODEL);
+      const haikuIds = haikuRows.map((row) => row.project_id);
+      const [haikuProjects, marketRows] = await Promise.all([
+        store.projectsByIds(haikuIds),
+        store.marketRows(ANALYSIS_VERSION, HAIKU_MODEL),
+      ]);
+      const projectById = new Map(haikuProjects.map((project) => [project.id, project]));
+      const analyzedById = new Map(marketRows.analyzed.map((row) => [row.project_id, row]));
+      const entries: LunaValidationEntry[] = haikuRows.flatMap((saved) => {
+        const project = projectById.get(saved.project_id);
+        const analyzed = analyzedById.get(saved.project_id);
+        if (!project || !analyzed) return [];
+        return [{ project, analyzed, saved, analysis: saved.raw_analysis }];
+      });
+      const sampleErrors = validateLunaSample(sample, entries);
+      if (sampleErrors.length) throw new Error(`고정 표본 검증 실패:\n${sampleErrors.map((error) => `- ${error}`).join("\n")}`);
+      log(`Sonnet 검증은 기존 Luna 표본 ${sample.selected_project_ids.length}건을 그대로 사용합니다`);
+      log(`기준 Haiku 모집단=${entries.length}건 / Claude CLI model=${SONNET_MODEL}`);
+      for (const row of sample.selected) log(`  ${row.project_id} · ${row.project_type ?? "unknown"} · ${row.engagement_type ?? "unknown"} · ${row.selection_reasons.join(", ")}`);
+      if (values["select-only"]) return;
+
+      const sampleIds = sample.selected_project_ids;
+      const projects = await store.projectsByIds(sampleIds);
+      if (projects.length !== sampleIds.length) throw new Error(`Sonnet 표본 프로젝트를 모두 찾지 못했습니다 (${projects.length}/${sampleIds.length})`);
+      const cfg = { ...loadLlmConfig(), model: SONNET_MODEL };
+      // Sonnet 검증은 API 키를 제거한 Claude Code 구독제 claude -p 경로만 허용한다.
+      const llm = new ClaudeCliClient(cfg, { useApiKey: false });
+      const delayMs = values["delay-ms"] === undefined
+        ? Number.parseInt(process.env.ANALYZER_CLI_DELAY_MS || "250", 10)
+        : nonNegative(values["delay-ms"], "--delay-ms");
+      if (!Number.isFinite(delayMs) || delayMs < 0) throw new Error("ANALYZER_CLI_DELAY_MS 는 0 이상의 정수여야 합니다");
+      const concurrency = values.concurrency === undefined ? 1 : positive(values.concurrency, "--concurrency");
+      if (concurrency !== 1) throw new Error("sonnet-validate는 구독 사용량 보호를 위해 concurrency=1만 허용합니다");
+      log(`sonnet-validate total=${sampleIds.length} backend=claude-cli model=${SONNET_MODEL} concurrency=1 delay_ms=${delayMs}`);
+      log(`sample=${samplePath}`);
+      log(`progress=${progressFile}`);
+      const result = await runSample({
+        version: ANALYSIS_VERSION,
+        sampleFile: samplePath,
+        sampleIds,
+        projects,
+        progressFile,
+        model: SONNET_MODEL,
+        backend: "claude-cli",
+        llm,
+        store,
+        maxAttempts: 3,
+        delayMs,
+        concurrency: 1,
+        retryFailed: Boolean(values["retry-failed"]),
+        log,
+      });
+      if (result.stopped) {
+        log(`Sonnet 분석 일시중지: ${result.progress.stopped_reason}. Haiku/Luna/Terra 결과는 변경하지 않았습니다.`);
+        return;
+      }
+      const sonnetRows = await store.analysesFor(ANALYSIS_VERSION, sampleIds, SONNET_MODEL);
+      if (sonnetRows.length !== sampleIds.length) {
+        log(`Sonnet 결과가 아직 완성되지 않아 비교 리포트를 만들지 않습니다 (${sonnetRows.length}/${sampleIds.length})`);
+        return;
+      }
+      const report = buildModelValidationReport(sample, haikuRows, sonnetRows, SONNET_MODEL, "Sonnet");
+      const repoRoot = path.resolve(process.env.INIT_CWD ?? process.cwd());
+      const readReport = (file: string): Record<string, any> | null => existsSync(file)
+        ? JSON.parse(readFileSync(file, "utf8")) as Record<string, any>
+        : null;
+      const terraReport = readReport(path.join(repoRoot, "docs/terra-validation-10-report.json"));
+      const lunaReport = readReport(path.join(repoRoot, "docs/luna-validation-10-report.json"));
+      const comparable = {
+        project_type: report.agreement.project_type.rate,
+        engagement_type: report.agreement.engagement_type.rate,
+        reuse_level_3: report.agreement.reuse_level_3.rate,
+        complexity_jaccard: report.agreement.complexity_types.mean,
+        technology_assets_jaccard: report.agreement.technology_assets.mean,
+        vibe_mae: report.agreement.numeric.vibe_coding_difficulty.mae,
+        hours_midpoint_median_relative_error: report.agreement.estimated_hours_midpoint.median_relative_error,
+        learning_mae: report.agreement.numeric.learning_value.mae,
+        reusability_mae: report.agreement.numeric.reusability_value.mae,
+        market_mae: report.agreement.numeric.market_value.mae,
+      };
+      const fromReport = (source: Record<string, any> | null) => source?.agreement ? {
+        project_type: source.agreement.project_type?.rate ?? null,
+        engagement_type: source.agreement.engagement_type?.rate ?? null,
+        reuse_level_3: source.agreement.reuse_level_3?.rate ?? null,
+        complexity_jaccard: source.agreement.complexity_types?.mean ?? null,
+        technology_assets_jaccard: source.agreement.technology_assets?.mean ?? null,
+        vibe_mae: source.agreement.numeric?.vibe_coding_difficulty?.mae ?? null,
+        hours_midpoint_median_relative_error: source.agreement.estimated_hours_midpoint?.median_relative_error ?? null,
+        learning_mae: source.agreement.numeric?.learning_value?.mae ?? null,
+        reusability_mae: source.agreement.numeric?.reusability_value?.mae ?? null,
+        market_mae: source.agreement.numeric?.market_value?.mae ?? null,
+      } : null;
+      const terraComparable = fromReport(terraReport);
+      const lunaComparable = fromReport(lunaReport);
+      const allComparisons = { sonnet: comparable, terra: terraComparable, luna: lunaComparable };
+      const metricRows: Array<[string, keyof typeof comparable, boolean]> = [
+        ["project_type 일치", "project_type", true],
+        ["engagement 일치", "engagement_type", true],
+        ["reuse 3단계 일치", "reuse_level_3", true],
+        ["complexity Jaccard", "complexity_jaccard", true],
+        ["technology_assets Jaccard", "technology_assets_jaccard", true],
+        ["vibe MAE", "vibe_mae", false],
+        ["시간 중앙 상대오차", "hours_midpoint_median_relative_error", false],
+        ["learning MAE", "learning_mae", false],
+        ["reusability MAE", "reusability_mae", false],
+        ["market MAE", "market_mae", false],
+      ];
+      const formatComparable = (name: string, value: number | null) => value === null ? "—" : name.includes("일치") || name.includes("오차") ? `${(value * 100).toFixed(1)}%` : value.toFixed(2);
+      const thresholdPasses = (source: Record<string, any> | null) => source?.recommendation?.thresholds
+        ? Object.values(source.recommendation.thresholds).filter(Boolean).length
+        : null;
+      const sonnetPasses = Object.values(report.recommendation.thresholds).filter(Boolean).length;
+      const terraPasses = thresholdPasses(terraReport);
+      const lunaPasses = thresholdPasses(lunaReport);
+      const distance = (key: keyof typeof comparable, value: number | null) => {
+        if (value === null) return Number.POSITIVE_INFINITY;
+        if (key === "project_type" || key === "engagement_type" || key === "reuse_level_3" || key.endsWith("jaccard")) return 1 - value;
+        return Math.abs(value);
+      };
+      const closenessWins: Record<string, number> = { Sonnet: 0, Terra: 0, Luna: 0 };
+      for (const [, key] of metricRows) {
+        const valuesForKey = (Object.entries(allComparisons) as Array<[string, typeof comparable | null]>)
+          .map(([label, source]) => ({ label, distance: distance(key, source?.[key] ?? null) }))
+          .sort((a, b) => a.distance - b.distance);
+        const closestMetric = valuesForKey[0];
+        if (closestMetric && Number.isFinite(closestMetric.distance)) {
+          const winner = closestMetric.label === "sonnet" ? "Sonnet" : closestMetric.label === "terra" ? "Terra" : "Luna";
+          closenessWins[winner] = (closenessWins[winner] ?? 0) + 1;
+        }
+      }
+      const maxWins = Math.max(...Object.values(closenessWins));
+      const closest = Object.entries(closenessWins).filter(([, wins]) => wins === maxWins).map(([label]) => label).join(" / ");
+      const output = {
+        ...report,
+        haiku_recovery: { performed: true, scope: sampleIds.length, model: HAIKU_MODEL, purpose: "Sonnet 저장 오류로 갱신된 기존 기준값 복구" },
+        cli_model_probe: { command_model: SONNET_MODEL, observed_model_usage: SONNET_MODEL, backend: "claude -p", api_key_used: false },
+        comparison_to_terra_luna: allComparisons,
+        comparison_summary: { threshold_passes: { sonnet: sonnetPasses, terra: terraPasses, luna: lunaPasses }, closeness_wins: closenessWins, closest_to_haiku: closest },
+      };
+      const sideBySide = [
+        "",
+        "## Luna / Terra와 참고 비교",
+        "",
+        `- Claude CLI 모델 확인: **${SONNET_MODEL}** (probe의 modelUsage에 동일 식별자 확인)`,
+        "- 세 모델 모두 동일한 10개 project_id를 사용했고, Sonnet 저장 오류 복구를 위해 이 고정 10건의 Haiku 기준만 재실행했습니다.",
+        "",
+        "| 지표 | Sonnet vs Haiku | Terra vs Haiku | Luna vs Haiku |",
+        "|---|---:|---:|---:|",
+        ...metricRows.map(([name, key]) => `| ${name} | ${formatComparable(name, comparable[key])} | ${formatComparable(name, terraComparable?.[key] ?? null)} | ${formatComparable(name, lunaComparable?.[key] ?? null)} |`),
+        "",
+        `- 임시 기준 통과 수: Sonnet ${sonnetPasses}/6 · Terra ${terraPasses ?? "—"}/6 · Luna ${lunaPasses ?? "—"}/6`,
+        `- Haiku에 가장 가까운 모델(10개 지표의 상대 거리 승수): **${closest}** (Sonnet ${closenessWins.Sonnet}, Terra ${closenessWins.Terra}, Luna ${closenessWins.Luna})`,
+        "",
+      ].join("\n");
+      mkdirSync(path.dirname(reportBase), { recursive: true });
+      writeFileSync(`${reportBase}.json`, `${JSON.stringify(output, null, 2)}\n`);
+      const markdown = renderLunaValidationMarkdown(report, "Sonnet").replace(
+        "- Haiku 결과는 재분석하지 않았고 기존 행을 그대로 사용했습니다.",
+        "- Sonnet 저장 오류 복구를 위해 고정 10건의 Haiku 기준만 재실행했고, 그 외 Haiku 결과는 재분석하지 않았습니다.",
+      );
+      writeFileSync(`${reportBase}.md`, `${markdown}${sideBySide}`);
+      log(`Sonnet 검증 완료: ${report.matched_n}/${sampleIds.length}`);
+      log(`권고: ${report.recommendation.label}`);
+      log(`Haiku에 가장 가까운 모델(지표 승수): ${closest}`);
       log(`→ ${reportBase}.md`);
       log(`→ ${reportBase}.json`);
       return;

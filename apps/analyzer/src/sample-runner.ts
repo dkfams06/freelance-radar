@@ -46,6 +46,7 @@ export interface RunSampleOptions {
   delayMs: number;
   concurrency: number;
   retryFailed: boolean;
+  force?: boolean;
   log: (message: string) => void;
 }
 
@@ -189,7 +190,7 @@ export async function runSample(opts: RunSampleOptions): Promise<RunSampleResult
   }
   const progress = loadProgress(opts);
   const byId = new Map(opts.projects.map((p) => [p.id, p]));
-  const analyzed = await opts.store.analyzedHashes(opts.version, opts.model);
+  const analyzed = opts.force ? new Map<string, string>() : await opts.store.analyzedHashes(opts.version, opts.model);
   const unresolved = await opts.store.unresolvedErrorProjectIds(opts.version, opts.model);
 
   if (opts.retryFailed) {

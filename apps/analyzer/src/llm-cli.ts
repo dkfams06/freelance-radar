@@ -147,7 +147,11 @@ export function interpretCliOutput(stdout: string, fallbackModel: string): Analy
     cache_creation_input_tokens: j.usage?.cache_creation_input_tokens ?? 0,
     cache_read_input_tokens: j.usage?.cache_read_input_tokens ?? 0,
   };
-  const model = Object.keys(j.modelUsage ?? {})[0] ?? fallbackModel;
+  // Claude Code가 내부 보조 호출까지 modelUsage에 함께 기록할 수 있다.
+  // 요청한 모델이 목록에 있으면 첫 번째 키(예: Haiku 보조 호출)를 모델로 저장하지 않는다.
+  const model = Object.prototype.hasOwnProperty.call(j.modelUsage ?? {}, fallbackModel)
+    ? fallbackModel
+    : Object.keys(j.modelUsage ?? {})[0] ?? fallbackModel;
   if (j.is_error) {
     const status = j.api_error_status ?? null;
     const auth = status === 401 || /authenticate|login|OAuth/i.test(j.result ?? "");
