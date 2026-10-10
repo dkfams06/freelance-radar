@@ -7,7 +7,12 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "분석 · freelance-radar" };
 
 const VERSION = "v3.3";
-const MODEL = "claude-haiku-4-5-20251001";
+const MODELS = ["claude-haiku-4-5-20251001", "gpt-5.6-luna", "gpt-5.6-terra"] as const;
+const MODEL_LABELS: Record<(typeof MODELS)[number], string> = {
+  "claude-haiku-4-5-20251001": "Haiku 4.5",
+  "gpt-5.6-luna": "Luna",
+  "gpt-5.6-terra": "Terra",
+};
 const PAGE_SIZE = 1000;
 
 const PROJECT_TYPE_LABEL: Record<string, string> = {
@@ -52,6 +57,8 @@ type AnalysisDbRow = Omit<AnalyzedProject, keyof MarketProject> & {
   model: string;
 };
 
+type AnalysisErrorDbRow = AnalysisErrorSummary & { model: string };
+
 async function pageAll<T>(build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }>): Promise<T[]> {
   const rows: T[] = [];
   for (let from = 0; ; from += PAGE_SIZE) {
@@ -62,7 +69,12 @@ async function pageAll<T>(build: (from: number, to: number) => PromiseLike<{ dat
   }
 }
 
-async function loadReport(): Promise<MarketReport> {
+type LoadedReport = {
+  report: MarketReport;
+  modelCoverage: Array<{ model: (typeof MODELS)[number]; label: string; n: number }>;
+};
+
+async function loadReport(): Promise<LoadedReport> {
   const db = getDb();
   const [projectRows, analysisRows, errorRows] = await Promise.all([
     pageAll<ProjectDbRow>((from, to) =>
@@ -80,18 +92,18 @@ async function loadReport(): Promise<MarketReport> {
             "vibe_coding_difficulty,estimated_hours_min,estimated_hours_max,learning_value,reusability_value,market_value",
         )
         .eq("analysis_version", VERSION)
-        .eq("model", MODEL)
+        .in("model", [...MODELS])
         .order("project_id")
         .range(from, to) as unknown as PromiseLike<{ data: AnalysisDbRow[] | null; error: unknown }>,
     ),
-    pageAll<AnalysisErrorSummary>((from, to) =>
+    pageAll<AnalysisErrorDbRow>((from, to) =>
       db
         .from("analysis_errors")
-        .select("project_id,error_type,attempt,resolved_at")
+        .select("project_id,model,error_type,attempt,resolved_at")
         .eq("analysis_version", VERSION)
-        .eq("model", MODEL)
+        .in("model", [...MODELS])
         .order("project_id")
-        .range(from, to) as unknown as PromiseLike<{ data: AnalysisErrorSummary[] | null; error: unknown }>,
+        .range(from, to) as unknown as PromiseLike<{ data: AnalysisErrorDbRow[] | null; error: unknown }>,
     ),
   ]);
 
@@ -106,17 +118,34 @@ async function loadReport(): Promise<MarketReport> {
     budget_max: p.budget_max,
   }));
   const byId = new Map(projects.map((p) => [p.id, p]));
-  const analyzed: AnalyzedProject[] = analysisRows.flatMap((a) => {
+  const modelPriority = new Map(MODELS.map((model, index) => [model, index]));
+  const priority = (model: string) => modelPriority.get(model as (typeof MODELS)[number]) ?? Number.MAX_SAFE_INTEGER;
+  const selectedByProject = new Map<string, AnalysisDbRow>();
+  for (const row of analysisRows) {
+    const current = selectedByProject.get(row.project_id);
+    if (!current || priority(row.model) < priority(current.model)) {
+      selectedByProject.set(row.project_id, row);
+    }
+  }
+  const selectedRows = [...selectedByProject.values()];
+  const effectiveErrors = errorRows.filter((error) => selectedByProject.get(error.project_id)?.model === error.model || !selectedByProject.has(error.project_id));
+  const analyzed: AnalyzedProject[] = selectedRows.flatMap((a) => {
     const project = byId.get(a.project_id);
     return project ? [{ ...project, ...a, project_id: a.project_id }] : [];
   });
 
-  return computeMarketReport(projects, analyzed, {
+  const report = computeMarketReport(projects, analyzed, {
     version: VERSION,
     minN: 10,
     minCombo: 10,
-    errors: errorRows,
+    errors: effectiveErrors,
   });
+  const modelCoverage = MODELS.map((model) => ({
+    model,
+    label: MODEL_LABELS[model],
+    n: selectedRows.filter((row) => row.model === model).length,
+  }));
+  return { report, modelCoverage };
 }
 
 function integer(value: number | null | undefined): string {
@@ -205,16 +234,18 @@ export default async function AnalysisPage() {
     return <main className="wrap"><h1>분석 미리보기</h1><div className="notice">Supabase 환경변수가 없습니다.</div></main>;
   }
 
-  const report = await loadReport();
+  const loaded = await loadReport();
+  const report = loaded.report;
   const lists = report.non_staffing.lists;
   const pending = Math.max(0, report.base.total - report.coverage.analyzed);
+  const modelCoverage = loaded.modelCoverage;
 
   return (
     <main className="wrap">
       <header className="page-head">
         <div>
           <p className="eyebrow">freelance-radar · 시장 분석 미리보기</p>
-          <h1>Haiku v3.3 분석 미리보기</h1>
+          <h1>v3.3 통합 분석 미리보기</h1>
           <p className="muted">DB의 성공 분석만 사용합니다. 분석 중에는 15초마다 갱신됩니다.</p>
         </div>
         <AutoRefresh intervalMs={15000} />
@@ -222,8 +253,14 @@ export default async function AnalysisPage() {
 
       <nav className="notice">
         <a href="/admin/crawler">← 수집 관리</a>
-        <span className="muted" style={{ marginLeft: 12 }} title={MODEL}>사용 모델: Haiku 4.5</span>
+        <span className="muted" style={{ marginLeft: 12 }} title={MODELS.join(", ")}>사용 모델: Haiku 4.5 · Luna · Terra</span>
       </nav>
+
+      <section className="notice" style={{ marginTop: 16 }}>
+        <b>통합 커버리지</b>
+        <span className="muted" style={{ marginLeft: 10 }}>같은 project_id는 한 번만 집계하며 Haiku 결과를 우선합니다.</span>
+        <span style={{ marginLeft: 10 }}>{modelCoverage.map((item) => `${item.label} ${integer(item.n)}건`).join(" · ")}</span>
+      </section>
 
       <section className="stats" aria-label="분석 커버리지">
         <Stat label="전체 프로젝트" value={integer(report.base.total)} />
